@@ -1,4 +1,5 @@
 require_relative "boot"
+require_relative 'log_formatter'
 
 require "rails/all"
 
@@ -18,5 +19,26 @@ module App
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    config.i18n.default_locale = :ja
+
+    config.enable_dependency_loading = true
+    config.active_record.schema_format = :sql
+    config.autoload_paths += %W[#{config.root}/app/services]
+
+    formatter = Logger::CustomFormatter.new
+    config.logger = Logger.new("log/common-#{Time.current.strftime('%Y%m%d')}.log", 'daily')
+    config.logger.formatter = formatter
+
+    config.generators do |g|
+      g.test_framework :rspec,
+                        fixtures: true,
+                        view_specs: false,
+                        helper_specs: false,
+                        routing_specs: false,
+                        controller_specs: true,
+                        request_specs: false
+      g.fixture_replacement :factory_bot, dir: 'spec/factories'
+    end
   end
 end

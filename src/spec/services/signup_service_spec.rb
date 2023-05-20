@@ -51,7 +51,7 @@ describe SignupService do
         end
       end
 
-      context 'regsitration_tokensへのインサートに失敗した場合' do
+      context 'regitration_tokensへのインサートに失敗した場合' do
         let(:email) { 'test@example.com' }
         let(:password) { 'P@ssw0rd' }
     

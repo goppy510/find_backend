@@ -11,6 +11,7 @@ gem "sprockets-rails"
 
 # Use mysql as the database for Active Record
 gem "mysql2", "~> 0.5"
+gem 'activerecord-import', '~> 1.4', '>= 1.4.1'
 
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", "~> 5.0"
@@ -31,6 +32,9 @@ gem 'rails-i18n'
 
 gem 'sendgrid-ruby'
 
+gem 'dotenv-rails', '~> 2.8', '>= 2.8.1'
+gem 'config', '~> 4.2'
+
 # Use Redis adapter to run Action Cable in production
 # gem "redis", "~> 4.0"
 
@@ -38,7 +42,7 @@ gem 'sendgrid-ruby'
 # gem "kredis"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
-# gem "bcrypt", "~> 3.1.7"
+gem "bcrypt", "~> 3.1.7"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
@@ -53,11 +57,12 @@ gem "bootsnap", require: false
 # gem "image_processing", "~> 1.2"
 
 group :development, :test do
-  # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
+  gem "database_cleaner"
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
   gem "committee-rails"
-  gem 'rspec-rails'
+  gem "rspec-rails"
   gem "factory_bot_rails"
+  gem "faker"
 end
 
 group :development do
@@ -69,6 +74,10 @@ group :development do
 
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
+
+  gem 'rubocop', '~> 1.51'
+  gem 'rubocop-checkstyle_formatter', '~> 0.6.0'
+  gem 'rubocop-rails', '~> 2.19', '>= 2.19.1'
 end
 
 group :test do
@@ -76,4 +85,9 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
   gem "webdrivers"
+end
+
+group :production, :staging do
+  gem "unicorn"
+  gem "unicorn-worker-killer"
 end

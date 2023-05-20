@@ -8,22 +8,36 @@
 /.bundle
 
 # Ignore all logfiles and tempfiles.
+log/
 /log/*
+/tmp
 /tmp/*
 !/log/.keep
-!/tmp/.keep
 
 # Ignore pidfiles, but keep the directory.
 /tmp/pids/*
 !/tmp/pids/
-!/tmp/pids/.keep
+
+Gemfile.lock
+
+config/settings.local.yml
+config/settings/*.local.yml
+config/environments/*.local.yml
+
+db/structure.sql
+
+doc/
+.yardoc/
+
+/.env
+
+.vscode/
 
 # Ignore uploaded files in development.
 /storage/*
 !/storage/.keep
 /tmp/storage/*
 !/tmp/storage/
-!/tmp/storage/.keep
 
 /public/assets
 

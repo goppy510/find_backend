@@ -1,0 +1,2 @@
+class VerifyEmailController < ApplicationController
+end

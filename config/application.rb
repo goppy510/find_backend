@@ -1,7 +1,6 @@
 require_relative "boot"
-require_relative 'log_formatter'
-
 require "rails/all"
+require_relative 'log_formatter'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -25,6 +24,9 @@ module App
     config.enable_dependency_loading = true
     config.active_record.schema_format = :sql
     config.autoload_paths += %W[#{config.root}/app/services]
+    config.autoload_paths += %W[#{config.root}/app/values]
+    config.autoload_paths += %W[#{config.root}/app/values/account]
+    config.autoload_paths += %W[#{config.root}/app/values/prompt]
 
     formatter = Logger::CustomFormatter.new
     config.logger = Logger.new("log/common-#{Time.current.strftime('%Y%m%d')}.log", 'daily')

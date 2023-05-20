@@ -15,12 +15,20 @@ class SignupService
     self.freeze
   end
 
-
   def signup
+    user = nil
+    registration = nil
+
     ActiveRecord::Base.transaction do
       user = User.create!(email: self.email.to_s, password: self.password.to_s)
-      token = RegistrationToken.create!(user_id: user.id, token: self.token.to_s, expires_at: self.expires_at.to_s)
+      registration = RegistrationToken.create!(user_id: user.id, token: self.token.to_s, expires_at: self.expires_at.to_s)
     end
+    result = {}
+    if user.present? && registration.present?
+      result[:email] = user.email
+      result[:token] = registration.token
+    end
+    result
   rescue ActiveRecord::RecordInvalid => e
     raise SignupError, e.message
   end

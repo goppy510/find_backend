@@ -20,7 +20,7 @@ class Email
   private
 
   def email_valid?(value)
-    email_format = /\A[a-zA-Z0-9_\#!$%&`'*+\-{|}~^\/=?\.]+@[a-zA-Z0-9][a-zA-Z0-9\.-]+\z/
+    email_format = /\A[\w+\-]+(?:\.[\w+\-]+)*@[a-z\d\-]+(?:\.[a-z\d\-]+)*\.[a-z]{2,}\z/i
     value =~ email_format
   end
 

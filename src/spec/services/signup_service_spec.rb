@@ -31,6 +31,15 @@ describe SignupService do
           expect(registration_token.token).to_not eq nil
           expect(registration_token.expires_at).to eq(Time.zone.local(2023, 05, 10, 4, 0, 0))
         end
+
+        it 'emailとtokenが返り値として存在すること' do
+          service = SignupService.new(email, password)
+          result = service.signup
+          user = User.find_by(email: email)
+          registration_token = RegistrationToken.find_by(user_id: user.id)
+          expect(result[:email]).to eq email
+          expect(result[:token]).to eq registration_token.token
+        end
       end
     end
 

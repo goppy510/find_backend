@@ -63,6 +63,7 @@ group :development, :test do
   gem "rspec-rails"
   gem "factory_bot_rails"
   gem "faker"
+  gem "solargraph", require: false
 end
 
 group :development do
@@ -75,7 +76,7 @@ group :development do
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
 
-  gem 'rubocop', '~> 1.51'
+  gem 'rubocop', '~> 1.51', require: false
   gem 'rubocop-checkstyle_formatter', '~> 0.6.0'
   gem 'rubocop-rails', '~> 2.19', '>= 2.19.1'
 end

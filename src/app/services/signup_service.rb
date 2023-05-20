@@ -15,6 +15,7 @@ class SignupService
     self.freeze
   end
 
+  # ユーザー情報をDBに登録する
   def signup
     user = nil
     registration = nil

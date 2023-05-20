@@ -50,6 +50,23 @@ describe SignupService do
           expect {  SignupService.new(email, nil) }.to raise_error(ArgumentError, 'passwordがありません')
         end
       end
+
+      context 'regsitration_tokensへのインサートに失敗した場合' do
+        let(:email) { 'test@example.com' }
+        let(:password) { 'P@ssw0rd' }
+    
+        it 'usersとregistration_tokensにデータがインサートされないこと' do
+          allow(RegistrationToken).to receive(:create!).and_raise(ActiveRecord::RecordInvalid)
+          expect {
+            SignupService.new(email, password).signup
+          }.to raise_error(SignupError)
+    
+          # ユーザーと登録トークンが両方とも作成されていないことを確認する
+          user = User.find_by(email: email)
+          expect(user).to be_nil
+          expect(RegistrationToken.count).to be_zero
+        end
+      end
     end
   end
 end

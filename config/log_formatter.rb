@@ -1,3 +1,6 @@
+require 'logger'
+require 'active_support/core_ext/class/attribute_accessors'
+
 class Logger::CustomFormatter < Logger::Formatter
   cattr_accessor(:datetime_format) { '%Y/%m/%d %H:%M:%S' }
 

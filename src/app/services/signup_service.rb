@@ -4,50 +4,23 @@ class SignupService
   attr_reader :email, :password
 
   def initialize(email, password)
-    unless
-      raise ArgumentError, 'emailがありません'
-    end
+    raise ArgumentError, 'emailがありません' unless email
+    raise ArgumentError, 'passwordがありません' unless password
 
-    unless email_valid?(email)
-      raise EmailFormatError, 'emailの形式が正しくありません'
-
-    if password
-      raise InvalidPasswordParameterError, 'passwordがありません'
-    end
-
-    @email = email
-    @password = password
+    @email = Email.from_string(email)
+    @password = Password.from_string(password)
 
     self.freeze
   end
 
-
-  def signup
-    User.create(email: @email, password_digest: @password)
-  rescue ActiveRecord::RecordInvalid => e
-    raise InvalidUserError, e.message
-  end
-
-
-
-
-
-  def password_valid?(password)
-    MIN_LEN = 8
-    MAX_LEN = 50
-    return false unless (MIN_LEN..MAX_LEN).include?(password.length)
-
-    # 大文字、小文字、数字、記号の存在を確認
-    has_lowercase = password =~ /[a-z]/
-    has_uppercase = password =~ /[A-Z]/
-    has_digit = password =~ /\d/
-    has_symbol = password =~ /[\W_]/
-
-    # すべての条件を満たしている場合にのみtrueを返す
-    has_lowercase && has_uppercase && has_digit && has_symbol
+  class << self
+    def signup(email, password)
+      service = self.new(email, password)
+      User.create(email: service.email.value, password: service.password.value)
+    rescue ActiveRecord::RecordInvalid => e
+      raise InvalidUserError, e.message
+    end
   end
 end
 
-
-class InvalidPasswordParameterError < StandardError;
 class InvalidUserError < StandardError; end

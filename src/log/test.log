@@ -1,0 +1,20 @@
+  [1m[35m (4.8ms)[0m  [1m[35mCREATE DATABASE `makelead_test` DEFAULT CHARACTER SET `utf8mb4`[0m
+  [1m[35m (49.5ms)[0m  [1m[35mCREATE TABLE `schema_migrations` (`version` varchar(255) NOT NULL PRIMARY KEY)[0m
+  [1m[35m (17.8ms)[0m  [1m[35mCREATE TABLE `ar_internal_metadata` (`key` varchar(255) NOT NULL PRIMARY KEY, `value` varchar(255), `created_at` datetime(6) NOT NULL, `updated_at` datetime(6) NOT NULL)[0m
+  [1m[35m (0.7ms)[0m  [1m[34mSELECT GET_LOCK('3820764022003010145', 0)[0m
+  [1m[36mActiveRecord::SchemaMigration Pluck (2.7ms)[0m  [1m[34mSELECT `schema_migrations`.`version` FROM `schema_migrations` ORDER BY `schema_migrations`.`version` ASC[0m
+Migrating to DeviseTokenAuthCreateUsers (20230308183502)
+  [1m[35m (30.9ms)[0m  [1m[35mCREATE TABLE `users` (`id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY, `display_name` varchar(255) DEFAULT '' NOT NULL, `login_id` varchar(255) DEFAULT '' NOT NULL, `thumbnail` varchar(255), `first_name` varchar(255), `last_name` varchar(255), `first_katakana` varchar(255), `last_katakana` varchar(255), `email` varchar(255), `provider` varchar(255) DEFAULT 'email' NOT NULL, `uid` varchar(255) DEFAULT '' NOT NULL, `encrypted_password` varchar(255) DEFAULT '' NOT NULL, `reset_password_token` varchar(255), `reset_password_sent_at` datetime(6), `allow_password_change` tinyint(1) DEFAULT FALSE, `remember_created_at` datetime(6), `confirmation_token` varchar(255), `confirmed_at` datetime(6), `confirmation_sent_at` datetime(6), `unconfirmed_email` varchar(255), `tokens` text, `created_at` datetime(6) NOT NULL, `updated_at` datetime(6) NOT NULL)[0m
+  [1m[35m (52.0ms)[0m  [1m[35mCREATE UNIQUE INDEX `index_users_on_email` ON `users` (`email`)[0m
+  [1m[35m (29.0ms)[0m  [1m[35mCREATE UNIQUE INDEX `index_users_on_uid_and_provider` ON `users` (`uid`, `provider`)[0m
+  [1m[35m (30.4ms)[0m  [1m[35mCREATE UNIQUE INDEX `index_users_on_reset_password_token` ON `users` (`reset_password_token`)[0m
+  [1m[35m (30.7ms)[0m  [1m[35mCREATE UNIQUE INDEX `index_users_on_confirmation_token` ON `users` (`confirmation_token`)[0m
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mActiveRecord::SchemaMigration Create (2.8ms)[0m  [1m[32mINSERT INTO `schema_migrations` (`version`) VALUES ('20230308183502')[0m
+  [1m[36mTRANSACTION (0.7ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mActiveRecord::InternalMetadata Load (2.9ms)[0m  [1m[34mSELECT `ar_internal_metadata`.* FROM `ar_internal_metadata` WHERE `ar_internal_metadata`.`key` = 'environment' LIMIT 1[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mActiveRecord::InternalMetadata Create (0.9ms)[0m  [1m[32mINSERT INTO `ar_internal_metadata` (`key`, `value`, `created_at`, `updated_at`) VALUES ('environment', 'test', '2023-03-10 16:30:31.567738', '2023-03-10 16:30:31.567738')[0m
+  [1m[36mTRANSACTION (0.6ms)[0m  [1m[35mCOMMIT[0m
+  [1m[35m (0.5ms)[0m  [1m[34mSELECT RELEASE_LOCK('3820764022003010145')[0m
+  [1m[36mActiveRecord::SchemaMigration Pluck (1.1ms)[0m  [1m[34mSELECT `schema_migrations`.`version` FROM `schema_migrations` ORDER BY `schema_migrations`.`version` ASC[0m

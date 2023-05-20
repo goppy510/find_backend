@@ -1,2 +1,0 @@
-class CreateRegistrationToken < ApplicationRecord
-end

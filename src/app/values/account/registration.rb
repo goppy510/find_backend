@@ -2,12 +2,15 @@
 
 require 'securerandom'
 
-class RegistrationToken
+class Registration
 
   class << self
-    def generate
+    def token
       SecureRandom.uuid
     end
+
+    def expires_at
+      Time.current.in_time_zone + 1.hour
+    end
   end
-  
 end

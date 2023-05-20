@@ -1,0 +1,3 @@
+class RegistrationToken < ApplicationRecord
+  
+end

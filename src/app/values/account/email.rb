@@ -7,7 +7,7 @@ class Email
     raise ArgumentError, 'emailがありません' unless value
     raise EmailFormatError, 'emailの形式が正しくありません' unless email_valid?(value)
 
-    @value = value
+    @value = value.downcase
 
     self.freeze
   end

@@ -9,4 +9,8 @@ sendgrid:
     host: localhost:3000
 mail:
   from: dev-no-replay@find-market.jp
+sakura:
+  domain: find-market.sakura.ne.jp
+  user: dev-no-replay@find-market.jp
+  password: find39ml
 

@@ -1,0 +1,12 @@
+app:
+  host: http://localhost:3000
+sendgrid:
+  api_key:
+  api_host: http://localhost:3030
+  delivery_method: sendgrid
+  raise_delivery_errors: true
+  default_url_options:
+    host: localhost:3000
+mail:
+  from: dev-no-replay@find-market.jp
+

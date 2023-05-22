@@ -1,0 +1,6 @@
+sendgrid:
+  api_key:
+  delivery_method: test
+  raise_delivery_errors: true
+  default_url_options:
+    host: localhost:3000

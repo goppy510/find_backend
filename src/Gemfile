@@ -31,6 +31,7 @@ gem "jbuilder"
 gem 'rails-i18n'
 
 gem 'sendgrid-ruby'
+gem 'mail'
 
 gem 'dotenv-rails', '~> 2.8', '>= 2.8.1'
 gem 'config', '~> 4.2'
@@ -79,6 +80,7 @@ group :development do
   gem 'rubocop', '~> 1.51', require: false
   gem 'rubocop-checkstyle_formatter', '~> 0.6.0'
   gem 'rubocop-rails', '~> 2.19', '>= 2.19.1'
+  gem 'letter_opener_web'
 end
 
 group :test do

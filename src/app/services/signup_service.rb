@@ -26,14 +26,14 @@ class SignupService
   end
 
   # 本登録用のメールを送信する
-  def send_activation_email
+  def activation_email
     user = User.find_by(email: self.email.to_s)
     registration_token = RegistrationToken.find_by(user_id: user.id)
 
     raise RecordNotFound, 'userまたはregistration_tokenがありません' if user.blank? || if registration_token.blank?
 
     # メールの作成と送信
-    RegsitrationMailer.send_registration_mail(self.email.to_s, self.token.to_s, self.expires_at.to_s).deliver
+    RegistRationMailer.send_activation_mail(self.email.to_s, self.token.to_s, self.expires_at.to_s).deliver
   end
 end
 

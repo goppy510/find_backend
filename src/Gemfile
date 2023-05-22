@@ -34,7 +34,6 @@ gem 'sendgrid-ruby'
 gem 'mail'
 
 gem 'dotenv-rails', '~> 2.8', '>= 2.8.1'
-gem 'config', '~> 4.2'
 gem 'settingslogic'
 
 # Use Redis adapter to run Action Cable in production

@@ -1,6 +1,7 @@
 require_relative "boot"
 require "rails/all"
 require_relative 'log_formatter'
+require_relative 'settings_loader'
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.

@@ -9,7 +9,7 @@ class Api::UserController < ApplicationController
 
     service = SignupService.new(params[:email], params[:password])
     service.signup
-    service.submit_verify_email
+    service.activation_email
 
     render json: { status: 'success' }, status: 200
   end

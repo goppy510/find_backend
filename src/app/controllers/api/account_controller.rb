@@ -8,22 +8,10 @@ class Api::UserController < ApplicationController
     end
 
     service = SignupService.new(params[:email], params[:password])
-    response = service.signup
+    service.signup
+    service.submit_verify_email
 
-    render json: response
-  end
-
-  # 新規登録時の確認メール送信用
-  def submit_verify_email
-    if params[:email].blank? or params[:token].blank?
-      render_error(400, 'user', 'invalid_parameter')
-      return
-    end
-
-    service = VerifyEmailService.new(params[:email], params[:token])
-    response = service.verify_email
-
-    render json: response
+    render json: { status: 'success' }, status: 200
   end
 
   # 確認メールクリック後

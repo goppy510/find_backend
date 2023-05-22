@@ -17,22 +17,25 @@ class SignupService
 
   # ユーザー情報をDBに登録する
   def signup
-    user = nil
-    registration = nil
-
     ActiveRecord::Base.transaction do
-      user = User.create!(email: self.email.to_s, password: self.password.to_s)
-      registration = RegistrationToken.create!(user_id: user.id, token: self.token.to_s, expires_at: self.expires_at.to_s)
+      User.create!(email: self.email.to_s, password: self.password.to_s)
+      RegistrationToken.create!(user_id: user.id, token: self.token.to_s, expires_at: self.expires_at.to_s)
     end
-    result = {}
-    if user.present? && registration.present?
-      result[:email] = user.email
-      result[:token] = registration.token
-    end
-    result
   rescue ActiveRecord::RecordInvalid => e
     raise SignupError, e.message
+  end
+
+  # 本登録用のメールを送信する
+  def send_activation_email
+    user = User.find_by(email: self.email.to_s)
+    registration_token = RegistrationToken.find_by(user_id: user.id)
+
+    raise RecordNotFound, 'userまたはregistration_tokenがありません' if user.blank? || if registration_token.blank?
+
+    # メールの作成と送信
+    RegsitrationMailer.send_registration_mail(self.email.to_s, self.token.to_s, self.expires_at.to_s).deliver
   end
 end
 
 class SignupError < StandardError; end
+class SubmitVerifyEmailError < StandardError; end

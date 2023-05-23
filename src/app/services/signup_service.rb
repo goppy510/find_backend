@@ -18,7 +18,7 @@ class SignupService
   # ユーザー情報をDBに登録する
   def signup
     ActiveRecord::Base.transaction do
-      User.create!(email: self.email.to_s, password: self.password.to_s)
+      user = User.create!(email: self.email.to_s, password: self.password.to_s)
       RegistrationToken.create!(user_id: user.id, token: self.token.to_s, expires_at: self.expires_at.to_s)
     end
   rescue ActiveRecord::RecordInvalid => e
@@ -30,10 +30,10 @@ class SignupService
     user = User.find_by(email: self.email.to_s)
     registration_token = RegistrationToken.find_by(user_id: user.id)
 
-    raise RecordNotFound, 'userまたはregistration_tokenがありません' if user.blank? || if registration_token.blank?
+    raise RecordNotFound, 'userまたはregistration_tokenがありません' if user.blank? || registration_token.blank?
 
     # メールの作成と送信
-    RegistRationMailer.send_activation_mail(self.email.to_s, self.token.to_s, self.expires_at.to_s).deliver
+    RegistrationMailer.send_activation_mail(self.email.to_s, self.token.to_s, self.expires_at.to_s).deliver
   end
 end
 

@@ -2,7 +2,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :users do
       post '/signup',                        to: 'api/signup#signup'
-      post '/activation',                    to: 'api/verify_email#activate_account'
+      post '/activation',                    to: 'api/activation#activate'
       post '/login',                         to: 'api/login#login'
       delete '/logout',                      to: 'api/logout#logout'
       get '/:id',                            to: 'api/account#show'

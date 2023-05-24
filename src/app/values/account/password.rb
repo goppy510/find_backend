@@ -4,17 +4,16 @@ class Password
   attr_reader :value
 
   def initialize(value)
-    unless value
-      raise ArgumentError, 'passwordがありません'
-    end
-
-    unless password_valid?(value)
-      raise PasswordFormatError, 'passwordの形式が正しくありません'
-    end
+    raise ArgumentError, 'passwordがありません' unless value
+    raise PasswordFormatError, 'passwordの形式が正しくありません' unless password_valid?(value)
 
     @value = value
 
     self.freeze
+  end
+
+  def to_s
+    @value.to_s
   end
 
   private

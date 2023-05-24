@@ -1,0 +1,17 @@
+AllCops:
+  TargetRubyVersion: 3.1.1
+  Exclude:
+    - bin/*
+    - db/schema.rb
+    - vendor/**/*
+
+Style/Documentation:
+  Enabled: false
+
+Style/AsciiComments:
+  Enabled: false
+
+Lint/AssignmentInCondition:
+  Enambled: false
+
+

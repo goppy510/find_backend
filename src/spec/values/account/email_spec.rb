@@ -59,6 +59,16 @@ describe Email do
           expect(email.value).to eq value
         end
       end
+
+      context 'メールアドレスに大文字が含まれている場合' do
+        let!(:actual_value) { 'aaA5oGe@hogehoge.ac.jp' }
+        let!(:expect_value) { 'aaa5oge@hogehoge.ac.jp' }
+
+        it '小文字として登録されること' do
+          email = Email.from_string(actual_value)
+          expect(email.value).to eq expect_value
+        end
+      end
     end
 
     context '異常系' do

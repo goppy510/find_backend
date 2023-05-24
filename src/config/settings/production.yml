@@ -1,0 +1,6 @@
+sendgrid:
+  api_key: <%= ENV['SENDGRID_API_KEY'] %>
+  delivery_method: sendgrid
+  raise_delivery_errors: true
+  default_url_options:
+    host: "本番環境ホストURL"

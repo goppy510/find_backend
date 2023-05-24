@@ -4,17 +4,16 @@ class Email
   attr_reader :value
 
   def initialize(value)
-    unless value
-      raise ArgumentError, 'emailがありません'
-    end
+    raise ArgumentError, 'emailがありません' unless value
+    raise EmailFormatError, 'emailの形式が正しくありません' unless email_valid?(value)
 
-    unless email_valid?(value)
-      raise EmailFormatError, 'emailの形式が正しくありません'
-    end
-
-    @value = value
+    @value = value.downcase
 
     self.freeze
+  end
+
+  def to_s
+    @value.to_s
   end
 
   private

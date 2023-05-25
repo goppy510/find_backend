@@ -1,4 +1,7 @@
 class ApplicationController < ActionController::Base
+  include ActionController::Cookies
+  include UserAuth::Authenticator
+
   protect_from_forgery with: :null_session
   before_action :authenticate_token
   rescue_from StandardError, with: :render_500

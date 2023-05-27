@@ -16,6 +16,11 @@ class Auth::AuthenticatorService
     cookies.delete(token_access_key)
   end
 
+  # 401エラーかつ、クッキーを削除する
+  def unauthorized_user
+    head_unauthorized && delete_cookie
+  end
+
   private
 
   # トークンのユーザーを返す
@@ -34,7 +39,7 @@ class Auth::AuthenticatorService
     }
     res
   rescue ActiveRecord::RecordNotFound, JWT::DecodeError, JWT::EncodeError => e
-    raise e
+    nil
   end
 
   # トークンの取得(リクエストヘッダー優先してなけばクッキーから取得）
@@ -57,8 +62,7 @@ class Auth::AuthenticatorService
     Auth.token_access_key
   end
 
-  # 401エラーかつ、クッキーを削除する
-  def unauthorized_user
-    head(:unauthorized) && delete_cookie
+  def head_unauthorized
+    head(:unauthorized)
   end
 end

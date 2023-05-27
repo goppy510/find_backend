@@ -39,7 +39,7 @@ describe SignupService do
         let!(:password) { 'P@ssw0rd' }
 
         it 'ArgumentErrorがスローされること' do
-          expect { SignupService.new(nil, password) }.to raise_error(ArgumentError, 'emailがありません')
+          expect { SignupService.new(nil, password) }.to raise_error(ArgumentError, 'emailまたはpasswordがありません')
         end
       end
 
@@ -47,7 +47,7 @@ describe SignupService do
         let!(:email) { Faker::Internet.email }
 
         it 'ArgumentErrorがスローされること' do
-          expect { SignupService.new(email, nil) }.to raise_error(ArgumentError, 'passwordがありません')
+          expect { SignupService.new(email, nil) }.to raise_error(ArgumentError, 'emailまたはpasswordがありません')
         end
       end
 

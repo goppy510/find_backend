@@ -1,25 +1,18 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :null_session
+
+  include ActionController::Cookies
+  include Auth::AuthenticatorService
+
   before_action :authenticate_token
   rescue_from StandardError, with: :render_500
   rescue_from ActiveRecord::RecordInvalid, with: :render_422
   rescue_from AuthenticationError, with: :not_authenticated
 
-  extend T::Sig
-
   # エラーをjsonで返すメソッド
-  sig { params(status: Integer, resource: String, code: String).void }
   def render_error(status = 400, resource, code)
     message = I18n.t("errors.#{resource}.#{code}")
     render json: { error: { status: status, code: code,  message: message }, status: status
-  end
-
-  def current_user
-    @current_user ||= Jwt::UserAuthenticator.call(request.headers)
-  end
-
-  def authenticate
-    raise AuthenticationError unless current_user
   end
 
   private

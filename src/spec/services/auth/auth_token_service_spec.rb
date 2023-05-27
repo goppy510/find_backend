@@ -69,15 +69,19 @@ describe Auth::AuthTokenService do
         end
       end
     end
+  end
 
-    context '異常系' do
+  describe '#lifetime_text' do
+    context '正常系' do
       before do
         travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
       end
 
-      context 'tokenがなかった場合' do
-        it 'ArgumentErrorが発生すること' do
-          expect{ ActivationService.new(nil) }.to raise_error(ArgumentError, 'tokenがありません')
+      context '正しくauthが生成できた場合' do
+        it '2週間が返ってくること' do
+          service = Auth::AuthTokenService.new
+          lifetime = service.lifetime_text
+          expect(lifetime).to eq '2週間'
         end
       end
     end

@@ -17,8 +17,8 @@ class SignupService
   # ユーザー情報をDBに登録する
   def signup
     ActiveRecord::Base.transaction do
-      user = User.create!(email: @email, password: @password)
-      RegistrationToken.create!(user_id: user.id, token: @token, expires_at: @expires_at)
+      user = UserRepository.create(@email, @password)
+      RegistrationTokenRepository.create(user.id, @token, @expires_at)
     end
   rescue ActiveRecord::RecordInvalid => e
     raise SignupError, e.message
@@ -26,8 +26,8 @@ class SignupService
 
   # 本登録用のメールを送信する
   def activation_email
-    user = User.find_by(email: @email)
-    registration_token = RegistrationToken.find_by(user_id: user.id)
+    user = UserUserRepository.find_by_email(@email)
+    registration_token = RegistrationTokenRepository.find_by_user_id(user.id)
 
     raise RecordNotFound, 'userまたはregistration_tokenがありません' if user.blank? || registration_token.blank?
 

@@ -18,6 +18,7 @@ class Auth::AuthenticatorService
   private
 
   # リクエストヘッダーからトークンを取得する
+  # フロント側でAuthorization = `Bearer ${<accessToken>}`というようにtokenを埋め込んでもらう前提
   def token_from_request_headers
     request.headers["Authorization"]&.split&.last
   end
@@ -27,7 +28,7 @@ class Auth::AuthenticatorService
     Auth.token_access_key
   end
 
-  # トークンの取得(リクエストヘッダー優先)
+  # トークンの取得(リクエストヘッダー優先してなけばクッキーから取得）
   def token
     token_from_request_headers || cookies[token_access_key]
   end

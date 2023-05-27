@@ -38,24 +38,21 @@ describe Auth::AuthenticatorService  do
           expect(actual_user[:user_id]).to eq(user1.id)
         end
       end
-    end
-  end
 
-  describe '#delete_cookie' do
-    context '正常系' do
-      before do
-        travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
-      end
+      # delete_cookie, unauthorized_userをまとめてテスト
+      # cookiesメソッドはコントローラーのテストじゃないとできないのでこのテストでは実施しない
+      context '無効なtokenだった（userが見つからない）場合' do
+        let!(:service_mock) { Auth::AuthenticatorService.new }
+        before do
+          allow(service_mock).to receive(:current_user).and_return(nil)
+          # 左辺がfalseだと右辺呼ばれないのでtrueを返して右辺が呼ばれるようにしているｓ
+          allow(service_mock).to receive(:head_unauthorized).and_return(true)
+          allow(service_mock).to receive(:delete_cookie)
+        end
 
-      let!(:user1) { create(:user) }
-      let!(:user2) { create(:user) }
-      let!(:token) { user1.to_token }
-
-      context 'usersにレコードがあり、かつ、tokenが有効な場合' do
-        it 'user.idがsubのvalueと一致すること' do
-          service = Auth::AuthTokenService.new(token: token)
-          actual_user = service.entity_for_user
-          expect(actual_user.id).to eq user1.id
+        it 'delete_cookieメソッドが呼ばれること' do
+          service_mock.authenticate_user
+          expect(service_mock).to have_received(:delete_cookie)
         end
       end
     end

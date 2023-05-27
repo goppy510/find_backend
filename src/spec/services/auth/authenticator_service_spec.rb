@@ -4,54 +4,67 @@ require 'rails_helper'
 require 'rspec-rails'
 require 'faker'
 
-describe ActivationService do
-  describe '#account' do
+describe Auth::AuthenticatorService  do
+  describe '#authenticate_user' do
     context '正常系' do
-      context '有効なトークンを受け取った場合' do
-        before do
-          travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
-        end
-
-        let!(:user) { create(:user) }
-        let!(:registration_token) { create(:registration_token, user_id: user.id, token: 'token', expires_at: Time.zone.local(2023, 05, 10, 4, 0, 0)) }
-
-        it 'usersのactivatedがtrueになること' do
-          service = ActivationService.new(registration_token.token)
-          service.activate
-          expect(User.find(user.id).activated).to be_truthy
-        end
-
-        it 'registration_tokensの該当レコードが物理削除されること' do
-          service = ActivationService.new(registration_token.token)
-          service.activate
-          expect(RegistrationToken.find_by(user_id: user.id)).to be_nil
-        end
-      end
-    end
-
-    context '異常系' do
       before do
         travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
       end
 
-      context 'tokenがなかった場合' do
-        it 'ArgumentErrorが発生すること' do
-          expect{ ActivationService.new(nil) }.to raise_error(ArgumentError, 'tokenがありません')
+      let!(:user1) { create(:user) }
+      let!(:user2) { create(:user) }
+      let!(:token) {  Auth::AuthTokenService.new(payload: { sub: user1.id }).token }
+      let!(:service) { Auth::AuthenticatorService.new }
+
+      context '有効なtokenがヘッダーにあり、tokenに有効なuser.idがある場合' do
+        before do
+          allow(service).to receive(:token_from_request_headers).and_return(token)
+        end
+
+        let(:headers) { { 'Authorization' => "Bearer #{token}" } }
+        let(:request) { double('request', headers: headers) }
+
+        it '正しいuserオブジェクトが返ってくること' do
+          actual_user = service.authenticate_user
+          expect(actual_user[:user_id]).to eq(user1.id)
         end
       end
 
-      context 'registration_tokensのレコードがない場合' do
-        it 'ActiveRecord::RecordNotFoundが発生すること' do
-          expect{ ActivationService.new('hoge') }.to raise_error(ActiveRecord::RecordNotFound, 'registration_tokenがありません')
+      context '有効なtokenがcookieにあり、tokenに有効なuser.idがある場合' do
+        before do
+          cookies = { token_access_key: token }
+          request = double('request', cookies: cookies)
+          allow(service).to receive(:request).and_return(request)
+          allow(service).to receive(:token_from_request_headers).and_return(nil)
+        end
+
+        let!(:service) { Auth::AuthenticatorService.new }
+
+        it '正しいuserオブジェクトが返ってくること' do
+          actual_user = service.authenticate_user
+
+          expect(actual_user.id).to eq(user1.id)
+          expect(actual_user.email).to eq(user1.email)
         end
       end
+    end
+  end
 
-      context 'tokenの有効期限が切れている場合' do
-        let!(:user) { create(:user) }
-        let!(:registration_token) { create(:registration_token, user_id: user.id, token: 'token', expires_at: Time.zone.local(2023, 05, 10, 2, 0, 0)) }
+  describe '#delete_cookie' do
+    context '正常系' do
+      before do
+        travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
+      end
 
-        it 'ExpiredTokenErrorが発生すること' do
-          expect{ ActivationService.new(registration_token.token) }.to raise_error(ExpiredTokenError, 'tokenの有効期限が切れています')
+      let!(:user1) { create(:user) }
+      let!(:user2) { create(:user) }
+      let!(:token) { user1.to_token }
+
+      context 'usersにレコードがあり、かつ、tokenが有効な場合' do
+        it 'user.idがsubのvalueと一致すること' do
+          service = Auth::AuthTokenService.new(token: token)
+          actual_user = service.entity_for_user
+          expect(actual_user.id).to eq user1.id
         end
       end
     end

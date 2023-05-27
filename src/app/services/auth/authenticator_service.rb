@@ -17,6 +17,11 @@ class Auth::AuthenticatorService
 
   private
 
+  # トークンの取得(リクエストヘッダー優先してなけばクッキーから取得）
+  def token
+    token_from_request_headers || cookies[token_access_key]
+  end
+
   # リクエストヘッダーからトークンを取得する
   # フロント側でAuthorization = `Bearer ${<accessToken>}`というようにtokenを埋め込んでもらう前提
   def token_from_request_headers
@@ -28,22 +33,17 @@ class Auth::AuthenticatorService
     Auth.token_access_key
   end
 
-  # トークンの取得(リクエストヘッダー優先してなけばクッキーから取得）
-  def token
-    token_from_request_headers || cookies[token_access_key]
-  end
-
-  # トークンからユーザーを取得する
-  def fetch_entity_from_token
-    AuthTokenService.new(token: token).entity_for_user
-  rescue ActiveRecord::RecordNotFound, JWT::DecodeError, JWT::EncodeError
-    nil
-  end
-
   # トークンのユーザーを返す
   def current_user
     return if token.blank?
     @_current_user ||= fetch_entity_from_token
+  end
+
+  # トークンからユーザーを取得する
+  def fetch_entity_from_token
+    Auth::AuthTokenService.new(token: token).entity_for_user
+  rescue ActiveRecord::RecordNotFound, JWT::DecodeError, JWT::EncodeError
+    nil
   end
 
   # 401エラーかつ、クッキーを削除する

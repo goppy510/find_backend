@@ -3,11 +3,14 @@ Rails.application.routes.draw do
     namespace :users do
       post '/signup',                        to: 'api/signup#signup'
       post '/activation',                    to: 'api/activation#activate'
-      post '/login',                         to: 'api/login#login'
-      delete '/logout',                      to: 'api/logout#logout'
-      get '/:id',                            to: 'api/account#show'
-      put '/:id/password',                   to: 'api/account#update_password'
-      put '/:id/profile',                    to: 'api/account#update_profile'
+      post '/profile',                       to: 'api/profile#create'
+      put '/:id/profile',                    to: 'api/profile#update'
+      post '/login',                         to: 'api/login#create'
+      delete '/logout',                      to: 'api/login#destroy'
+      get '/:id/profile',                    to: 'api/profile#show'
+      put '/:id/password',                   to: 'api/profile#update_password'
+      post '/session',                       to: 'api/session#create'
+      delete '/session/:id',                 to: 'api/session#destroy'  
     end
 
     namespace :prompts do

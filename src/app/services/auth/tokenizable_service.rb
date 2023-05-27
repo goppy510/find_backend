@@ -16,7 +16,7 @@ module Auth::TokenizableService
 
   # 有効期限付きのトークンを返す
   def to_lifetime_token(lifetime)
-    auth = AuthTokenService.new(lifetime: lifetime, payload: to_token_payload)
+    auth = Auth::AuthTokenService.new(lifetime: lifetime, payload: to_token_payload)
     { token: auth.token, lifetime_text: auth.lifetime_text }
   end
 

@@ -24,7 +24,7 @@ config/settings.local.yml
 config/settings/*.local.yml
 config/environments/*.local.yml
 
-db/structure.sql
+/db/structure.sql
 
 doc/
 .yardoc/

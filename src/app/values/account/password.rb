@@ -12,7 +12,9 @@ class Account::Password
 
   private
 
-  def password_valid?(value)
+  def password_valid?(input_value)
+    # 数値だけのパターンも入力としてはあり得るので文字列化
+    value = input_value.to_s
     min_len = 8
     max_len = 50
     return false unless (min_len..max_len).include?(value.length)

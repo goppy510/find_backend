@@ -23,10 +23,6 @@ module App
 
     config.enable_dependency_loading = true
     config.active_record.schema_format = :sql
-    config.autoload_paths += %W[#{config.root}/app/services]
-    config.autoload_paths += %W[#{config.root}/app/values]
-    config.autoload_paths += %W[#{config.root}/app/values/account]
-    config.autoload_paths += %W[#{config.root}/app/values/prompt]
 
     formatter = Logger::CustomFormatter.new
     config.logger = Logger.new("log/common-#{Time.current.strftime('%Y%m%d')}.log", 'daily')

@@ -39,7 +39,11 @@ class Auth::AuthenticatorService
 
   # トークンの取得(リクエストヘッダー優先してなけばクッキーから取得）
   def token
-    token_from_request_headers || cookies[token_access_key]
+    token_from_request_headers || token_from_cookies
+  end
+
+  def token_from_cookies
+    cookies[token_access_key]
   end
 
   # リクエストヘッダーからトークンを取得する

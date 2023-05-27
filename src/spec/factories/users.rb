@@ -6,7 +6,7 @@ require 'faker'
 FactoryBot.define do
   factory :user do
     email { Faker::Internet.email }
-    password_digest { |n| "password_digest_#{n}" }
+    password { |n| "password_digest_#{n}" }
     activated { false }
   end
 end

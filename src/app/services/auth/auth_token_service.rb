@@ -22,7 +22,7 @@ class Auth::AuthTokenService
   # subjectからユーザーを検索する
   def entity_for_user
     # subのvalueにuser.idが入っている
-    User.find(@payload["sub"])
+    User.find(@payload[:sub])
   end
 
   # token_lifetimeの日本語変換を返す

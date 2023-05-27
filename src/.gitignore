@@ -53,3 +53,5 @@ doc/
 /config/credentials/test.key
 
 /config/credentials/*
+
+/config/credentials.yml.enc

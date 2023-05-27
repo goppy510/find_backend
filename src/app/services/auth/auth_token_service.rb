@@ -20,9 +20,11 @@ class Auth::AuthTokenService
   end
 
   # subjectからユーザーを検索する
-  def entity_for_user
+  def find_available_user
     # subのvalueにuser.idが入っている
-    User.find(@payload[:sub])
+    user = UserRepository.find_by_id(@payload[:sub])
+    return false if @payload[:exp] < Time.current.to_i
+    user
   end
 
   # token_lifetimeの日本語変換を返す

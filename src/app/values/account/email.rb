@@ -1,6 +1,6 @@
 #frozen_string_literal: true
 
-class Email
+class Account::Email
   attr_reader :value
 
   def initialize(value)
@@ -8,12 +8,6 @@ class Email
     raise EmailFormatError, 'emailの形式が正しくありません' unless email_valid?(value)
 
     @value = value.downcase
-
-    self.freeze
-  end
-
-  def to_s
-    @value.to_s
   end
 
   private
@@ -25,7 +19,7 @@ class Email
 
   class << self
     def from_string(value)
-      self.new(value)
+      new(value).value.to_s
     end
   end
   

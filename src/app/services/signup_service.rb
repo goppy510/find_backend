@@ -4,13 +4,12 @@ class SignupService
   attr_reader :email, :password, :token, :expires_at
 
   def initialize(email, password)
-    raise ArgumentError, 'emailがありません' unless email
-    raise ArgumentError, 'passwordがありません' unless password
+    raise ArgumentError, 'emailまたはpasswordがありません' if email.blank? or password.blank?
 
-    @email = Email.from_string(email)
-    @password = Password.from_string(password)
-    @token = Registration.token
-    @expires_at = Registration.expires_at
+    @email = Account::Email.from_string(email)
+    @password = Account::Password.from_string(password)
+    @token = Account::Registration.token
+    @expires_at = Account::Registration.expires_at
 
     self.freeze
   end
@@ -18,8 +17,8 @@ class SignupService
   # ユーザー情報をDBに登録する
   def signup
     ActiveRecord::Base.transaction do
-      user = User.create!(email: self.email.to_s, password: self.password.to_s)
-      RegistrationToken.create!(user_id: user.id, token: self.token.to_s, expires_at: self.expires_at.to_s)
+      user = User.create!(email: @email, password: @password)
+      RegistrationToken.create!(user_id: user.id, token: @token, expires_at: @expires_at)
     end
   rescue ActiveRecord::RecordInvalid => e
     raise SignupError, e.message
@@ -27,13 +26,13 @@ class SignupService
 
   # 本登録用のメールを送信する
   def activation_email
-    user = User.find_by(email: self.email.to_s)
+    user = User.find_by(email: @email)
     registration_token = RegistrationToken.find_by(user_id: user.id)
 
     raise RecordNotFound, 'userまたはregistration_tokenがありません' if user.blank? || registration_token.blank?
 
     # メールの作成と送信
-    RegistrationMailer.send_activation_mail(self.email.to_s, self.token.to_s, self.expires_at.to_s).deliver
+    RegistrationMailer.send_activation_mail(@email, @token, @expires_at).deliver
   end
 end
 

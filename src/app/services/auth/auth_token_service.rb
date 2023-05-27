@@ -23,8 +23,6 @@ class Auth::AuthTokenService
   def find_available_user
     # subのvalueにuser.idが入っている
     user = UserRepository.find_by_id(@payload[:sub])
-    return false if @payload[:exp] < Time.current.to_i
-    user
   end
 
   # token_lifetimeの日本語変換を返す

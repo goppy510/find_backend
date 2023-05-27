@@ -4,7 +4,7 @@ require 'rails_helper'
 require 'rspec-rails'
 require 'faker'
 
-describe  Auth::AuthTokenService do
+describe Auth::AuthTokenService do
   describe '#new' do
     context '正常系' do
       before do
@@ -46,6 +46,26 @@ describe  Auth::AuthTokenService do
           service = Auth::AuthTokenService.new(token: token)
           token = service.instance_variable_get(:@token)
           expect(token).not_to be_nil
+        end
+      end
+    end
+  end
+
+  describe '#entity_for_user' do
+    context '正常系' do
+      before do
+        travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
+      end
+
+      let!(:user1) { create(:user) }
+      let!(:user2) { create(:user) }
+      let!(:token) { user1.to_token }
+
+      context 'usersにレコードがあり、かつ、tokenが有効な場合' do
+        it 'user.idがsubのvalueと一致すること' do
+          service = Auth::AuthTokenService.new(token: token)
+          actual_user = service.entity_for_user
+          expect(actual_user.id).to eq user1.id
         end
       end
     end

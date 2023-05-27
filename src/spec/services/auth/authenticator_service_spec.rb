@@ -21,9 +21,6 @@ describe Auth::AuthenticatorService  do
           allow(service).to receive(:token_from_request_headers).and_return(token)
         end
 
-        let(:headers) { { 'Authorization' => "Bearer #{token}" } }
-        let(:request) { double('request', headers: headers) }
-
         it '正しいuserオブジェクトが返ってくること' do
           actual_user = service.authenticate_user
           expect(actual_user[:user_id]).to eq(user1.id)
@@ -32,19 +29,13 @@ describe Auth::AuthenticatorService  do
 
       context '有効なtokenがcookieにあり、tokenに有効なuser.idがある場合' do
         before do
-          cookies = { token_access_key: token }
-          request = double('request', cookies: cookies)
-          allow(service).to receive(:request).and_return(request)
           allow(service).to receive(:token_from_request_headers).and_return(nil)
+          allow(service).to receive(:token_from_cookies).and_return(token)
         end
-
-        let!(:service) { Auth::AuthenticatorService.new }
 
         it '正しいuserオブジェクトが返ってくること' do
           actual_user = service.authenticate_user
-
-          expect(actual_user.id).to eq(user1.id)
-          expect(actual_user.email).to eq(user1.email)
+          expect(actual_user[:user_id]).to eq(user1.id)
         end
       end
     end

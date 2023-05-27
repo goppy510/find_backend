@@ -14,7 +14,7 @@ class ActivationService
   # activate
   def activate
     ActiveRecord::Base.transaction do
-      @user.update!(confirmed: true)
+      @user.update!(activated: true)
       RegistrationToken.find_by(user_id: @user.id)&.destroy!
     end
   end

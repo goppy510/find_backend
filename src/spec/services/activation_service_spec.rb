@@ -15,10 +15,10 @@ describe ActivationService do
         let!(:user) { create(:user) }
         let!(:registration_token) { create(:registration_token, user_id: user.id, token: 'token', expires_at: Time.zone.local(2023, 05, 10, 4, 0, 0)) }
 
-        it 'usersのconfirmedがtrueになること' do
+        it 'usersのactivatedがtrueになること' do
           service = ActivationService.new(registration_token.token)
           service.activate
-          expect(User.find(user.id).confirmed).to be_truthy
+          expect(User.find(user.id).activated).to be_truthy
         end
 
         it 'registration_tokensの該当レコードが物理削除されること' do

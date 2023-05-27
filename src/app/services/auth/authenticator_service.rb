@@ -2,6 +2,7 @@
 
 require 'jwt'
 
+# tokenを取得した状態で、それを使った認証などをするクラス
 class Auth::AuthenticatorService
 
   # トークンからcurrent_userを検索し、存在しない場合は401を返す
@@ -17,6 +18,25 @@ class Auth::AuthenticatorService
 
   private
 
+  # トークンのユーザーを返す
+  def current_user
+    return if token.blank?
+    @_current_user ||= find_user_from_token
+  end
+
+  # トークンからユーザーを取得する
+  def find_user_from_token
+    service = Auth::AuthTokenService.new(token: token)
+    user = service.find_available_user
+    res = {
+      exp: service.payload[:exp],
+      user_id: user.id
+    }
+    res
+  rescue ActiveRecord::RecordNotFound, JWT::DecodeError, JWT::EncodeError => e
+    raise e
+  end
+
   # トークンの取得(リクエストヘッダー優先してなけばクッキーから取得）
   def token
     token_from_request_headers || cookies[token_access_key]
@@ -31,19 +51,6 @@ class Auth::AuthenticatorService
   # クッキーのオブジェクトキー(config/initializers/user_auth.rb)
   def token_access_key
     Auth.token_access_key
-  end
-
-  # トークンのユーザーを返す
-  def current_user
-    return if token.blank?
-    @_current_user ||= fetch_entity_from_token
-  end
-
-  # トークンからユーザーを取得する
-  def fetch_entity_from_token
-    Auth::AuthTokenService.new(token: token).entity_for_user
-  rescue ActiveRecord::RecordNotFound, JWT::DecodeError, JWT::EncodeError
-    nil
   end
 
   # 401エラーかつ、クッキーを削除する

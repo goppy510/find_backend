@@ -1,6 +1,6 @@
 #frozen_string_literal: true
 
-class Password
+class Account::Password
   attr_reader :value
 
   def initialize(value)
@@ -8,19 +8,11 @@ class Password
     raise PasswordFormatError, 'passwordの形式が正しくありません' unless password_valid?(value)
 
     @value = value
-
-    self.freeze
-  end
-
-  def to_s
-    @value.to_s
   end
 
   private
 
-  def password_valid?(input_value)
-    value = input_value.to_s
-  
+  def password_valid?(value)
     min_len = 8
     max_len = 50
     return false unless (min_len..max_len).include?(value.length)
@@ -37,7 +29,7 @@ class Password
 
   class << self
     def from_string(value)
-      self.new(value)
+      new(value).value.to_s
     end
   end
   

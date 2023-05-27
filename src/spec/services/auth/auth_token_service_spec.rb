@@ -24,6 +24,29 @@ describe  Auth::AuthTokenService do
           expect(payload[:exp]).to eq(Time.parse('2023-05-24 03:00:00').to_i)
           expect(payload[:aud]).to eq(Settings[:app][:host])
         end
+
+        it '@tokenが生成されていること' do
+          service = Auth::AuthTokenService.new
+          token = service.instance_variable_get(:@token)
+          expect(token).not_to be_nil
+        end
+      end
+
+      context 'tokenが存在する場合' do
+        let!(:token) { Auth::AuthTokenService.new.token }
+
+        it '@payloadのaudがAPIホストであること,expが2023-05-24 03:00:00のタイムスタンプであること' do
+          service = Auth::AuthTokenService.new(token: token)
+          payload = service.instance_variable_get(:@payload)
+          expect(payload[:exp]).to eq(Time.parse('2023-05-24 03:00:00').to_i)
+          expect(payload[:aud]).to eq(Settings[:app][:host])
+        end
+
+        it '@tokenが入力されたものと一致すること' do
+          service = Auth::AuthTokenService.new(token: token)
+          token = service.instance_variable_get(:@token)
+          expect(token).not_to be_nil
+        end
       end
     end
 

@@ -51,7 +51,7 @@ describe Auth::AuthTokenService do
     end
   end
 
-  describe '#entity_for_user' do
+  describe '#find_user_from_token' do
     context '正常系' do
       before do
         travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
@@ -59,13 +59,22 @@ describe Auth::AuthTokenService do
 
       let!(:user1) { create(:user) }
       let!(:user2) { create(:user) }
-      let!(:token) { user1.to_token }
 
       context 'usersにレコードがあり、かつ、tokenが有効な場合' do
+        let!(:token) { Auth::AuthTokenService.new(payload: { sub: user1.id }).token }
+
         it 'user.idがsubのvalueと一致すること' do
           service = Auth::AuthTokenService.new(token: token)
-          actual_user = service.entity_for_user
+          actual_user = service.find_available_user
           expect(actual_user.id).to eq user1.id
+        end
+      end
+
+      context 'usersにレコードがあり、かつ、tokenが無効な場合' do
+        let!(:token) { Auth::AuthTokenService.new(payload: { sub: user1.id, exp: Time.zone.local(2023, 04, 10, 3, 0, 0).to_i }).token }
+
+        it 'JWT::ExpiredSignatureが発生すること' do
+          expect { Auth::AuthTokenService.new(token: token)}.to raise_error(JWT::ExpiredSignature)
         end
       end
     end

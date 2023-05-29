@@ -30,7 +30,7 @@ class SignupService
     payload = signup_payload(user)
     auth = generate_token(payload, lifetime: Auth.token_signup_lifetime) #SessionModuleのメソッド
     token = auth.token
-    expires_at = toTime(auth) #SessionModuleのメソッド
+    expires_at = Time.at(auth.payload[:exp]) #SessionModuleのメソッド
 
     # メールの作成と送信
     ActivationMailer.send_activation_email(email, token, expires_at).deliver

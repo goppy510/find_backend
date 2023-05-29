@@ -40,6 +40,15 @@ describe Auth::AuthTokenService do
           token = service.instance_variable_get(:@token)
           expect(token).not_to be_nil
         end
+
+        context 'payloadが引数にある場合' do
+          it '@payloadに引数に渡したkey, valがあること' do
+            service = Auth::AuthTokenService.new(payload: { sub: 'hoge', type: 'hogehoge' })
+            payload = service.instance_variable_get(:@payload)
+            expect(payload[:sub]).to eq('hoge')
+            expect(payload[:type]).to eq('hogehoge')
+          end
+        end
       end
 
       context 'tokenが存在する場合' do

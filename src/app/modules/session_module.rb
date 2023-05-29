@@ -1,53 +1,55 @@
-module Session
-
-  def login
-    email = Email.from_string(params[:email])
-    password = Password.from_string(params[:password])
-
-    activated_user = UserRepository.find_by_activated(email, password)
-
-    # プロフィール未入力の場合はその旨をjsonで返す（フロント側で入力画面に飛ばすため）
-    render_error(400, 'user', 'profile_incomplete') unless ProfileRepository.find_by_user_id(activated_user.id)
-
-    # api認証用のtokenを生成する
-    auth = activated_user.genrate_token(activated_user)
-
-    # クッキーのtoken等を入れる
-    cookies[token_access_key] = save_token_cookie
-
-    # ハッシュ形式にして呼び出し元に返す
-    res = {
-      exp: auth.payload[:exp],
-      user_id: activated_user.id
-    }
-    render json: { res }
-  end
-
-  # ログアウト
-  def logout
-    Auth::AuthenticatorService.new.delete_cookie
-    head(:ok)
-  end
+module SessionModule
 
   # トークンが有効ならUserオブジェクトを返す
-  def authenticate_user
-    res = Auth::AuthenticatorService.new.authenticate_user
-    render json: { res }
+  # ログイン後の処理はクッキーを使う
+  def authenticate_user(token)
+    Auth::AuthenticatorService.new(cookie_token: token).authenticate_user
+  end
+
+  # アクティベート未のUserならオブジェクトを返す
+  # アクティベート時はクッキーを生成しないのでヘッダーから取り出す
+  def authenticate_user_not_activate(token)
+    Auth::AuthenticatorService.new(header_token: token).authenticate_user_not_activate
+  end
+
+  # tokenを生成する
+  def generate_token(lifetime: nil, payload: {})
+    Auth::AuthTokenService.new(lifetime: lifetime, payload: payload)
+  end
+
+  # クッキーを削除する（コントローラーで呼ばれる想定）
+  def delete_cookie
+    cookies.delete(Auth.token_access_key)
   end
 
   private
 
-  def genrate_token(user)
-    Auth::AuthTokenService.new(payload: { sub: user.id })
+  # API認証用のトークン生成のためのペイロード
+  def api_payload(user)
+    {
+      sub: user.id,
+      type: 'api'
+    }
   end
 
   # クッキーに保存するトークン
   def save_token_cookie(auth)
     {
       value: auth.token,
-      expires: Time.at(auth.payload[:exp]),
+      expires: auth.payload[:exp],
       secure: Rails.env.production?,
       http_only: true
     }
+  end
+
+  #　クッキーから取り出す
+  def cookie_token
+    cookies[Auth.token_access_key]
+  end
+
+
+  # ヘッダーに含まれているトークンを取り出す
+  def header_token
+    request.headers['Authorization']&.split&.last
   end
 end

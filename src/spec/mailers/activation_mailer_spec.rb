@@ -4,7 +4,7 @@ require 'rails_helper'
 require 'rspec-rails'
 require 'faker'
 
-describe RegistrationMailer do
+describe ActivationMailer do
   let!(:from_content) { Settings[:mail][:from] }
   let!(:signature) do
     "----------------------------------\r\n" \
@@ -24,9 +24,9 @@ describe RegistrationMailer do
     context 'メールが送信された場合' do
       let!(:email) { Faker::Internet.email }
       let!(:user) { create(:user, email: email) }
-      let!(:registration_token) { create(:registration_token, user_id: user.id) }
-      let!(:token) { registration_token.token }
-      let!(:expires_at) { registration_token.expires_at }
+      let!(:auth) { Auth::AuthTokenService.new(payload: { sub: user.id, type: 'activation' }) }
+      let!(:token) { auth.token }
+      let!(:expires_at) { Time.at(auth.payload[:exp]) }
       let!(:url) { "http://localhost:3000/activation?token=#{token}" }
       let!(:subject_content) { '【find-market】本登録のお願い' }
       let!(:body) do
@@ -42,25 +42,25 @@ describe RegistrationMailer do
       end
 
       it '送信元が正しいこと' do
-        RegistrationMailer.send_activation_email(email, token, expires_at).deliver_now
+        ActivationMailer.send_activation_email(email, token, expires_at).deliver_now
         mail = ActionMailer::Base.deliveries.last
         expect(mail.from.first).to eq(from_content)
       end
 
       it '宛先が正しいこと' do
-        RegistrationMailer.send_activation_email(email, token, expires_at).deliver_now
+        ActivationMailer.send_activation_email(email, token, expires_at).deliver_now
         mail = ActionMailer::Base.deliveries.last
         expect(mail.to.first).to eq(email)
       end
     
       it '件名が正しいこと' do
-        RegistrationMailer.send_activation_email(email, token, expires_at).deliver_now
+        ActivationMailer.send_activation_email(email, token, expires_at).deliver_now
         mail = ActionMailer::Base.deliveries.last
         expect(mail.subject).to eq(subject_content)
       end
 
       it '本文が正しいこと' do
-        RegistrationMailer.send_activation_email(email, token, expires_at).deliver_now
+        ActivationMailer.send_activation_email(email, token, expires_at).deliver_now
         mail = ActionMailer::Base.deliveries.last
         expect(mail.body.encoded).to eq(body)
       end

@@ -12,10 +12,20 @@ describe Auth::AuthTokenService do
       end
 
       context 'tokenが存在しない場合' do
-        it '@lifetimeが2 weeksであること' do
-          service = Auth::AuthTokenService.new
-          lifetime = service.instance_variable_get(:@lifetime)
-          expect(lifetime).to eq(2.weeks)
+        context 'liftimeが引数にない場合' do
+          it '@lifetimeが2 weeksであること' do
+            service = Auth::AuthTokenService.new
+            lifetime = service.instance_variable_get(:@lifetime)
+            expect(lifetime).to eq(2.weeks)
+          end
+        end
+
+        context 'lifetimeが引数にある場合' do
+          it '@lifetimeが受け取った引数の日時になっていること' do
+            service = Auth::AuthTokenService.new(lifetime: 1.hour)
+            lifetime = service.instance_variable_get(:@lifetime)
+            expect(lifetime).to eq(1.hour)
+          end
         end
 
         it '@payloadのaudがAPIホストであること,expが2023-05-24 03:00:00のタイムスタンプであること' do

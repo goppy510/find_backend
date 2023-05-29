@@ -24,7 +24,7 @@ describe ActivationMailer do
     context 'メールが送信された場合' do
       let!(:email) { Faker::Internet.email }
       let!(:user) { create(:user, email: email) }
-      let!(:auth) { Auth::AuthTokenService.new(payload: { sub: user.id, type: 'activation' }) }
+      let!(:auth) { Auth::AuthTokenService.new(lifetime: Auth.token_signup_lifetime, payload: { sub: user.id, type: 'activation' }) }
       let!(:token) { auth.token }
       let!(:expires_at) { Time.at(auth.payload[:exp]) }
       let!(:url) { "http://localhost:3000/activation?token=#{token}" }
@@ -57,6 +57,10 @@ describe ActivationMailer do
         ActivationMailer.send_activation_email(email, token, expires_at).deliver_now
         mail = ActionMailer::Base.deliveries.last
         expect(mail.subject).to eq(subject_content)
+      end
+
+      it '有効期限が正しいこと' do
+        expect(expires_at.strftime('%Y-%m-%d %H:%M:%S')).to eq((Time.current + 1.hour).strftime('%Y-%m-%d %H:%M:%S'))
       end
 
       it '本文が正しいこと' do

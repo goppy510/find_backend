@@ -31,11 +31,5 @@ describe ActivationService do
         end
       end
     end
-
-    context '異常系' do
-      before do
-        travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
-      end
-    end
   end
 end

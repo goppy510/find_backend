@@ -18,5 +18,3 @@ class ActivationService
     UserRepository.activate(user)
   end
 end
-
-class ExpiredTokenError < StandardError; end

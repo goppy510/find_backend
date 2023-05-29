@@ -1,38 +1,58 @@
 #frozen_string_literal: true
 
-require 'jwt'
-
 # tokenを取得した状態で、それを使った認証などをするクラス
 class Auth::AuthenticatorService
 
+  def initialize(header_token: nil, cookie_token: nil)
+    @header_token = header_token if header_token.present?
+    @cookie_token = cookie_token if cookie_token.present?
+  end
+
   # トークンからcurrent_userを検索し、存在しない場合は401を返す
   def authenticate_user
-    current_user.presence || unauthorized_user
+    current_user
   end
 
-  # クッキーを削除する
-  def delete_cookie
-    return if cookies[token_access_key].blank?
-    cookies.delete(token_access_key)
-  end
-
-  # 401エラーかつ、クッキーを削除する
-  def unauthorized_user
-    head_unauthorized && delete_cookie
+  # トークンからcurrent_userを検索し、存在しない場合は401を返す
+  def authenticate_user_not_activate
+    current_not_activated_user
   end
 
   private
 
-  # トークンのユーザーを返す
+  # トークンのアクティベート済みのユーザーを返す（ログインチェック等で使う）
   def current_user
     return if token.blank?
-    @_current_user ||= find_user_from_token
+    find_user_from_token
   end
 
-  # トークンからユーザーを取得する
+  # トークンのアクティベート未のユーザーを返す（ログインチェック等で使う）
+  def current_not_activated_user
+    return if token.blank?
+    find_not_activated_user_from_token
+  end
+
+  # トークンからアクティベート済みのユーザーを取得する
   def find_user_from_token
     service = Auth::AuthTokenService.new(token: token)
-    user = service.find_available_user
+    return if service.payload[:type] != 'api'
+    user = service&.find_available_user
+    return unless user
+    res = {
+      exp: service.payload[:exp],
+      user_id: user.id
+    }
+    res
+  rescue ActiveRecord::RecordNotFound, JWT::DecodeError, JWT::EncodeError => e
+    nil
+  end
+
+  # トークンからアクティベート未のユーザーを取得する
+  def find_not_activated_user_from_token
+    service = Auth::AuthTokenService.new(token: token)
+    return if service.payload[:type] != 'activation'
+    user = service&.find_not_available_user
+    return unless user
     res = {
       exp: service.payload[:exp],
       user_id: user.id
@@ -44,25 +64,11 @@ class Auth::AuthenticatorService
 
   # トークンの取得(リクエストヘッダー優先してなけばクッキーから取得）
   def token
-    token_from_request_headers || token_from_cookies
-  end
-
-  def token_from_cookies
-    cookies[token_access_key]
-  end
-
-  # リクエストヘッダーからトークンを取得する
-  # フロント側でAuthorization = `Bearer ${<accessToken>}`というようにtokenを埋め込んでもらう前提
-  def token_from_request_headers
-    request.headers["Authorization"]&.split&.last
+    @header_token || @cookie_token
   end
 
   # クッキーのオブジェクトキー(config/initializers/user_auth.rb)
   def token_access_key
     Auth.token_access_key
-  end
-
-  def head_unauthorized
-    head(:unauthorized)
   end
 end

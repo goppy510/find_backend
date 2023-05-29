@@ -19,10 +19,15 @@ class Auth::AuthTokenService
     @token = JWT.encode(@payload, secret_key, algorithm, header_fields)
   end
 
-  # subjectからユーザーを検索する
+  # subjectからアクティベート済みのユーザーを検索する
   def find_available_user
     # subのvalueにuser.idが入っている
-    user = UserRepository.find_by_id(@payload[:sub])
+    UserRepository.find_by_id(@payload[:sub])
+  end
+
+  # subjectからアクティベート未のユーザーを検索する
+  def find_not_available_user
+    UserRepository.find_by_id_not_activated(@payload[:sub])
   end
 
   # token_lifetimeの日本語変換を返す

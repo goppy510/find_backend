@@ -1,33 +1,22 @@
 #frozen_string_literal: true
 
 class ActivationService
+  include SessionModule
 
   def initialize(token)
-    raise ArgumentError, 'tokenがありません' unless token
-    user = find_by_token(token)
-    raise ActiveRecord::RecordNotFound, 'userが見つかりません' unless user
-    @user = user
-
-    freeze
+    @token = token
   end
 
   # activate
   def activate
-    ActiveRecord::Base.transaction do
-      @user.update!(activated: true)
-      RegistrationToken.find_by(user_id: @user.id)&.destroy!
-    end
-  end
+    auth = authenticate_user_not_activate(@token) #SessionModuleのメソッド
+    expires_at = Time.at(auth[:exp])
+    raise ExpiredTokenError, 'tokenの有効期限が切れています' if expires_at < Time.current
 
-  private
-
-  def find_by_token(token)
-    registration_token = RegistrationToken.find_by(token: token)
-    raise ActiveRecord::RecordNotFound, 'registration_tokenがありません' if registration_token.blank?
-    raise ExpiredTokenError, 'tokenの有効期限が切れています' if registration_token.expires_at < Time.current
-    registration_token.user
+    #アクティベートする
+    user = UserRepository.find_by_id_not_activated(auth[:user_id])
+    UserRepository.activate(user)
   end
 end
 
 class ExpiredTokenError < StandardError; end
-class TokenNotFound < StandardError; end

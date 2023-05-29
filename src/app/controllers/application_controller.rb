@@ -1,3 +1,7 @@
+#frozen_string_literal: true
+
+class AuthenticationError < StandardError; end
+
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :null_session
 
@@ -12,7 +16,7 @@ class ApplicationController < ActionController::Base
   # エラーをjsonで返すメソッド
   def render_error(status = 400, resource, code)
     message = I18n.t("errors.#{resource}.#{code}")
-    render json: { error: { status: status, code: code,  message: message }, status: status
+    render json: { error: { status: status, code: code,  message: message } }, status: status
   end
 
   private
@@ -31,5 +35,3 @@ class ApplicationController < ActionController::Base
     render json: { error: { messages: 'ログインしてください' } }, status: :unauthorized
   end
 end
-
-class AuthenticationError < StandardError; end

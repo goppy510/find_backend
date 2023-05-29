@@ -16,7 +16,7 @@ class LoginService
 
     # api認証用のtokenを生成する
     payload = api_payload(activated_user)
-    auth = generate_token(payload)
+    auth = generate_token(payload: payload)
 
     res = {}
     res[:cookie] = save_token_cookie(auth)

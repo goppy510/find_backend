@@ -1,5 +1,6 @@
 #frozen_string_literal: true
 
+# ユーザーがアクティベーションメールのリンクをクリックしたらアカウントを有効化するためのもの
 class ActivationService
   include SessionModule
 

@@ -28,7 +28,7 @@ class SignupService
 
     # アクティベーションメールのリンクのクエリパラメータに入れるJWTを生成する
     payload = signup_payload(user)
-    auth = generate_token(payload) #SessionModuleのメソッド
+    auth = generate_token(payload, lifetime: Auth.token_signup_lifetime) #SessionModuleのメソッド
     token = auth.token
     expires_at = toTime(auth) #SessionModuleのメソッド
 

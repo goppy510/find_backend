@@ -8,7 +8,7 @@ class UserRepository
     end
 
     def find_by_id(id)
-      User.find_by(id:id, activated: true)
+      User.find_by(id: id, activated: true)
     end
 
     def find_by_email_not_activated(email)

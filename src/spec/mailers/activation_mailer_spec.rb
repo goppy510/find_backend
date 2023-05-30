@@ -11,7 +11,7 @@ describe ActivationMailer do
     "find-marketお問い合わせ\r\n" \
     "support@find-market.co.jp\r\n" \
     "運営会社: 株式会社メイクリード\r\n" \
-    "連絡先: 〒102-0074 東京都千代田区九段南1丁目5番6号りそな九段ビル5F KSフロア\r\n" \
+    "連絡先: 〒214-0014 神奈川県川崎市多摩区登戸2432-1 Bluewater Building7F\r\n" \
     "----------------------------------\r\n" \
     "Copyright (C) MakeLead Co.,Ltd. All Rights Reserved\r\n\r\n" \
   end
@@ -31,8 +31,8 @@ describe ActivationMailer do
       let!(:subject_content) { '【find-market】本登録のお願い' }
       let!(:body) do
         "#{email} 様\r\n\r\n" \
-        "find-market カスタマーサポートです。\r\n\r\n" \
-        "この度は、ビジネス向け生成AIプロンプトデータベース「find-market（ファインドマーケット）」へのご登録、誠にありがとうございます。\r\n\r\n" \
+        "Find カスタマーサポートです。\r\n\r\n" \
+        "この度は、ビジネス向け生成AIプロンプトデータベース「Find（ファインド）」へのご登録、誠にありがとうございます。\r\n\r\n" \
         "以下のリンクをクリックして本登録を完了してください。\r\n\r\n" \
         "#{url}\r\n\r\n" \
         "有効期限（1時間）: #{expires_at.strftime('%Y-%m-%d %H:%M:%S')}\r\n\r\n" \

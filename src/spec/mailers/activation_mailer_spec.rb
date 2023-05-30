@@ -8,7 +8,7 @@ describe ActivationMailer do
   let!(:from_content) { Settings[:mail][:from] }
   let!(:signature) do
     "----------------------------------\r\n" \
-    "find-marketお問い合わせ\r\n" \
+    "Findお問い合わせ\r\n" \
     "support@find-market.co.jp\r\n" \
     "運営会社: 株式会社メイクリード\r\n" \
     "連絡先: 〒214-0014 神奈川県川崎市多摩区登戸2432-1 Bluewater Building7F\r\n" \

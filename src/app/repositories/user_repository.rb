@@ -8,19 +8,11 @@ class UserRepository
     end
 
     def find_by_id(id)
-      User.find_by(id: id, activated: true)
-    end
-
-    def find_by_id_not_activated(id)
-      User.find_by(id: id, activated: false)
+      User.find_by(id: id)
     end
 
     def find_by_email(email)
-      User.find_by(email: email, activated: true)
-    end
-
-    def find_by_email_not_activated(email)
-      User.find_by(email: email, activated: false)
+      User.find_by(email: email)
     end
 
     def find_by_activated(email, password)

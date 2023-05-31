@@ -14,7 +14,7 @@ class SignupService
   end
 
   # ユーザー情報をDBに登録する
-  def signup
+  def add
     UserRepository.create(@email, @password)
   rescue ActiveRecord::RecordInvalid => e
     raise SignupError, e.message
@@ -22,9 +22,8 @@ class SignupService
 
   # 本登録用のメールを送信する
   def activation_email
-
-    user = UserRepository.find_by_email_not_activated(@email)
-    raise UserNotFound, '指定のユーザーが見つかりませんでした' unless user
+    user = UserRepository.find_by_email(@email)
+    raise UserNotFound, '指定のユーザーが見つかりませんでした' if user.blank? or user&.activated
 
     # アクティベーションメールのリンクのクエリパラメータに入れるJWTを生成する
     payload = signup_payload(user)
@@ -44,6 +43,14 @@ class SignupService
       sub: user.id,
       type: 'activation'
     }
+  end
+
+  class << self
+    def signup(email, password)
+      service = SignupService.new(email, password)
+      service&.add
+      service&.activation_email
+    end
   end
 end
 

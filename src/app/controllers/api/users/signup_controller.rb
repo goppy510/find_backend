@@ -1,6 +1,6 @@
 #frozen_string_literal: true
 
-class Api::SignupController < ApplicationController
+class Api::Users::SignupController < ApplicationController
   include SessionModule
 
   # 仮登録用
@@ -10,9 +10,7 @@ class Api::SignupController < ApplicationController
       return
     end
 
-    service = SignupService.new(signup_params[:email], signup_params[:password])
-    service.signup
-    service.activation_email
+    SignupService.signup(signup_params[:email], signup_params[:password])
 
     render json: { status: 'success' }, status: 200
   end

@@ -1,15 +1,34 @@
 #frozen_string_literal: true
 
-class Api::LoginController < ApplicationController
-  include Session
+class Api::Users::LoginController < ApplicationController
+  include SessionModule
 
   # ログイン
   def create
-    login
+    if login_params[:email].blank? || login_params[:password].blank?
+      render_error(400, 'user', 'invalid_parameter')
+      return
+    end
+
+    service = LoginService.new(login_params[:email], login_params[:password])
+    res = service.login
+    if res
+      cookies.encrypted[Auth.token_access_key] = res[:cookie]
+      render json: { status: 'success', data: res[:response] }, status: 200
+      return
+    end
+    render_error(400, 'user', 'invalid_parameter')
+
   end
 
   # ログアウト
   def destroy
-    logout
+    delete_cookie
+  end
+
+  private
+
+  def login_params
+    params.permit(:email, :password)
   end
 end

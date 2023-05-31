@@ -1,16 +1,19 @@
 #frozen_string_literal: true
 
 class Api::ActivationController < ApplicationController
+  include SessionModule
+
   # 確認メールクリック後
   def activate
-    if params[:token].blank?
+    token = header_token
+    if token.blank?
       render_error(400, 'user', 'invalid_parameter')
       return
     end
 
-    service = ActivationService.new(params[:token])
-    response = service.activate
+    service = ActivationService.new(token)
+    service.activate
 
-    render json: response
+    render json: { status: 'success' }, status: 200
   end
 end

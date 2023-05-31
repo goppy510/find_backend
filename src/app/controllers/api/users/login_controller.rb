@@ -24,6 +24,7 @@ class Api::Users::LoginController < ApplicationController
   # ログアウト
   def destroy
     delete_cookie
+    render json: { status: 'success' }, status: 200
   end
 
   private

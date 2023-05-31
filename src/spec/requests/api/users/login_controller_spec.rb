@@ -68,15 +68,23 @@ describe Api::Users::LoginController, type: :request do
     end
   end
 
-  describe "DELETE /destroy" do
-    context "when logged in" do
-      before do
-        post '/api/login', params: { email: "test@example.com", password: "password" }
-        delete '/api/logout'
-      end
+  describe "DELETE /api/users/destroy" do
+    context "正常系" do
+      context 'cookieが保存されている場合' do
+        let!(:email) { Faker::Internet.email }
+        let!(:password) { 'P@ssw0rd' }
+        before do
+          post '/api/users/login', params: { email: email, password: password }
+          delete '/api/users/logout'
+        end
 
-      it "returns a 200 status code" do
-        expect(response).to have_http_status(200)
+        it "status_code: 200を返すこと" do
+          expect(response).to have_http_status(200)
+        end
+
+        it 'cookieが削除されること' do
+          expect(response.headers['Set-Cookie']).to be_blank
+        end
       end
     end
   end

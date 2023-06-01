@@ -23,13 +23,13 @@ class Auth::AuthTokenService
   def find_available_user
     # subのvalueにuser.idが入っている
     user = UserRepository.find_by_id(@payload[:sub])
-    return user if user.activated
+    return user if user&.activated
   end
 
   # subjectからアクティベート未のユーザーを検索する
   def find_not_available_user
     user = UserRepository.find_by_id(@payload[:sub])
-    return user if user.activated == false
+    return user if user&.activated == false
   end
 
   # token_lifetimeの日本語変換を返す

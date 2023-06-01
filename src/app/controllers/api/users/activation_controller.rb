@@ -1,6 +1,6 @@
 #frozen_string_literal: true
 
-class Api::ActivationController < ApplicationController
+class Api::Users::ActivationController < ApplicationController
   include SessionModule
 
   # 確認メールクリック後
@@ -11,9 +11,8 @@ class Api::ActivationController < ApplicationController
       return
     end
 
-    service = ActivationService.new(token)
-    service.activate
+    res = ActivationService.activate(token)
 
-    render json: { status: 'success' }, status: 200
+    render json: { status: 'success', message: 'activated' }, status: 200
   end
 end

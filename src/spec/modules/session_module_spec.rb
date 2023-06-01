@@ -236,4 +236,32 @@ describe SessionModule do
       end
     end
   end
+
+  describe '#cookie_token' do
+    let(:dummy_class) do
+      Class.new do
+        include SessionModule
+        def cookies
+          @cookies ||= {}
+        end
+      end
+    end
+    let(:dummy_instance) { dummy_class.new }
+
+    context '正常系' do
+      context 'tokenがcookieに保存されている場合' do
+        let!(:token) { "TestCookie" }
+        before do
+          travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
+          dummy_instance.cookies[Auth.token_access_key] = token
+        end
+
+        it 'cookieからtokenを取り出せること' do
+          allow(dummy_instance).to receive(:cookies).and_call_original
+          actual_token = dummy_instance.cookie_token
+          expect(actual_token).to eq(token)
+        end
+      end
+    end
+  end
 end

@@ -258,8 +258,37 @@ describe SessionModule do
 
         it 'cookieからtokenを取り出せること' do
           allow(dummy_instance).to receive(:cookies).and_call_original
-          actual_token = dummy_instance.cookie_token
-          expect(actual_token).to eq(token)
+          expect(dummy_instance.cookie_token).to eq(token)
+        end
+      end
+    end
+  end
+
+  describe '#header_token' do
+    let(:dummy_class) do
+      Class.new do
+        include SessionModule
+        def request
+          @request ||= instance_double(ActionDispatch::Request, headers: headers)
+        end
+    
+        def headers
+          @headers ||= {}
+        end
+      end
+    end
+    let(:dummy_instance) { dummy_class.new }
+
+    context '正常系' do
+      let!(:token) { 'token123' }
+      context 'Authorizationヘッダーが存在する場合' do
+        before do
+          allow(dummy_instance).to receive_message_chain(:request, :headers).and_return('Authorization' => "Bearer #{token}")
+        end
+  
+        it 'トークンが正しく取得されること' do
+          allow(dummy_instance).to receive(:headers).and_call_original
+          expect(dummy_instance.header_token).to eq(token)
         end
       end
     end

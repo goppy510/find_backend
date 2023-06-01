@@ -31,6 +31,22 @@ describe ActivationService do
         end
       end
     end
+
+    context '異常系' do
+      context '不正なトークンを受け取った場合' do
+        before do
+          travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
+        end
+
+        let!(:user) { create(:user) }
+        let!(:token) { 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' }
+
+        it 'AuthenticationErrorがスローされること' do
+          service = ActivationService.new(token)
+          expect { service.activate }.to raise_error(AuthenticationError)
+        end
+      end
+    end
   end
 
   describe '#self.activate' do

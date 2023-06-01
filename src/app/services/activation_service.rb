@@ -11,11 +11,11 @@ class ActivationService
   # アクティベート
   def activate
     auth = authenticate_user_not_activate(@token) #SessionModuleのメソッド
-    expires_at = Time.at(auth[:exp])
+    raise AuthenticationError unless auth
 
     #アクティベートする
     user = UserRepository.find_by_id(auth[:user_id])
-    return if user.blank? or user&.activated
+    raise UserNotFound if user.blank? or user&.activated
     UserRepository.activate(user)
   end
 
@@ -23,7 +23,10 @@ class ActivationService
     def activate(token)
       raise ArgumentError, 'tokenがありません' unless token
       service = new(token)
-      service.activate
+      service&.activate
     end
   end
 end
+
+class AuthenticationError < StandardError; end
+class UserNotFound < StandardError; end

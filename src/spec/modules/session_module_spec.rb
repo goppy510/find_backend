@@ -21,7 +21,7 @@ describe SessionModule do
           }
         end
 
-        # moduleはいincludeされないと使えないため
+        # moduleはincludeされないと使えないため
         let!(:dummy_class) {
           Class.new do
             include SessionModule
@@ -50,7 +50,7 @@ describe SessionModule do
           }
         end
 
-        # moduleはいincludeされないと使えないため
+        # moduleはincludeされないと使えないため
         let!(:dummy_class) {
           Class.new do
             include SessionModule
@@ -74,33 +74,136 @@ describe SessionModule do
   describe '#authenticate_user' do
     context '正常系' do
       context '正しいtokenを受け取った場合' do
-        before do
-          travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
+        let!(:user) { create(:user, activated: true) }
+        let!(:payload) do
+          {
+            sub: user.id,
+            type: 'api'
+          }
         end
-
-        let!(:email) { Faker::Internet.email }
-        let!(:password) { 'P@ssw0rd' }
-
-        let!(:dummy_signup_controller_class) {
+        let!(:dummy_class) {
           Class.new do
             include SessionModule
-
-            def params
-              {}
-            end
           end
         }
-        let!(:dummy_signup_controller) {
-          controller = dummy_signup_controller_class.new
-          allow(controller).to receive(:params).and_return({ email: email, password: password })
-          controller
-        }
+        let!(:auth) { dummy_class.new.generate_token(payload: payload) }
 
-        it 'usersにメールアドレスとハッシュ化されたパスワードがインサートされること' do
-          dummy_signup_controller.signup
-          user = UserRepository.find_by_email(email)
-          expect(user.email).to eq(email)
-          expect(user.authenticate(password)).to be_truthy
+        it '正しいユーザー情報を返すこと' do
+          actual_user = dummy_class.new.authenticate_user(auth.token)
+          expect(user.id).to eq(actual_user[:user_id])
+        end
+      end
+    end
+
+    context '異常系' do
+      context '不正なtokenを受け取った場合' do
+        let!(:user) { create(:user, activated: true) }
+        let!(:payload) do
+          {
+            sub: user.id,
+            type: 'api'
+          }
+        end
+        let!(:dummy_class) {
+          Class.new do
+            include SessionModule
+          end
+        }
+        let!(:invalid_token) { 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' }
+
+        it 'nilを返すこと' do
+          actual_user = dummy_class.new.authenticate_user(invalid_token)
+          expect(actual_user).to be_nil
+        end
+      end
+
+      context 'userがアクティベート未だった場合' do
+        let!(:user) { create(:user) }
+        let!(:payload) do
+          {
+            sub: user.id,
+            type: 'api'
+          }
+        end
+        let!(:dummy_class) {
+          Class.new do
+            include SessionModule
+          end
+        }
+        let!(:auth) { dummy_class.new.generate_token(payload: payload) }
+
+        it 'nilを返すこと' do
+          actual_user = dummy_class.new.authenticate_user(auth.token)
+          expect(actual_user).to be_nil
+        end
+      end
+    end
+  end
+
+  describe '#authenticate_user_not_activate' do
+    context '正常系' do
+      context '正しいtokenを受け取った場合' do
+        let!(:user) { create(:user) }
+        let!(:payload) do
+          {
+            sub: user.id,
+            type: 'activation'
+          }
+        end
+        let!(:dummy_class) {
+          Class.new do
+            include SessionModule
+          end
+        }
+        let!(:auth) { dummy_class.new.generate_token(payload: payload) }
+
+        it '正しいユーザー情報を返すこと' do
+          actual_user = dummy_class.new.authenticate_user_not_activate(auth.token)
+          expect(user.id).to eq(actual_user[:user_id])
+        end
+      end
+    end
+
+    context '異常系' do
+      context '不正なtokenを受け取った場合' do
+        let!(:user) { create(:user) }
+        let!(:payload) do
+          {
+            sub: user.id,
+            type: 'api'
+          }
+        end
+        let!(:dummy_class) {
+          Class.new do
+            include SessionModule
+          end
+        }
+        let!(:invalid_token) { 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' }
+
+        it 'nilを返すこと' do
+          actual_user = dummy_class.new.authenticate_user_not_activate(invalid_token)
+          expect(actual_user).to be_nil
+        end
+      end
+
+      context 'userがアクティベート済だった場合' do
+        let!(:user) { create(:user, activated: true) }
+        let!(:payload) do
+          {
+            sub: user.id,
+            type: 'api'
+          }
+        end
+        let!(:dummy_class) {
+          Class.new do
+            include SessionModule
+          end
+        }
+        let!(:auth) { dummy_class.new.generate_token(payload: payload) }
+
+        it 'nilを返すこと' do
+          actual_user = dummy_class.new.authenticate_user_not_activate(auth.token)
+          expect(actual_user).to be_nil
         end
       end
     end

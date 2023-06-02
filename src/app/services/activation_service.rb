@@ -1,33 +1,32 @@
 #frozen_string_literal: true
 
+# ユーザーがアクティベーションメールのリンクをクリックしたらアカウントを有効化するためのもの
 class ActivationService
+  include SessionModule
 
   def initialize(token)
-    raise ArgumentError, 'tokenがありません' unless token
-    user = find_by_token(token)
-    raise ActiveRecord::RecordNotFound, 'userが見つかりません' unless user
-    @user = user
-
-    freeze
+    @token = token
   end
 
-  # activate
+  # アクティベート
   def activate
-    ActiveRecord::Base.transaction do
-      @user.update!(confirmed: true)
-      RegistrationToken.find_by(user_id: @user.id)&.destroy!
-    end
+    auth = authenticate_user_not_activate(@token) #SessionModuleのメソッド
+    raise AuthenticationError unless auth
+
+    #アクティベートする
+    user = UserRepository.find_by_id(auth[:user_id])
+    raise UserNotFound if user.blank? or user&.activated
+    UserRepository.activate(user)
   end
 
-  private
-
-  def find_by_token(token)
-    registration_token = RegistrationToken.find_by(token: token)
-    raise ActiveRecord::RecordNotFound, 'registration_tokenがありません' if registration_token.blank?
-    raise ExpiredTokenError, 'tokenの有効期限が切れています' if registration_token.expires_at < Time.current
-    registration_token.user
+  class << self
+    def activate(token)
+      raise ArgumentError, 'tokenがありません' unless token
+      service = new(token)
+      service&.activate
+    end
   end
 end
 
-class ExpiredTokenError < StandardError; end
-class TokenNotFound < StandardError; end
+class AuthenticationError < StandardError; end
+class UserNotFound < StandardError; end

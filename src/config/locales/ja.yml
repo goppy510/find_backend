@@ -30,10 +30,26 @@
 # available at https://guides.rubyonrails.org/i18n.html.
 
 ja:
+  datetime:
+    prompts:
+      second: 秒
+      minute: 分
+      hour: 時
+      day: 日
+      month: 月
+      year: 年
+    periods:
+      second: 秒
+      minute: 分
+      hour: 時間
+      day: 日
+      week: 週間
+      month: ヶ月
+      year: 年
   errors:
     user:
       invalid_parameter: '不正なパラメータです'
-      unauthorized: '認証できませんでした'
+      unauthorized: 'emailまたはpasswordが間違っています'
       forbidden: 'このページにアクセスする権限がありません'
     prompt:
       

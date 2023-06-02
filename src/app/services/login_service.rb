@@ -1,13 +1,31 @@
-class UserService
+#frozen_string_literal: true
 
-  def initialize
+class LoginService
+  include SessionModule
 
-  def signup(email, password)
+  def initialize(email, password)
+    @email = Account::Email.from_string(email)
+    @password = Account::Password.from_string(password)
   end
 
+  # ログイン
+  def login
+    activated_user = UserRepository.find_by_activated(@email, @password)
+    return unless activated_user
 
-  private
+    # プロフィール未入力の場合はその旨をjsonで返す（フロント側で入力画面に飛ばすため）
+    return unless ProfileRepository.find_by_user_id(activated_user.id)
 
-  def hash_password(password)
+    # api認証用のtokenを生成する
+    payload = api_payload(activated_user)
+    auth = generate_token(payload: payload)
 
+    res = {}
+    res[:cookie] = save_token_cookie(auth)
+    res[:response] = {
+      exp: auth.payload[:exp],
+      user_id: activated_user.id
+    }
+    res
+  end
 end

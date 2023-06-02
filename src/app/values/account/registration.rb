@@ -2,7 +2,7 @@
 
 require 'securerandom'
 
-class Registration
+class Account::Registration
 
   class << self
     def token

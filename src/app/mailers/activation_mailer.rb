@@ -1,4 +1,4 @@
-class RegistrationMailer < ApplicationMailer
+class ActivationMailer < ApplicationMailer
   default :from => Settings[:mail][:from]
 
   def send_activation_email(email, token, expires_at)

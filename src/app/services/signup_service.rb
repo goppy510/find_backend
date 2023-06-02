@@ -1,41 +1,59 @@
 #frozen_string_literal: true
 
 class SignupService
+  include SessionModule
+
   attr_reader :email, :password, :token, :expires_at
 
   def initialize(email, password)
-    raise ArgumentError, 'emailがありません' unless email
-    raise ArgumentError, 'passwordがありません' unless password
-
-    @email = Email.from_string(email)
-    @password = Password.from_string(password)
-    @token = Registration.token
-    @expires_at = Registration.expires_at
+    raise ArgumentError, 'emailまたはpasswordがありません' if email.blank? or password.blank?
+    @email = Account::Email.from_string(email)
+    @password = Account::Password.from_string(password)
 
     self.freeze
   end
 
   # ユーザー情報をDBに登録する
-  def signup
-    ActiveRecord::Base.transaction do
-      user = User.create!(email: self.email.to_s, password: self.password.to_s)
-      RegistrationToken.create!(user_id: user.id, token: self.token.to_s, expires_at: self.expires_at.to_s)
-    end
+  def add
+    UserRepository.create(@email, @password)
   rescue ActiveRecord::RecordInvalid => e
     raise SignupError, e.message
   end
 
   # 本登録用のメールを送信する
   def activation_email
-    user = User.find_by(email: self.email.to_s)
-    registration_token = RegistrationToken.find_by(user_id: user.id)
+    user = UserRepository.find_by_email(@email)
+    raise UserNotFound, '指定のユーザーが見つかりませんでした' if user.blank? or user&.activated
 
-    raise RecordNotFound, 'userまたはregistration_tokenがありません' if user.blank? || registration_token.blank?
+    # アクティベーションメールのリンクのクエリパラメータに入れるJWTを生成する
+    payload = signup_payload(user)
+    auth = generate_token(lifetime: Auth.token_signup_lifetime, payload: payload) #SessionModuleのメソッド
+    token = auth.token
+    expires_at = Time.at(auth.payload[:exp]) #SessionModuleのメソッド
 
     # メールの作成と送信
-    RegistrationMailer.send_activation_mail(self.email.to_s, self.token.to_s, self.expires_at.to_s).deliver
+    ActivationMailer.send_activation_email(email, token, expires_at).deliver
+  end
+
+  private
+
+  # アクティベーション用のトークン生成のためのペイロード
+  def signup_payload(user)
+    {
+      sub: user.id,
+      type: 'activation'
+    }
+  end
+
+  class << self
+    def signup(email, password)
+      service = SignupService.new(email, password)
+      service&.add
+      service&.activation_email
+    end
   end
 end
 
 class SignupError < StandardError; end
+class UserNotFound < StandardError; end
 class SubmitVerifyEmailError < StandardError; end

@@ -81,7 +81,7 @@ describe SignupService do
 
         it 'UserNotFoundがスローされること' do
           service = SignupService.new(email, password)
-          expect { service.activation_email }.to raise_error(UserNotFound)
+          expect { service.activation_email }.to raise_error(Unauthorized)
         end
       end
     end

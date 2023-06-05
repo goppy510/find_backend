@@ -23,7 +23,7 @@ class SignupService
   # 本登録用のメールを送信する
   def activation_email
     user = UserRepository.find_by_email(@email)
-    raise UserNotFound, '指定のユーザーが見つかりませんでした' if user.blank? or user&.activated
+    raise Unauthorized, '指定のユーザーが見つかりませんでした' if user.blank? or user&.activated
 
     # アクティベーションメールのリンクのクエリパラメータに入れるJWTを生成する
     payload = signup_payload(user)
@@ -55,5 +55,5 @@ class SignupService
 end
 
 class SignupError < StandardError; end
-class UserNotFound < StandardError; end
+class Unauthorized < StandardError; end
 class SubmitVerifyEmailError < StandardError; end

@@ -1,8 +1,9 @@
-module SessionModule
+# frozen_string_literal: true
 
+module SessionModule
   # tokenを生成する
   def generate_token(lifetime: nil, payload: {})
-    Auth::AuthTokenService.new(lifetime: lifetime, payload: payload)
+    Auth::AuthTokenService.new(lifetime:, payload:)
   end
 
   # トークンが有効ならUserオブジェクトを返す
@@ -22,7 +23,7 @@ module SessionModule
     cookies.delete(Auth.token_access_key)
   end
 
-  #　クッキーから取り出す
+  # クッキーから取り出す
   def cookie_token
     cookies[Auth.token_access_key]
   end
@@ -46,7 +47,7 @@ module SessionModule
   def save_token_cookie(auth)
     {
       value: auth.token,
-      expires: Time.at(auth.payload[:exp]),
+      expires: Time.zone.at(auth.payload[:exp]),
       secure: Rails.env.production?,
       http_only: true
     }

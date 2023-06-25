@@ -19,5 +19,3 @@ FactoryBot.define do
     name { industry_names.sample }
   end
 end
-
-

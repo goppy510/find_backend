@@ -1,4 +1,4 @@
-#frozen_string_literal: true
+# frozen_string_literal: true
 
 require 'rails_helper'
 require 'rspec-rails'
@@ -19,11 +19,11 @@ describe Account::Password do
     context '異常系' do
       context 'アルファベットだけの場合' do
         let!(:values) do
-          [
-            'ssssssss',
-            'SSSSSSSS',
-            'sSsSsSsS',
-            'SsSsSsSs'
+          %w[
+            ssssssss
+            SSSSSSSS
+            sSsSsSsS
+            SsSsSsS
           ]
         end
 
@@ -35,7 +35,7 @@ describe Account::Password do
       end
 
       context '数値だけの場合' do
-        let!(:value) { 123456789 }
+        let!(:value) { 123_456_789 }
 
         it 'PasswordFormatErrorが発生すること' do
           expect { Account::Password.from_string(value) }.to raise_error(PasswordFormatError)

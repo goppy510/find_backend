@@ -1,4 +1,4 @@
-#frozen_string_literal: true
+# frozen_string_literal: true
 
 require 'rails_helper'
 require 'rspec-rails'
@@ -17,12 +17,12 @@ describe Account::Registration do
   describe '#expires_at' do
     context '正常系' do
       before do
-        travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
+        travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
       end
 
       it '有効期限がが生成されること' do
         expires_at = Account::Registration.expires_at
-        expect(expires_at).to eq(Time.zone.local(2023, 05, 10, 4, 0, 0))
+        expect(expires_at).to eq(Time.zone.local(2023, 5, 10, 4, 0, 0))
       end
     end
   end

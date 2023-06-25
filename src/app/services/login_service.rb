@@ -1,4 +1,4 @@
-#frozen_string_literal: true
+# frozen_string_literal: true
 
 class LoginService
   include SessionModule
@@ -18,7 +18,7 @@ class LoginService
 
     # api認証用のtokenを生成する
     payload = api_payload(activated_user)
-    auth = generate_token(payload: payload)
+    auth = generate_token(payload:)
 
     res = {}
     res[:cookie] = save_token_cookie(auth)

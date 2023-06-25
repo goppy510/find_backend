@@ -19,5 +19,4 @@ Lint/AssignmentInCondition:
 
 
 Rails/DynamicFindBy:
-  Whitelist:
-    - find_by_id
+  Enabled: false

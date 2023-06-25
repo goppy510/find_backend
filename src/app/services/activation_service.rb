@@ -10,12 +10,11 @@ class ActivationService
 
   # アクティベート
   def activate
-    auth = authenticate_user_not_activate(@token) # SessionModuleのメソッド
-    raise AuthenticationError unless auth
+    authenticate_user_not_activate(@token) # SessionModuleのメソッド
+    raise Unauthorized unless @auth
 
     # アクティベートする
-    user = UserRepository.find_by_id(auth[:user_id])
-    raise UserNotFound if user.blank? || user&.activated
+    user = UserRepository.find_by_id(@auth[:user_id])
 
     UserRepository.activate(user)
   end
@@ -30,5 +29,4 @@ class ActivationService
   end
 end
 
-class AuthenticationError < StandardError; end
-class UserNotFound < StandardError; end
+class Unauthorized < StandardError; end

@@ -45,9 +45,9 @@ describe ActivationService do
               .SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
         end
 
-        it 'AuthenticationErrorがスローされること' do
+        it 'Unauthorizedがスローされること' do
           service = ActivationService.new(token)
-          expect { service.activate }.to raise_error(AuthenticationError)
+          expect { service.activate }.to raise_error(Unauthorized)
         end
       end
     end

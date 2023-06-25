@@ -8,16 +8,14 @@ module SessionModule
 
   # トークンが有効ならUserオブジェクトを返す
   # ログイン後の処理はクッキーを使う
-  # Service
   def authenticate_user(token)
-    Auth::AuthenticatorService.new(cookie_token: token)&.authenticate_user
+    @auth = Auth::AuthenticatorService.new(cookie_token: token)&.authenticate_user
   end
 
   # アクティベート未のUserならオブジェクトを返す
   # アクティベート時はクッキーを生成しないのでヘッダーから取り出す
-  # Service
   def authenticate_user_not_activate(token)
-    Auth::AuthenticatorService.new(header_token: token)&.authenticate_user_not_activate
+    @auth = Auth::AuthenticatorService.new(header_token: token)&.authenticate_user_not_activate
   end
 
   # クッキーを削除する（コントローラーで呼ばれる想定）

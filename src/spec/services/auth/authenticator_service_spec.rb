@@ -82,7 +82,7 @@ describe Auth::AuthenticatorService do
   describe '#authenticate_user_not_activate' do
     context '正常系' do
       before do
-        travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
+        travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
       end
 
       let!(:user1) { create(:user, activated: false) }

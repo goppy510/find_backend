@@ -4,7 +4,6 @@ module ErrorHandlers
   extend ActiveSupport::Concern
 
   included do
-    rescue_from ActionController::AuthenticationError, with: :rescue401
     rescue_from ActionController::BadRequest, with: :rescue400
     rescue_from ActionController::Unauthorized, with: :rescue401
     rescue_from ActionController::Forbidden, with: :rescue403
@@ -18,8 +17,8 @@ module ErrorHandlers
     render json: {
       error: {
         status: 400,
-        code: e.message,
-        message: I18n.t("errors.code.#{e.message}")
+        code: err.message,
+        message: I18n.t("errors.coderr.#{err.message}")
       }
     }, status: :bad_request
   end
@@ -28,7 +27,7 @@ module ErrorHandlers
     @exception = err
     render json: {
       error: {
-        status: 401, code: e.message, message: I18n.t("errors.code.#{e.message}")
+        status: 401, code: err.message, message: I18n.t("errors.coderr.#{err.message}")
       }
     }, status: :unauthorized
   end
@@ -37,7 +36,7 @@ module ErrorHandlers
     @exception = err
     render json: {
       error: {
-        status: 403, code: e.message, message: I18n.t("errors.code.#{e.message}")
+        status: 403, code: err.message, message: I18n.t("errors.coderr.#{err.message}")
       }
     }, status: :forbidden
   end
@@ -46,7 +45,7 @@ module ErrorHandlers
     @exception = err
     render json: {
       error: {
-        status: 404, code: e.message, message: I18n.t("errors.code.#{e.message}")
+        status: 404, code: err.message, message: I18n.t("errors.coderr.#{err.message}")
       }
     }, status: :not_found
   end

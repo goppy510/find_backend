@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Account
+module Account
   class Name
     attr_reader :value
 

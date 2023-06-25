@@ -1,5 +1,8 @@
+require:
+  - rubocop-rails
+
 AllCops:
-  TargetRubyVersion: 3.1.1
+  TargetRubyVersion: 3.1
   Exclude:
     - bin/*
     - db/schema.rb
@@ -15,3 +18,6 @@ Lint/AssignmentInCondition:
   Enambled: false
 
 
+Rails/DynamicFindBy:
+  Whitelist:
+    - find_by_id

@@ -5,6 +5,6 @@ require 'faker'
 
 FactoryBot.define do
   factory :business_model do
-    name { ['BtoB', 'BtoC', 'その他'].sample }
+    name { %w[BtoB BtoC その他].sample }
   end
 end

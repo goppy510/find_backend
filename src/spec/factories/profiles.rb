@@ -15,4 +15,3 @@ FactoryBot.define do
     association :business_model
   end
 end
-

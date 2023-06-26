@@ -20,7 +20,7 @@ class ProfileService
     @profiles[:position] = profiles[:position] if profiles.key?(:position)
     @profiles[:business_model] = profiles[:business_model] if profiles.key?(:business_model)
 
-    self.freeze
+    freeze
   end
 
   # プロフィール新規作成
@@ -39,21 +39,11 @@ class ProfileService
   end
 
   class << self
-    def create(token, profiles)
-      raise ArgumentError, 'tokenがありません' if token.blank?
-      raise ArgumentError, 'profilesがありません', if profiles.empty?
-      required_keys = [
-        :name,
-        :phone_number,
-        :company_name,
-        :employee_count,
-        :industry,
-        :position,
-        :business_model
-      ]
-      required_keys.each { |key| hash.fetch(key) { raise KeyError, "Key #{key} が見つかりませんでした" } }
+    def create(user_id, profiles)
+      raise ArgumentError, 'user_idがありません' if user_id.blank?
+      raise ArgumentError, 'profilesがありません' if profiles.blank?
 
-      service = new(token, profiles: profiles)
+      service = new(user_id, profiles:)
       service&.create
     end
 
@@ -64,9 +54,10 @@ class ProfileService
       service&.edit
     end
 
-    def update_password(token, passwodd: password)
+    def update_password(token, password:)
       raise ArgumentError, 'tokenがありません' if token.blank?
       raise ArgumentError, 'passwordがありません' if password.blank?
+
       service = new(token, password)
       service&.update_password
     end

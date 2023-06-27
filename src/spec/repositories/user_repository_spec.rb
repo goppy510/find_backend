@@ -1,4 +1,4 @@
-#frozen_string_literal: true
+# frozen_string_literal: true
 
 require 'rails_helper'
 require 'rspec-rails'
@@ -9,7 +9,7 @@ describe UserRepository do
     context '正常系' do
       context 'メールアドレスとパスワードを受け取った場合' do
         before do
-          travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
+          travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
         end
 
         let!(:email) { Faker::Internet.email }
@@ -27,12 +27,12 @@ describe UserRepository do
   describe '#find_by_id' do
     context '該当するユーザーがレコードにある場合' do
       before do
-        travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
+        travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
       end
 
       let!(:email) { Faker::Internet.email }
       let!(:password) { 'P@ssw0rd' }
-      let!(:user) { create(:user, email: email, password: password) }
+      let!(:user) { create(:user, email:, password:) }
 
       it 'Userオブジェクトが返ること' do
         actual_user = UserRepository.find_by_id(user.id)
@@ -45,12 +45,12 @@ describe UserRepository do
   describe '#find_by_email' do
     context '該当するユーザーがレコードにある場合' do
       before do
-        travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
+        travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
       end
 
       let!(:email) { Faker::Internet.email }
       let!(:password) { 'P@ssw0rd' }
-      let!(:user) { create(:user, email: email, password: password) }
+      let!(:user) { create(:user, email:, password:) }
 
       it 'Userオブジェクトが返ること' do
         actual_user = UserRepository.find_by_email(email)
@@ -63,12 +63,12 @@ describe UserRepository do
   describe '#find_by_activated' do
     context 'アクティベート済の該当するユーザーがレコードにある場合' do
       before do
-        travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
+        travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
       end
 
       let!(:email) { Faker::Internet.email }
       let!(:password) { 'P@ssw0rd' }
-      let!(:user) { create(:user, email: email, password: password, activated: true) }
+      let!(:user) { create(:user, email:, password:, activated: true) }
 
       it 'Userオブジェクトが返ること' do
         actual_user = UserRepository.find_by_activated(email, password)
@@ -80,12 +80,12 @@ describe UserRepository do
     context '異常系' do
       context 'アクティベート未のユーザーの場合' do
         before do
-          travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
+          travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
         end
 
         let!(:email) { Faker::Internet.email }
         let!(:password) { 'P@ssw0rd' }
-        let!(:user) { create(:user, email: email, password: password, activated: false) }
+        let!(:user) { create(:user, email:, password:, activated: false) }
 
         it 'nilが返ること' do
           actual_user = UserRepository.find_by_activated(email, password)
@@ -95,12 +95,12 @@ describe UserRepository do
 
       context 'パスワードがemailと紐づいていない場合' do
         before do
-          travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
+          travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
         end
 
         let!(:email) { Faker::Internet.email }
         let!(:password) { 'P@ssw0rd' }
-        let!(:user) { create(:user, email: email, password: password, activated: false) }
+        let!(:user) { create(:user, email:, password:, activated: false) }
 
         it 'nilが返ること' do
           actual_user = UserRepository.find_by_activated(email, 'hoge')
@@ -113,12 +113,12 @@ describe UserRepository do
   describe '#activate' do
     context 'アクティベート未の該当するユーザーがレコードにある場合' do
       before do
-        travel_to Time.zone.local(2023, 05, 10, 3, 0, 0)
+        travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
       end
 
       let!(:email) { Faker::Internet.email }
       let!(:password) { 'P@ssw0rd' }
-      let!(:user) { create(:user, email: email, password: password, activated: false) }
+      let!(:user) { create(:user, email:, password:, activated: false) }
 
       it 'Userのactivatedがtrueになること' do
         UserRepository.activate(user)

@@ -28,7 +28,7 @@ describe ProfileService do
         end
 
         it 'profilesに登録されること' do
-          ProfileService.create(user.id, profiles)
+          ProfileService.create(user.id, profiles:)
           actual_data = Profile.find_by(user_id: user.id)
           expect(actual_data.full_name).to eq(profiles[:name])
           expect(actual_data.phone_number).to eq(profiles[:phone_number])

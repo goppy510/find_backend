@@ -13,9 +13,6 @@ class LoginService
     activated_user = UserRepository.find_by_activated(@email, @password)
     return unless activated_user
 
-    # プロフィール未入力の場合はその旨をjsonで返す（フロント側で入力画面に飛ばすため）
-    return unless ProfileRepository.find_by_user_id(activated_user.id)
-
     # api認証用のtokenを生成する
     payload = api_payload(activated_user)
     auth = generate_token(payload:)

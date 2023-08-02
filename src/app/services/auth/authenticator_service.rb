@@ -10,27 +10,17 @@ module Auth
 
     # トークンからcurrent_userを検索し、存在しない場合は401を返す
     def authenticate_user
-      current_user
+      find_user_from_token
     end
 
     # トークンからcurrent_userを検索し、存在しない場合は401を返す
     def authenticate_user_not_activate
-      current_not_activated_user
-    end
-
-    private
-
-    # トークンのアクティベート済みのユーザーを返す（ログインチェック等で使う）
-    def current_user
-      find_user_from_token
-    end
-
-    # トークンのアクティベート未のユーザーを返す（ログインチェック等で使う）
-    def current_not_activated_user
       return if token.blank?
 
       find_not_activated_user_from_token
     end
+
+    private
 
     # トークンの取得(リクエストヘッダー優先してなけばクッキーから取得）
     def token

@@ -8,7 +8,7 @@ class ProfileService
               :password
 
   def initialize(user_id, profiles: nil, password: nil)
-    hash_profiles = profiles[:profiles].to_unsafe_h
+    hash_profiles = profiles[:profiles]
     @user_id = user_id
     @password = password if password.present?
     @profiles = {}

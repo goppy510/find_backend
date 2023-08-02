@@ -7,18 +7,23 @@ class ProfileService
               :profiles,
               :password
 
-  def initialize(user_id, profiles: {}, password: nil)
+  def initialize(user_id, profiles: nil, password: nil)
+    hash_profiles = profiles[:profiles].to_unsafe_h
     @user_id = user_id
     @password = password if password.present?
     @profiles = {}
-    @profiles[:name] = Account::Name.from_string(profiles[:name]) if profiles.key?(:name)
-    @profiles[:phone_number] = Account::PhoneNumber.from_string(profiles[:phone_number]) if profiles.key?(:phone_number)
-    @profiles[:company_name] = Account::CompanyName.from_string(profiles[:company_name]) if profiles.key?(:company_name)
+    @profiles[:name] = Account::Name.from_string(hash_profiles[:name]) if hash_profiles.key?(:name)
+    if hash_profiles.key?(:phone_number)
+      @profiles[:phone_number] = Account::PhoneNumber.from_string(hash_profiles[:phone_number])
+    end
+    if hash_profiles.key?(:company_name)
+      @profiles[:company_name] = Account::CompanyName.from_string(hash_profiles[:company_name])
+    end
     # 以下、ラジオボタンの数値なのでバリデーションしない
-    @profiles[:employee_count] = profiles[:employee_count] if profiles.key?(:employee_count)
-    @profiles[:industry] = profiles[:industry] if profiles.key?(:industry)
-    @profiles[:position] = profiles[:position] if profiles.key?(:position)
-    @profiles[:business_model] = profiles[:business_model] if profiles.key?(:business_model)
+    @profiles[:employee_count] = hash_profiles[:employee_count] if hash_profiles.key?(:employee_count)
+    @profiles[:industry] = hash_profiles[:industry] if hash_profiles.key?(:industry)
+    @profiles[:position] = hash_profiles[:position] if hash_profiles.key?(:position)
+    @profiles[:business_model] = hash_profiles[:business_model] if hash_profiles.key?(:business_model)
 
     freeze
   end

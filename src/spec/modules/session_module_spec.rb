@@ -249,19 +249,25 @@ describe SessionModule do
     let(:dummy_class) do
       Class.new do
         include SessionModule
+        attr_reader :request
+
+        def initialize(cookies)
+          @request = ActionDispatch::TestRequest.create
+          @request.cookie_jar.encrypted[Auth.token_access_key] = cookies
+        end
+
         def cookies
-          @cookies ||= {}
+          @request.cookie_jar
         end
       end
     end
-    let(:dummy_instance) { dummy_class.new }
+    let(:dummy_instance) { dummy_class.new(token) }
 
     context '正常系' do
       context 'tokenがcookieに保存されている場合' do
         let!(:token) { 'TestCookie' }
         before do
           travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
-          dummy_instance.cookies[Auth.token_access_key] = token
         end
 
         it 'cookieからtokenを取り出せること' do

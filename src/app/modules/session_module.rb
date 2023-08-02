@@ -26,7 +26,7 @@ module SessionModule
   # クッキーから取り出す
   # Controller
   def cookie_token
-    cookies[Auth.token_access_key]
+    cookies.encrypted[Auth.token_access_key]
   end
 
   # ヘッダーに含まれているトークンを取り出す

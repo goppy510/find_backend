@@ -10,8 +10,8 @@ module Auth
 
     def initialize(lifetime: nil, payload: {}, token: nil, options: {})
       if token.present?
-        @payload, _other = JWT.decode(token.to_s, decode_key, true, decode_options.merge(options))
-        @payload = @payload.transform_keys(&:to_sym) # tokenがある場合はclaimsによってkeyがシンボルになるので合わせた
+        payload, _other = JWT.decode(token.to_s, decode_key, true, decode_options.merge(options))
+        @payload = payload.transform_keys(&:to_sym) # tokenがある場合はclaimsによってkeyがシンボルになるので合わせた
         @token = token
         return
       end

@@ -14,11 +14,35 @@ class ProfileRepository
         full_name: profiles[:name],
         phone_number: profiles[:phone_number],
         company_name: profiles[:company_name],
-        employee_count:,
-        industry:,
-        position:,
-        business_model:
+        employee_count_id: employee_count.id,
+        industry_id: industry.id,
+        position_id: position.id,
+        business_model_id: business_model.id
       )
+    end
+
+    def update_profiles(user_id, profiles = {})
+      updates = {}
+      updates[:employee_count_id] = EmployeeCount.find(profiles[:employee_count]).id if profiles.key?(:employee_count)
+      updates[:industry_id] = Industry.find(profiles[:industry]).id if profiles.key?(:industry)
+      updates[:position_id] = Position.find(profiles[:position]).id if profiles.key?(:position)
+      updates[:business_model_id] = BusinessModel.find(profiles[:business_model]).id if profiles.key?(:business_model)
+      # 残りのフィールドは直接更新します
+      updates[:full_name] = profiles[:name] if profiles.key?(:name)
+      updates[:phone_number] = profiles[:phone_number] if profiles.key?(:phone_number)
+      updates[:company_name] = profiles[:company_name] if profiles.key?(:company_name)
+      Profile.where(user_id:).update!(updates)
+    end
+
+    def update_password(user_id, current_password, new_password)
+      user = User.find_by(id: user_id)
+      raise IncorrectPasswordError unless user.authenticate(current_password)
+
+      user.update(password: new_password, password_confirmation: new_password)
+    end
+
+    def show(user_id)
+      Profile.find_by(user_id:)
     end
 
     def find_by_user_id(user_id)
@@ -26,3 +50,5 @@ class ProfileRepository
     end
   end
 end
+
+class IncorrectPasswordError < StandardError; end

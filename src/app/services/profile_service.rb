@@ -8,7 +8,7 @@ class ProfileService
               :password
 
   def initialize(user_id, profiles: nil, current_password: nil, new_password: nil)
-    hash_profiles = profiles[:profiles] if profiles.present?
+    hash_profiles = profiles if profiles.present?
     @user_id = user_id
     @current_password = current_password if current_password.present?
     @new_password = new_password if new_password.present?
@@ -31,6 +31,7 @@ class ProfileService
 
   # プロフィール新規作成
   def create
+    puts @profiles
     ProfileRepository.create(@user_id, @profiles)
   end
 

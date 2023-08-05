@@ -63,5 +63,5 @@ jobs:
           status: ${{ env.WORKFLOW_CONCLUSION }}
           fields: repo,message,commit,author,action,workflow
         env:
-          GITHUB_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -27,7 +27,7 @@ jobs:
       - name: Cache gems
         uses: actions/cache@v1
         with:
-          path: core/vendor/bundle
+          path: src/vendor/bundle
           key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-gem-
@@ -38,11 +38,11 @@ jobs:
           bundle exec rake parallel:create RAILS_ENV=test
           bundle exec rake db:migrate RAILS_ENV=test
           bundle exec rake parallel:prepare RAILS_ENV=test
-        working-directory: ./core
+        working-directory: ./src
       - name: Run Back-end Test
         run: |
           find ./spec -type f -name '*_spec.rb' | xargs -n4 | rs -T | sed -n "s/^/pyenv local 3.7.6 \\&\\& bundle exec parallel_rspec /; ${{ matrix.node }}p" | bash
-        working-directory: ./core
+        working-directory: ./src
         timeout-minutes: 60
   post-test:
     name: All tests passed

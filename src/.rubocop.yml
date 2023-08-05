@@ -1,0 +1,22 @@
+require:
+  - rubocop-rails
+
+AllCops:
+  TargetRubyVersion: 3.1
+  Exclude:
+    - bin/*
+    - db/schema.rb
+    - vendor/**/*
+
+Style/Documentation:
+  Enabled: false
+
+Style/AsciiComments:
+  Enabled: false
+
+Lint/AssignmentInCondition:
+  Enambled: false
+
+
+Rails/DynamicFindBy:
+  Enabled: false

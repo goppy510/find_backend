@@ -1,19 +1,21 @@
-class ApplicationController < ActionController::Base
-  before_action :authenticate_token
+#frozen_string_literal: true
 
-  extend T::Sig
+class ActionController::AuthenticationError < ActionController::ActionControllerError; end
+class UserNotFound < StandardError; end
+class ActionController::Forbidden < ActionController::ActionControllerError; end
+class ActionController::Unauthorized < ActionController::ActionControllerError; end
+class ActionController::BadRequest < ActionController::ActionControllerError; end
+
+class ApplicationController < ActionController::Base
+  protect_from_forgery with: :null_session
+
+  include ActionController::Cookies
+  include SessionModule
+  include ErrorHandlers
 
   # エラーをjsonで返すメソッド
-  sig { params(status: Integer, resource: String, code: String).void }
   def render_error(status = 400, resource, code)
     message = I18n.t("errors.#{resource}.#{code}")
-    render json: { error: { status: status, code: code,  message: message }, status: status
-  end
-
-  private
-
-  def authenticate_token
-    # トークンのチェックを行うロジックを実装
-    # トークンが無効な場合は適切な処理を行う（リダイレクト、エラーレスポンスなど）
+    render json: { error: { status: status, code: code,  message: message } }, status: status
   end
 end

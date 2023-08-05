@@ -1,35 +1,29 @@
-#frozen_string_literal: true
+# frozen_string_literal: true
 
-class Email
-  attr_reader :value
+module Account
+  class Email
+    attr_reader :value
 
-  def initialize(value)
-    unless value
-      raise ArgumentError, 'emailがありません'
+    def initialize(value)
+      raise ArgumentError, 'emailがありません' unless value
+      raise EmailFormatError, 'emailの形式が正しくありません' unless email_valid?(value)
+
+      @value = value.downcase
     end
 
-    unless email_valid?(value)
-      raise EmailFormatError, 'emailの形式が正しくありません'
+    private
+
+    def email_valid?(value)
+      email_format = /\A[\w+-]+(?:\.[\w+-]+)*@[a-z\d-]+(?:\.[a-z\d-]+)*\.[a-z]{2,}\z/i
+      value =~ email_format
     end
 
-    @value = value
-
-    self.freeze
-  end
-
-  private
-
-  def email_valid?(value)
-    email_format = /\A[\w+\-]+(?:\.[\w+\-]+)*@[a-z\d\-]+(?:\.[a-z\d\-]+)*\.[a-z]{2,}\z/i
-    value =~ email_format
-  end
-
-  class << self
-    def from_string(value)
-      self.new(value)
+    class << self
+      def from_string(value)
+        new(value).value.to_s
+      end
     end
   end
-  
 end
 
 class EmailFormatError < StandardError; end

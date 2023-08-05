@@ -24,7 +24,7 @@ config/settings.local.yml
 config/settings/*.local.yml
 config/environments/*.local.yml
 
-db/structure.sql
+/db/structure.sql
 
 doc/
 .yardoc/
@@ -45,3 +45,13 @@ doc/
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+/config/credentials/development.key
+
+/config/credentials/production.key
+
+/config/credentials/test.key
+
+/config/credentials/*
+
+/config/credentials.yml.enc

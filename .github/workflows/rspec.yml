@@ -1,0 +1,66 @@
+name: Rspec
+on: pull_request
+jobs:
+  rspec:
+    name: Run spec
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [1, 2, 3, 4]
+    services:
+      mysql:
+        image: mysql:5.7
+        options: --health-cmd “mysqladmin ping -h localhost” --health-interval 20s --health-timeout 10s --health-retries 10
+        env:
+          MYSQL_ROOT_PASSWORD: password
+    container:
+      image: ghcr.io/goppy510/find_backend/find_backend-ci:latest
+      credentials:
+        username: goppy510
+        password: ${{ secrets.GHCR_TOKEN }}
+      env:
+        DATABASE_URL: mysql2://root:password@mysql:3306
+        DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: true
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v1
+      - name: Cache gems
+        uses: actions/cache@v1
+        with:
+          path: core/vendor/bundle
+          key: ${{ runner.os }}-gem-${{ hashFiles(‘**/Gemfile.lock’) }}
+          restore-keys: |
+            ${{ runner.os }}-gem-
+      - name: Build and Setup
+        run: |
+          gem install bundler -v 2.3.26
+          bundle install --jobs 4 --retry 3 --path vendor/bundle
+          bundle exec rake parallel:create RAILS_ENV=test
+          bundle exec rake db:migrate RAILS_ENV=test
+          bundle exec rake parallel:prepare RAILS_ENV=test
+        working-directory: ./core
+      - name: Run Back-end Test
+        run: |
+          find ./spec -type f -name ‘*_spec.rb’ | xargs -n4 | rs -T | sed -n “s/^/pyenv local 3.7.6 \\&\\& bundle exec parallel_rspec /; ${{ matrix.node }}p” | bash
+        working-directory: ./core
+        timeout-minutes: 60
+  post-test:
+    name: All tests passed
+    runs-on: ubuntu-latest
+    needs: rspec
+    steps:
+      - run: echo ok
+  slack:
+    name: Slack Notify
+    runs-on: ubuntu-latest
+    needs: rspec
+    if: always()
+    steps:
+      - uses: technote-space/workflow-conclusion-action@v1 # Workflow の結果を取得するアクション
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ env.WORKFLOW_CONCLUSION }}
+          fields: repo,message,commit,author,action,workflow
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

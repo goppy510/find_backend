@@ -1,17 +1,17 @@
-#frozen_string_literal: true
+# frozen_string_literal: true
 
 require 'rails_helper'
 require 'rspec-rails'
 
-describe Password do
+describe Account::Password do
   describe '#from_string' do
     context '正常系' do
       context 'パスワードの仕様を満たす場合' do
         let!(:value) { 'P@ssw0rd' }
 
         it 'Passwordオブジェクトとしてパスワードが返されること' do
-          password = Password.from_string(value)
-          expect(password.value).to eq value
+          password = Account::Password.from_string(value)
+          expect(password).to eq value
         end
       end
     end
@@ -19,26 +19,26 @@ describe Password do
     context '異常系' do
       context 'アルファベットだけの場合' do
         let!(:values) do
-          [
-            'ssssssss',
-            'SSSSSSSS',
-            'sSsSsSsS',
-            'SsSsSsSs'
+          %w[
+            ssssssss
+            SSSSSSSS
+            sSsSsSsS
+            SsSsSsS
           ]
         end
 
         it 'PasswordFormatErrorが発生すること' do
           values.each do |value|
-            expect { Password.from_string(value) }.to raise_error(PasswordFormatError)
+            expect { Account::Password.from_string(value) }.to raise_error(PasswordFormatError)
           end
         end
       end
 
       context '数値だけの場合' do
-        let!(:value) { 123456789 }
+        let!(:value) { 123_456_789 }
 
         it 'PasswordFormatErrorが発生すること' do
-          expect { Password.from_string(value) }.to raise_error(PasswordFormatError)
+          expect { Account::Password.from_string(value) }.to raise_error(PasswordFormatError)
         end
       end
 
@@ -46,7 +46,7 @@ describe Password do
         let!(:value) { '1234a567B89' }
 
         it 'PasswordFormatErrorが発生すること' do
-          expect { Password.from_string(value) }.to raise_error(PasswordFormatError)
+          expect { Account::Password.from_string(value) }.to raise_error(PasswordFormatError)
         end
       end
 
@@ -54,7 +54,7 @@ describe Password do
         let!(:value) { 'aaaaaaa' }
 
         it 'PasswordFormatErrorが発生すること' do
-          expect { Password.from_string(value) }.to raise_error(PasswordFormatError)
+          expect { Account::Password.from_string(value) }.to raise_error(PasswordFormatError)
         end
       end
 
@@ -62,7 +62,7 @@ describe Password do
         let!(:value) { 'a' * 51 }
 
         it 'PasswordFormatErrorが発生すること' do
-          expect { Password.from_string(value) }.to raise_error(PasswordFormatError)
+          expect { Account::Password.from_string(value) }.to raise_error(PasswordFormatError)
         end
       end
     end

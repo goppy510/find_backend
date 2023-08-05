@@ -18,7 +18,7 @@ FactoryBot.define do
     selected_data = employee_count_data.sample
     name { selected_data[:name] }
     range { selected_data[:range] }
-    created_at { Time.now }
-    updated_at { Time.now }
+    created_at { Time.zone.now }
+    updated_at { Time.zone.now }
   end
 end

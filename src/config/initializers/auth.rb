@@ -1,4 +1,4 @@
-#frozen_string_literal: true
+# frozen_string_literal: true
 
 module Auth
   mattr_accessor :token_signup_lifetime # アクティベーション用のtokenの有効期限のデフォルト
@@ -11,7 +11,7 @@ module Auth
   mattr_accessor :not_found_exception_class # ユーザーが見つからない場合の例外
 
   self.token_signup_lifetime = 1.hour
-  self.token_lifetime = 2.week
+  self.token_lifetime = 2.weeks
   self.token_audience = Settings[:app][:host]
   self.token_signature_algorithm = 'HS256'
   self.token_secret_signature_key = Rails.application.credentials.secret_key_base

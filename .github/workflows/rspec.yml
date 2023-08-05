@@ -31,6 +31,10 @@ jobs:
           key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-gem-
+      - name: Create log directory
+        run: mkdir -p ./src/log
+      - name: Bundle Install
+        run: bundle install
       - name: Build and Setup
         run: |
           gem install bundler -v 2.3.26

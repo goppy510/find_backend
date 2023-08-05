@@ -9,44 +9,42 @@ module Api
       # プロフィール作成
       def create
         user_id = @auth[:user_id]
-        ProfileService.create(user_id, profiles: profile_params.to_unsafe_h)
-
+        valid_profiles = { profiles: profile_params.to_unsafe_h }
+        ProfileService.create(user_id, valid_profiles)
         render json: { status: 'success' }, status: :ok
-      rescue StandardError
+      rescue StandardError => e
+        Rails.logger.error e
+        raise ActionController::BadRequest
+      end
+
+      # プロフィール更新用
+      def update
+        user_id = @auth[:user_id]
+        ProfileService.update_profiles(user_id, params[:profiles])
+        render json: { status: 'success' }, status: :ok
+      rescue StandardError => e
+        Rails.logger.error e
+        raise ActionController::BadRequest
+      end
+
+      # パスワード更新用
+      def update_password
+        user_id = @auth[:user_id]
+        ProfileService.update_password(user_id, password_params[:current_password], password_params[:new_password])
+        render json: { status: 'success' }, status: :ok
+      rescue StandardError => e
+        Rails.logger.error e
         raise ActionController::BadRequest
       end
 
       # ユーザー情報閲覧用
       def show
-        if params[:token].blank?
-          render_error(400, 'user', 'invalid_parameter')
-          return
-        end
-
-        service = AccountService.new(params[:token])
-        service.show
-      end
-
-      # パスワード更新用
-      def update_password
-        if params[:token].blank?
-          render_error(400, 'user', 'invalid_parameter')
-          return
-        end
-
-        service = AccountService.new(params[:token])
-        service.update_password
-      end
-
-      # プロフィール更新用
-      def update
-        if params[:token].blank?
-          render_error(400, 'user', 'invalid_parameter')
-          return
-        end
-
-        user_service = AccountService.new(params[:token])
-        user_service.update_profile
+        user_id = @auth[:user_id]
+        res = ProfileService.show(user_id)
+        render json: { status: 'success', data: res }, status: :ok
+      rescue StandardError => e
+        Rails.logger.error e
+        raise ActionController::BadRequest
       end
 
       private
@@ -68,6 +66,10 @@ module Api
           :position,
           :business_model
         )
+      end
+
+      def password_params
+        params.require(:password).permit(:current_password, :new_password)
       end
     end
   end

@@ -20,12 +20,18 @@ module Api
           return
         end
         render_error(400, 'user', 'invalid_parameter')
+      rescue StandardError => e
+        Rails.logger.error e
+        raise ActionController::BadRequest
       end
 
       # ログアウト
       def destroy
         delete_cookie
         render json: { status: 'success' }, status: :ok
+      rescue StandardError => e
+        Rails.logger.error e
+        raise ActionController::BadRequest
       end
 
       private

@@ -1,0 +1,28 @@
+name: 'update docker'
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/Dockerfile'
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Login to Github Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: goppy510
+          password: ${{ secrets.GHCR_TOKEN }}
+      -
+        name: Build and push
+        run: |
+          docker build -t ghcr.io/goppy510/find_backend/find_backend-ci:latest .
+          docker push ghcr.io/goppy510/find_backend/find_backend-ci:latest
+        working-directory: .github/workflows

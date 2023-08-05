@@ -28,7 +28,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: core/vendor/bundle
-          key: ${{ runner.os }}-gem-${{ hashFiles(‘**/Gemfile.lock’) }}
+          key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-gem-
       - name: Build and Setup
@@ -41,7 +41,7 @@ jobs:
         working-directory: ./core
       - name: Run Back-end Test
         run: |
-          find ./spec -type f -name ‘*_spec.rb’ | xargs -n4 | rs -T | sed -n “s/^/pyenv local 3.7.6 \\&\\& bundle exec parallel_rspec /; ${{ matrix.node }}p” | bash
+          find ./spec -type f -name '*_spec.rb' | xargs -n4 | rs -T | sed -n “s/^/pyenv local 3.7.6 \\&\\& bundle exec parallel_rspec /; ${{ matrix.node }}p” | bash
         working-directory: ./core
         timeout-minutes: 60
   post-test:

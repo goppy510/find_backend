@@ -33,7 +33,7 @@ jobs:
             ${{ runner.os }}-gem-
       - name: Build and Setup
         run: |
-          gem install bundler -v 3.2.4
+          gem install bundler -v 2.3.26
           bundle install --jobs 4 --retry 3 --path vendor/bundle
           bundle exec rake parallel:create RAILS_ENV=test
           bundle exec rake db:migrate RAILS_ENV=test

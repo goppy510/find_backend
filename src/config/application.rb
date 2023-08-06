@@ -2,6 +2,7 @@
 
 require_relative 'boot'
 require 'rails/all'
+require 'rack/cors'
 require_relative 'log_formatter'
 
 # Require the gems listed in Gemfile, including any gems
@@ -39,13 +40,6 @@ module App
                        controller_specs: true,
                        request_specs: false
       g.fixture_replacement :factory_bot, dir: 'spec/factories'
-    end
-
-    config.middleware.insert_before 0, Rack::Cors do
-      allow do
-        origins 'localhost:3000'  # 本番環境の場合は適切なオリジンを設定
-        resource '*', headers: :any, methods: %i[get post put delete options]
-      end
     end
   end
 end

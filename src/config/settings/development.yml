@@ -1,5 +1,5 @@
 app:
-  host: http://localhost:3000
+  host: http://localhost:8080
 sendgrid:
   api_key:
   api_host: http://localhost:3030

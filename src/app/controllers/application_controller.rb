@@ -1,7 +1,7 @@
-#frozen_string_literal: true
+# frozen_string_literal: true
 
 class ActionController::AuthenticationError < ActionController::ActionControllerError; end
-class UserNotFound < StandardError; end
+class ActionController::UserNotFound < ActionController::ActionControllerError; end
 class ActionController::Forbidden < ActionController::ActionControllerError; end
 class ActionController::Unauthorized < ActionController::ActionControllerError; end
 class ActionController::BadRequest < ActionController::ActionControllerError; end

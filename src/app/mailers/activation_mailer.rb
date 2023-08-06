@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 class ActivationMailer < ApplicationMailer
-  default :from => Settings[:mail][:from]
+  default from: Settings[:mail][:from]
 
   def send_activation_email(email, token, expires_at)
     @email = email
     @url = "#{Settings[:app][:host]}/activation?token=#{token}"
-    @expires_at = expires_at.strftime('%Y-%m-%d %H:%M:%S')
+    @expires_at = expires_at.in_time_zone('Tokyo').strftime('%Y-%m-%d %H:%M:%S')
 
     subject_content = '【find-market】本登録のお願い'
 

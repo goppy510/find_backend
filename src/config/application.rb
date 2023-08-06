@@ -1,5 +1,7 @@
-require_relative "boot"
-require "rails/all"
+# frozen_string_literal: true
+
+require_relative 'boot'
+require 'rails/all'
 require_relative 'log_formatter'
 
 # Require the gems listed in Gemfile, including any gems
@@ -30,13 +32,20 @@ module App
 
     config.generators do |g|
       g.test_framework :rspec,
-                        fixtures: true,
-                        view_specs: false,
-                        helper_specs: false,
-                        routing_specs: false,
-                        controller_specs: true,
-                        request_specs: false
+                       fixtures: true,
+                       view_specs: false,
+                       helper_specs: false,
+                       routing_specs: false,
+                       controller_specs: true,
+                       request_specs: false
       g.fixture_replacement :factory_bot, dir: 'spec/factories'
+    end
+
+    config.middleware.insert_before 0, Rack::Cors do
+      allow do
+        origins 'localhost:3000'  # 本番環境の場合は適切なオリジンを設定
+        resource '*', headers: :any, methods: %i[get post put delete options]
+      end
     end
   end
 end

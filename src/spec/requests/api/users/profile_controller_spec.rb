@@ -161,13 +161,13 @@ describe Api::Users::ProfileController, type: :request do
     end
   end
 
-  describe 'GET /api/users/:id/profile' do
+  describe 'GET /api/users/profile' do
     context '正常系' do
       context '正しいuser_idを受け取った場合' do
         let!(:profile) { create(:profile, user_id: user.id) }
         before do
           travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
-          get "/api/users/#{user.id}/profile"
+          get '/api/users/profile'
         end
 
         it 'jsonであること' do

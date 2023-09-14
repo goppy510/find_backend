@@ -83,7 +83,6 @@ class ProfileService
 
       res = new(token)&.show
       {
-        user_id: res[:user_id],
         name: res[:full_name],
         phone_number: res[:phone_number],
         company_name: res[:company_name],

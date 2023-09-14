@@ -270,7 +270,6 @@ describe ProfileService do
 
         it 'profileのデータがハッシュで返されること' do
           res = ProfileService.show(token)
-          expect(res[:user_id]).to eq(user.id)
           expect(res[:name]).to eq(profile.full_name)
           expect(res[:phone_number]).to eq(profile.phone_number)
           expect(res[:company_name]).to eq(profile.company_name)

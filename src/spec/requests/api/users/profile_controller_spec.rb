@@ -3,6 +3,7 @@
 require 'rails_helper'
 
 describe Api::Users::ProfileController, type: :request do
+  include SessionModule
   let!(:email) { Faker::Internet.email }
   let!(:password) { 'P@ssw0rd' }
   let!(:user) { create(:user, email:, password:, activated: true) }
@@ -12,8 +13,15 @@ describe Api::Users::ProfileController, type: :request do
       password:
     }
   end
+  let!(:payload) do
+    {
+      sub: user.id,
+      type: 'api'
+    }
+  end
+  let!(:auth) { generate_token(payload:) }
+  let!(:token) { auth.token }
   before do
-    travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
     post '/api/users/login', params: login_params
   end
 
@@ -39,8 +47,7 @@ describe Api::Users::ProfileController, type: :request do
         end
 
         before do
-          travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
-          post '/api/users/profile', params: valid_params
+          post '/api/users/profile', params: valid_params,  headers: { 'Authorization' => "Bearer #{token}" }
         end
 
         it 'status_code: okを返すこと' do
@@ -56,8 +63,7 @@ describe Api::Users::ProfileController, type: :request do
     context '異常系' do
       context 'パラメータがなかった場合' do
         before do
-          travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
-          post '/api/users/profile', params: {}
+          post '/api/users/profile', params: {},  headers: { 'Authorization' => "Bearer #{token}" }
         end
         it 'status_code: 400を返すこと' do
           expect(response).to have_http_status(400)
@@ -92,8 +98,7 @@ describe Api::Users::ProfileController, type: :request do
         end
 
         before do
-          travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
-          put "/api/users/#{user.id}/profile", params:
+          put "/api/users/#{user.id}/profile", params: ,  headers: { 'Authorization' => "Bearer #{token}" }
         end
         it 'status_code: okを返すこと' do
           expect(response).to have_http_status(:ok)
@@ -134,8 +139,7 @@ describe Api::Users::ProfileController, type: :request do
         end
 
         before do
-          travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
-          put "/api/users/#{user.id}/password", params:
+          put "/api/users/#{user.id}/password", params: ,  headers: { 'Authorization' => "Bearer #{token}" }
         end
         it 'status_code: okを返すこと' do
           expect(response).to have_http_status(:ok)
@@ -149,7 +153,7 @@ describe Api::Users::ProfileController, type: :request do
     context '異常系' do
       context 'パラメータがなかった場合' do
         before do
-          put "/api/users/#{user.id}/password", params: {}
+          put "/api/users/#{user.id}/password", params: {},  headers: { 'Authorization' => "Bearer #{token}" }
         end
         it 'status_code: 400を返すこと' do
           expect(response).to have_http_status(400)
@@ -166,8 +170,7 @@ describe Api::Users::ProfileController, type: :request do
       context '正しいuser_idを受け取った場合' do
         let!(:profile) { create(:profile, user_id: user.id) }
         before do
-          travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
-          get '/api/users/profile'
+          get '/api/users/profile', headers: { 'Authorization' => "Bearer #{token}" }
         end
 
         it 'jsonであること' do

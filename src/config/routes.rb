@@ -10,7 +10,7 @@ Rails.application.routes.draw do
       put '/:id/profile',  to: 'profile#update'
       post '/login',       to: 'login#create'
       delete '/logout',    to: 'login#destroy'
-      get '/profile',  to: 'profile#show'
+      get '/profile',      to: 'profile#show'
       put '/:id/password', to: 'profile#update_password'
     end
 

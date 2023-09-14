@@ -40,7 +40,7 @@ module Api
       def show
         token = header_token
         res = ProfileService.show(token)
-        render json: { status: 'success', data: res }, status: :ok
+        render json: res, status: :ok
       rescue StandardError => e
         Rails.logger.error e
         raise ActionController::BadRequest

@@ -21,9 +21,6 @@ describe Api::Users::ProfileController, type: :request do
   end
   let!(:auth) { generate_token(payload:) }
   let!(:token) { auth.token }
-  before do
-    post '/api/users/login', params: login_params
-  end
 
   describe 'POST /api/users/profile' do
     context '正常系' do
@@ -178,8 +175,7 @@ describe Api::Users::ProfileController, type: :request do
         end
         it 'jsonでprofilesの中身を受け取ること' do
           expect(JSON.parse(response.body)).to eq(
-            'data' => {
-              'user_id' => user.id,
+            {
               'name' => profile.full_name,
               'phone_number' => profile.phone_number,
               'company_name' => profile.company_name,
@@ -187,15 +183,11 @@ describe Api::Users::ProfileController, type: :request do
               'industry' => Industry.find(profile[:industry_id]).name,
               'position' => Position.find(profile[:position_id]).name,
               'business_model' => BusinessModel.find(profile[:business_model_id]).name
-            },
-            'status' => 'success'
+            }
           )
         end
         it 'status_code: okを返すこと' do
           expect(response).to have_http_status(:ok)
-        end
-        it 'statusがsuccessであること' do
-          expect(JSON.parse(response.body)['status']).to eq('success')
         end
       end
     end

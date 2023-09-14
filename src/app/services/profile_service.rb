@@ -7,9 +7,9 @@ class ProfileService
               :profiles,
               :password
 
-  def initialize(user_id, profiles: nil, current_password: nil, new_password: nil)
+  def initialize(token, profiles: nil, current_password: nil, new_password: nil)
     hash_profiles = profiles[:profiles] if profiles.present?
-    @user_id = user_id
+    @user_id = authenticate_user(token)[:user_id]
     @current_password = current_password if current_password.present?
     @new_password = new_password if new_password.present?
     @profiles = {}
@@ -50,40 +50,39 @@ class ProfileService
   end
 
   class << self
-    def create(user_id, profiles)
-      raise ArgumentError, 'user_idがありません' if user_id.blank?
+    def create(token, profiles)
+      raise ArgumentError, 'tokenがありません' if token.blank?
       raise ArgumentError, 'profilesがありません' if profiles.blank?
 
-      service = new(user_id, profiles:)
+      service = new(token, profiles:)
       service&.create
     end
 
-    def update_profiles(user_id, profiles)
-      raise ArgumentError, 'user_idがありません' if user_id.blank?
+    def update_profiles(token, profiles)
+      raise ArgumentError, 'tokenがありません' if token.blank?
       raise ArgumentError, 'profilesがありません' if profiles.blank?
 
-      service = new(user_id, profiles:)
+      service = new(token, profiles:)
       service&.update_profiles
     end
 
-    def update_password(user_id, current_password, new_password)
-      raise ArgumentError, 'user_idがありません' if user_id.blank?
+    def update_password(token, current_password, new_password)
+      raise ArgumentError, 'tokenがありません' if token.blank?
       raise ArgumentError, 'current_passwordがありません' if current_password.blank?
       raise ArgumentError, 'new_passwordがありません' if new_password.blank?
 
-      service = new(user_id, current_password:, new_password:)
+      service = new(token, current_password:, new_password:)
       service&.update_password
     rescue StandardError => e
       Rails.logger.error e
       raise e
     end
 
-    def show(user_id)
-      raise ArgumentError, 'user_idがありません' if user_id.blank?
+    def show(token)
+      raise ArgumentError, 'tokenがありません' if token.blank?
 
-      res = new(user_id)&.show
+      res = new(token)&.show
       {
-        user_id: res[:user_id],
         name: res[:full_name],
         phone_number: res[:phone_number],
         company_name: res[:company_name],

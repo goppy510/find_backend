@@ -17,12 +17,9 @@ class LoginService
     payload = api_payload(activated_user)
     auth = generate_token(payload:)
 
-    res = {}
-    res[:cookie] = save_token_cookie(auth)
-    res[:response] = {
-      exp: auth.payload[:exp],
-      user_id: activated_user.id
+    {
+      token: auth.token,
+      expires: Time.zone.at(auth.payload[:exp])
     }
-    res
   end
 end

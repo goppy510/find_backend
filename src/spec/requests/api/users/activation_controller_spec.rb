@@ -19,7 +19,6 @@ describe Api::Users::ActivationController, type: :request do
           }
         end
         let!(:auth) { generate_token(lifetime: Auth.token_signup_lifetime, payload:) }
-
         let!(:token) { auth.token }
 
         before do

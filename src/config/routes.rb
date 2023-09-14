@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
   namespace :api do
     namespace :users do
       post '/signup',      to: 'signup#signup'
@@ -9,7 +10,7 @@ Rails.application.routes.draw do
       put '/:id/profile',  to: 'profile#update'
       post '/login',       to: 'login#create'
       delete '/logout',    to: 'login#destroy'
-      get '/:id/profile',  to: 'profile#show'
+      get '/profile',      to: 'profile#show'
       put '/:id/password', to: 'profile#update_password'
     end
 

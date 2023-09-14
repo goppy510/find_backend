@@ -18,17 +18,6 @@ module SessionModule
     @auth = Auth::AuthenticatorService.new(header_token: token)&.authenticate_user_not_activate
   end
 
-  # クッキーを削除する（コントローラーで呼ばれる想定）
-  def delete_cookie
-    cookies.delete(Auth.token_access_key)
-  end
-
-  # クッキーから取り出す
-  # Controller
-  def cookie_token
-    cookies.encrypted[Auth.token_access_key]
-  end
-
   # ヘッダーに含まれているトークンを取り出す
   # Controller
   def header_token
@@ -42,16 +31,6 @@ module SessionModule
     {
       sub: user.id,
       type: 'api'
-    }
-  end
-
-  # クッキーに保存するトークン
-  def save_token_cookie(auth)
-    {
-      value: auth.token,
-      expires: Time.zone.at(auth.payload[:exp]),
-      secure: Rails.env.production?,
-      http_only: true
     }
   end
 end

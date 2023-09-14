@@ -5,6 +5,7 @@ require 'rspec-rails'
 require 'faker'
 
 describe LoginService do
+  include SessionModule
   describe '#login' do
     context '正常系' do
       context '正しいメールアドレスとパスワードを受け取った場合' do
@@ -16,12 +17,20 @@ describe LoginService do
         let!(:password) { 'P@ssw0rd' }
         let!(:user) { create(:user, email:, password:, activated: true) }
         let!(:profile) { create(:profile, user_id: user.id) }
+        let!(:payload) do
+          {
+            sub: user.id,
+            type: 'api'
+          }
+        end
+        let!(:auth) { generate_token(payload:) }
+        let!(:token) { auth.token }
 
-        it 'use.idとexpがレスポンスとして返ってくること' do
+        it 'tokenとexpがレスポンスとして返ってくること' do
           service = LoginService.new(email, password)
           res = service.login
-          expect(Time.zone.at(res[:response][:exp])).to eq(Time.zone.local(2023, 5, 24, 3, 0, 0))
-          expect(res[:response][:user_id]).to eq(user.id)
+          expect(res[:expires]).to eq(Time.zone.local(2023, 5, 24, 3, 0, 0))
+          expect(res[:token]).to eq(token)
         end
       end
     end

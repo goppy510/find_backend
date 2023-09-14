@@ -6,7 +6,7 @@ RUN echo "deb http://deb.debian.org/debian buster main" > /etc/apt/sources.list 
 
 RUN apt-get install -y build-essential \
   openssl \
-  mysql-client
+  default-mysql-client
 
 
 ENV LANG C.UTF-8

@@ -7,7 +7,7 @@ Rails.application.routes.draw do
       post '/signup',      to: 'signup#signup'
       post '/activation',  to: 'activation#activate'
       post '/profile',     to: 'profile#create'
-      put '/:id/profile',  to: 'profile#update'
+      put  '/profile',     to: 'profile#update'
       post '/login',       to: 'login#create'
       delete '/logout',    to: 'login#destroy'
       get '/profile',      to: 'profile#show'

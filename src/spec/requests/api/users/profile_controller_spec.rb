@@ -72,7 +72,7 @@ describe Api::Users::ProfileController, type: :request do
     end
   end
 
-  describe 'PUT /api/users/:id/profile' do
+  describe 'PUT /api/users/profile' do
     context '正常系' do
       context '正しい更新用パラメータを受け取った場合' do
         let!(:current_profiles) { create(:profile, user_id: user.id) }
@@ -95,7 +95,7 @@ describe Api::Users::ProfileController, type: :request do
         end
 
         before do
-          put "/api/users/#{user.id}/profile", params: ,  headers: { 'Authorization' => "Bearer #{token}" }
+          put "/api/users/profile", params: ,  headers: { 'Authorization' => "Bearer #{token}" }
         end
         it 'status_code: okを返すこと' do
           expect(response).to have_http_status(:ok)
@@ -109,7 +109,7 @@ describe Api::Users::ProfileController, type: :request do
     context '異常系' do
       context 'パラメータがなかった場合' do
         before do
-          put "/api/users/#{user.id}/profile", params: {}
+          put "/api/users/profile", params: {}
         end
         it 'status_code: 400を返すこと' do
           expect(response).to have_http_status(400)

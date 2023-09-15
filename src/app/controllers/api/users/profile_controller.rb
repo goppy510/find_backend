@@ -19,7 +19,7 @@ module Api
       # プロフィール更新用
       def update
         token = header_token
-        ProfileService.update_profiles(token, params[:profiles])
+        ProfileService.update_profiles(token, profiles: params[:profiles])
         render json: { status: 'success' }, status: :ok
       rescue StandardError => e
         Rails.logger.error e

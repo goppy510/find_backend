@@ -22,3 +22,15 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+
+
+# 環境構築
+```
+docker-compose build
+
+docker-compose up -d
+
+docker-compose run web ruby bootstrap.rb development --no-gemupate
+```
+
+

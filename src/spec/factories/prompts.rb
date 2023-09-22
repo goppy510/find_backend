@@ -1,0 +1,25 @@
+# frozen_string_literal: true
+
+require 'factory_bot_rails'
+require 'faker'
+
+FactoryBot.define do
+  factory :prompt do
+    uuid { SecureRandom.uuid }
+    about { Faker::Lorem.sentence }
+    input_example { Faker::Lorem.sentence }
+    output_example { Faker::Lorem.sentence }
+    prompt_text { Faker::Lorem.sentence } # 'prompt' is a reserved word, so using 'prompt_text'
+    association :user
+    deleted { false }
+    created_at { Time.zone.now }
+    updated_at { Time.zone.now }
+
+    after(:build) do |prompt|
+      prompt.category ||= 
+        Category.any? ? Category.order(Arel.sql('RAND()')).first : create(:category)
+      prompt.generative_ai_model ||= 
+        GenerativeAiModel.any? ? GenerativeAiModel.order(Arel.sql('RAND()')).first : create(:generative_ai_model)
+    end
+  end
+end

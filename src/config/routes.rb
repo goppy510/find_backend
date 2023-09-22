@@ -15,13 +15,14 @@ Rails.application.routes.draw do
     end
 
     namespace :prompts do
-      get '/',       to: 'prompts#index'
-      post '/',      to: 'prompts#create'
-      get '/:id',    to: 'prompts#show'
-      put '/:id',    to: 'prompts#update'
-      delete '/:id', to: 'prompts#destroy'
-      post '/:id/like', to: 'prompts#like'
-      delete '/:id/like', to: 'prompts#unlike'
+      # get '/',            to: 'prompt#index'
+      # post '/',           to: 'prompt#create'
+      # get '/:id',         to: 'prompt#show'
+      # put '/:id',         to: 'prompt#update'
+      # delete '/:id',      to: 'prompt#destroy'
+      # post '/:id/like',   to: 'prompt#like'
+      # delete '/:id/like', to: 'prompt#unlike'
+      get '/categories',  to: 'category#index'
     end
   end
 end

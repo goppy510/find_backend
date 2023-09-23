@@ -46,6 +46,11 @@ class PromptService
     PromptRepository.update(@user_id, @prompt_id, @prompts)
   end
 
+  # プロンプト削除
+  def delete
+    PromptRepository.delete(@user_id, @prompt_id)
+  end
+
   # プロンプト表示
   def show
     PromptRepository.prompt_detail(@prompt_id)
@@ -94,6 +99,14 @@ class PromptService
 
       service = new(token, prompt_id:, prompts:)
       service&.update
+    end
+
+    def delete(token, prompt_id)
+      raise ArgumentError, 'tokenがありません' if token.blank?
+      raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
+
+      service = new(token, prompt_id:)
+      service&.delete
     end
 
     # プロンプト表示

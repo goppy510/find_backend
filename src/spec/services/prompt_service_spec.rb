@@ -170,6 +170,56 @@ describe PromptService do
     end
   end
 
+  describe '#self.delete' do
+    context '正常系' do
+      context '必要なすべてのパラメータを受け取った場合' do
+        before do
+          travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
+        end
+        let!(:email) { Faker::Internet.email }
+        let!(:password) { 'P@ssw0rd' }
+        let!(:user) { create(:user, email:, password:, activated: true) }
+        let!(:current_prompts) { create(:prompt, user_id: user.id) }
+        let!(:prompt_id) { current_prompts.id }
+        let!(:payload) do
+          {
+            sub: user.id,
+            type: 'api'
+          }
+        end
+        let!(:auth) { generate_token(payload:) }
+        let!(:token) { auth.token }
+
+        it 'promptが削除されること' do
+          PromptService.delete(token, prompt_id)
+          prompt = Prompt.find_by(id: prompt_id, user_id: user.id, deleted: false)
+          expect(prompt).to eq(nil)
+        end
+      end
+    end
+
+    context '異常系' do
+      before do
+        travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
+      end
+      let!(:password) { 'P@ssw0rd' }
+      let!(:user) { create(:user, password:, activated: true) }
+      let!(:current_prompts) { create(:prompt, user_id: user.id) }
+
+      context 'tokenがない場合' do
+        it 'ArgumentErrorがスローされること' do
+          expect { PromptService.delete(nil, current_prompts.id) }.to raise_error(ArgumentError, 'tokenがありません')
+        end
+      end
+
+      context 'prompt_idがない場合' do
+        it 'ArgumentErrorがスローされること' do
+          expect { PromptService.delete(user.id, nil) }.to raise_error(ArgumentError, 'prompt_idがありません')
+        end
+      end
+    end
+  end
+
   describe '#self.show' do
     context '正常系' do
       context '必要なすべてのパラメータを受け取った場合' do

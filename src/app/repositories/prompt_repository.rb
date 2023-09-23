@@ -34,18 +34,24 @@ class PromptRepository
       Prompt.where(id: prompt_id, user_id:).update!(updates)
     end
 
+    # プロンプトを論理削除する
+    def delete(user_id, prompt_id)
+      Prompt.where(id: prompt_id, user_id:).update!(deleted: true)
+    end
+
     # プロンプトを取得する
     def prompt_only(prompt_id)
-      Prompt.find_by(id: prompt_id)
+      Prompt.find_by(id: prompt_id, deleted: false)
     end
 
     # 詳細ページ用にプロンプトを取得する
     def prompt_detail(prompt_id)
       Prompt.left_outer_joins(:likes, :bookmarks, :category, :generative_ai_model, user: :profile)
-        .where(id: prompt_id).group('prompts.id', 'profiles.nickname', 'categories.name', 'generative_ai_models.name')
+        .where(id: prompt_id, deleted: false)
+        .group('prompts.id', 'profiles.nickname', 'categories.name', 'generative_ai_models.name')
         .select('prompts.*', 'profiles.nickname AS nickname', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
         .first
-    end    
+    end
   end
 end
 

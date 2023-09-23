@@ -100,32 +100,46 @@ describe PromptRepository do
 
   describe '#prompt_detail' do
     context '正常系' do
-      context 'user_id, prompt_idを受け取った場合' do
-        before do
-          travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
-        end
-        let!(:email_creator) { Faker::Internet.email }
-        let!(:email_1) { Faker::Internet.email }
-        let!(:email_2) { Faker::Internet.email }
-        let!(:password) { 'P@ssw0rd' }
-        let!(:user_creator) { create(:user, email: email_creator, password:, activated: true) }
-        let!(:prompts) { create(:prompt, user_id: user_creator.id) }
-        let!(:user_1) { create(:user, email: email_1, password:, activated: true) }
-        let!(:user_2) { create(:user, email: email_2, password:, activated: true) }
-        let!(:like_1) { create(:like, user_id: user_1.id, prompt_id: prompts.id) }
-        let!(:like_2) { create(:like, user_id: user_2.id, prompt_id: prompts.id) }
-        let!(:bookmark_1) { create(:bookmark, user_id: user_1.id, prompt_id: prompts.id) }
-        let!(:bookmark_2) { create(:bookmark, user_id: user_2.id, prompt_id: prompts.id) }
+      before do
+        travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
+      end
+      let!(:email_creator) { Faker::Internet.email }
+      let!(:email_1) { Faker::Internet.email }
+      let!(:email_2) { Faker::Internet.email }
+      let!(:password) { 'P@ssw0rd' }
+      let!(:user_creator) { create(:user, email: email_creator, password:, activated: true) }
+      let!(:user_1) { create(:user, email: email_1, password:, activated: true) }
+      let!(:user_2) { create(:user, email: email_2, password:, activated: true) }
+      let!(:like_1) { create(:like, user_id: user_1.id, prompt_id: prompts.id) }
+      let!(:like_2) { create(:like, user_id: user_2.id, prompt_id: prompts.id) }
+      let!(:bookmark_1) { create(:bookmark, user_id: user_1.id, prompt_id: prompts.id) }
+      let!(:bookmark_2) { create(:bookmark, user_id: user_2.id, prompt_id: prompts.id) }
 
+      context 'user_id, prompt_idを受け取った場合（有効なプロンプトが存在する場合）' do
+        let!(:prompts) { create(:prompt, user_id: user_creator.id) }
         it '渡されたuser_idとuuidに紐づくプロンプトが返されること' do
           response = PromptRepository.prompt_detail(prompts.id)
           expected = Prompt.left_outer_joins(:likes, :bookmarks, :category, :generative_ai_model, user: :profile)
-          .where(id: prompts.id).group('prompts.id', 'profiles.nickname', 'categories.name', 'generative_ai_models.name')
-          .select('prompts.*', 'profiles.nickname AS nickname', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
-          .first
+                        .where(id: prompts.id, deleted: false)
+                        .group('prompts.id', 'profiles.nickname', 'categories.name', 'generative_ai_models.name')
+                        .select('prompts.*', 'profiles.nickname AS nickname', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
+                        .first
           expect(response).to eq(expected)
           expect(response.likes_count).to eq(2)
           expect(response.bookmarks_count).to eq(2)
+        end
+      end
+
+      context 'user_id, prompt_idを受け取った場合（プロンプトが削除済みの場合）' do
+        let!(:prompts) { create(:prompt, user_id: user_creator.id, deleted: true) }
+        it 'nilが返されること' do
+          response = PromptRepository.prompt_detail(prompts.id)
+          expected = Prompt.left_outer_joins(:likes, :bookmarks, :category, :generative_ai_model, user: :profile)
+                        .where(id: prompts.id, deleted: false)
+                        .group('prompts.id', 'profiles.nickname', 'categories.name', 'generative_ai_models.name')
+                        .select('prompts.*', 'profiles.nickname AS nickname', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
+                        .first
+          expect(response).to be_nil
         end
       end
     end

@@ -7,9 +7,10 @@ FactoryBot.define do
   factory :prompt do
     uuid { SecureRandom.uuid }
     about { Faker::Lorem.sentence }
+    title { Faker::Lorem.sentence }
     input_example { Faker::Lorem.sentence }
     output_example { Faker::Lorem.sentence }
-    prompt_text { Faker::Lorem.sentence } # 'prompt' is a reserved word, so using 'prompt_text'
+    prompt { Faker::Lorem.sentence }
     association :user
     deleted { false }
     created_at { Time.zone.now }

@@ -18,13 +18,15 @@ describe ProfileService do
         let!(:user) { create(:user, email:, password:, activated: true) }
         let!(:profiles) do
           {
-            name: '田中 太郎',
-            phone_number: '08012345678',
-            company_name: '株式会社makelead',
-            employee_count: 1,
-            industry: 2,
-            position: 3,
-            business_model: 2
+            profiles: {
+              name: '田中 太郎',
+              phone_number: '08012345678',
+              company_name: '株式会社makelead',
+              employee_count: 1,
+              industry: 2,
+              position: 3,
+              business_model: 2
+            }
           }
         end
         let!(:payload) do
@@ -37,15 +39,15 @@ describe ProfileService do
         let!(:token) { auth.token }
 
         it 'profilesに登録されること' do
-          ProfileService.create(token, profiles:)
+          ProfileService.create(token, profiles)
           actual_data = Profile.find_by(user_id: user.id)
-          expect(actual_data.full_name).to eq(profiles[:name])
-          expect(actual_data.phone_number).to eq(profiles[:phone_number])
-          expect(actual_data.company_name).to eq(profiles[:company_name])
-          expect(actual_data.employee_count_id).to eq(profiles[:employee_count])
-          expect(actual_data.industry_id).to eq(profiles[:industry])
-          expect(actual_data.position_id).to eq(profiles[:position])
-          expect(actual_data.business_model_id).to eq(profiles[:business_model])
+          expect(actual_data.full_name).to eq(profiles[:profiles][:name])
+          expect(actual_data.phone_number).to eq(profiles[:profiles][:phone_number])
+          expect(actual_data.company_name).to eq(profiles[:profiles][:company_name])
+          expect(actual_data.employee_count_id).to eq(profiles[:profiles][:employee_count])
+          expect(actual_data.industry_id).to eq(profiles[:profiles][:industry])
+          expect(actual_data.position_id).to eq(profiles[:profiles][:position])
+          expect(actual_data.business_model_id).to eq(profiles[:profiles][:business_model])
         end
       end
     end
@@ -60,13 +62,15 @@ describe ProfileService do
       let!(:user) { create(:user, email:, password:, activated: true) }
       let!(:profiles) do
         {
-          name: '田中 太郎',
-          phone_number: '08012345678',
-          company_name: '株式会社makelead',
-          employee_count: 1,
-          industry: 2,
-          position: 3,
-          business_model: 2
+          profile: {
+            name: '田中 太郎',
+            phone_number: '08012345678',
+            company_name: '株式会社makelead',
+            employee_count: 1,
+            industry: 2,
+            position: 3,
+            business_model: 2
+          }
         }
       end
 
@@ -96,9 +100,11 @@ describe ProfileService do
         let!(:current_profiles) { create(:profile, user_id: user.id) }
         let!(:new_profiles) do
           {
-            name: '田中 太郎',
-            phone_number: '08012345678',
-            employee_count: 1
+            profiles: {
+              name: '田中 太郎',
+              phone_number: '08012345678',
+              employee_count: 1
+            }
           }
         end
         let!(:payload) do
@@ -111,12 +117,12 @@ describe ProfileService do
         let!(:token) { auth.token }
 
         it 'userのidでnew_profilesにあるものは更新され、それ以外は更新されないこと' do
-          ProfileService.update_profiles(token, profiles: new_profiles)
+          ProfileService.update_profiles(token, new_profiles)
           profile = Profile.find_by(user_id: user.id)
-          expect(profile.full_name).to eq(new_profiles[:name])
-          expect(profile.phone_number).to eq(new_profiles[:phone_number])
+          expect(profile.full_name).to eq(new_profiles[:profiles][:name])
+          expect(profile.phone_number).to eq(new_profiles[:profiles][:phone_number])
           expect(profile.company_name).to eq(current_profiles[:company_name])
-          expect(profile.employee_count_id).to eq(new_profiles[:employee_count])
+          expect(profile.employee_count_id).to eq(new_profiles[:profiles][:employee_count])
           expect(profile.position_id).to eq(current_profiles[:position_id])
           expect(profile.business_model_id).to eq(current_profiles[:business_model_id])
         end
@@ -132,9 +138,11 @@ describe ProfileService do
       let!(:current_profiles) { create(:profile, user_id: user.id) }
       let!(:new_profiles) do
         {
-          name: '田中 太郎',
-          phone_number: '08012345678',
-          employee_count: 1
+          profiles: {
+            name: '田中 太郎',
+            phone_number: '08012345678',
+            employee_count: 1
+          }
         }
       end
 

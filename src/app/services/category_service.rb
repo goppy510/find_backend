@@ -3,10 +3,7 @@
 class CategoryService
   include SessionModule
 
-  attr_reader :email, :password, :token, :expires_at
-
   def initialize(token = nil)
-    @user_id = authenticate_user(token)[:user_id] if token.present?
     freeze
   end
 

@@ -34,8 +34,14 @@ class PromptRepository
     end
 
     # プロンプトを取得する
-    def show(user_id, uuid)
-      Prompt.find_by(user_id:, uuid:)
+    def prompt_only(uuid)
+      Prompt.find_by(uuid:)
+    end
+
+    # 詳細ページ用にプロンプトを取得する
+    def prompt_detail(uuid)
+      Prompt.left_outer_joins(:likes, :bookmarks).where(uuid: uuid).group(:id)
+        .select('prompts.*', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count').first
     end
   end
 end

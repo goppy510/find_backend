@@ -15,13 +15,20 @@ Rails.application.routes.draw do
     end
 
     namespace :prompts do
-      # get '/',            to: 'prompt#index'
-      # post '/',           to: 'prompt#create'
-      # get '/:id',         to: 'prompt#show'
-      # put '/:id',         to: 'prompt#update'
-      # delete '/:id',      to: 'prompt#destroy'
-      # post '/:id/like',   to: 'prompt#like'
-      # delete '/:id/like', to: 'prompt#unlike'
+      # プロンプトのCRUD
+      get '/',              to: 'prompt#index'
+      post '/',             to: 'prompt#create'
+      get '/:prompt_id',    to: 'prompt#show'
+      put '/:prompt_id',    to: 'prompt#update'
+      delete '/:prompt_id', to: 'prompt#delete'
+
+      # いいね・ブックマーク
+      post '/:prompt_id/like',       to: 'prompt#like'
+      delete '/:prompt_id/like',     to: 'prompt#dislike'
+      post '/:prompt_id/bookmark',   to: 'prompt#bookmark'
+      delete '/:prompt_id/bookmark', to: 'prompt#disbookmark'
+
+      # カテゴリの検索
       get '/categories',  to: 'category#index'
     end
   end

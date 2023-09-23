@@ -117,7 +117,7 @@ class PromptService
       # promptデータを取得
       res = new(token, prompt_id:)&.show
       {
-        prompt_id: res[:uuid],
+        prompt_uuid: res[:uuid],
         category: res[:category_name],
         about: res[:about],
         input_example: res[:input_example],

@@ -16,11 +16,11 @@ Rails.application.routes.draw do
 
     namespace :prompts do
       # プロンプトのCRUD
-      get '/',              to: 'prompt#index'
-      post '/',             to: 'prompt#create'
-      get '/:prompt_id',    to: 'prompt#show'
-      put '/:prompt_id',    to: 'prompt#update'
-      delete '/:prompt_id', to: 'prompt#delete'
+      get '/',         to: 'prompt#index'
+      post '/',        to: 'prompt#create'
+      get '/:uuid',    to: 'prompt#show'
+      put '/:uuid',    to: 'prompt#update'
+      delete '/:uuid', to: 'prompt#delete'
 
       # いいね・ブックマーク
       post '/:prompt_id/like',       to: 'prompt#like'

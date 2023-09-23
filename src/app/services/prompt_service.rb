@@ -128,6 +128,7 @@ class PromptService
         nickname: res[:nickname],
         likes_count: res[:likes_count],
         bookmarks_count: res[:bookmarks_count],
+        updated_at: res[:updated_at]
       }
     end
 

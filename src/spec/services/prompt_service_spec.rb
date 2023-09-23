@@ -260,6 +260,7 @@ describe PromptService do
           expect(res[:nickname]).to eq(profile_creator.nickname)
           expect(res[:likes_count]).to eq(2)
           expect(res[:bookmarks_count]).to eq(2)
+          expect(res[:updated_at]).to eq(prompts.updated_at)
         end
       end
     end

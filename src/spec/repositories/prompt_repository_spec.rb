@@ -77,6 +77,22 @@ describe PromptRepository do
     end
   end
 
+  describe '#delete' do
+    let!(:email_creator) { Faker::Internet.email }
+    let!(:password) { 'P@ssw0rd' }
+    let!(:user_creator) { create(:user, email: email_creator, password:, activated: true) }
+    let!(:prompts) { create(:prompt, user_id: user_creator.id) }
+
+    context '正常系' do
+      context 'user_id, prompt_idを受け取った場合' do
+        it 'prompt_idに紐づくプロンプトが削除されること' do
+          PromptRepository.delete(user_creator.id, prompts.id)
+          expect(Prompt.find_by(id: prompts.id, user_id: user_creator.id).deleted).to eq(true)
+        end
+      end
+    end
+  end
+
   describe '#prompt_only' do
     context '正常系' do
       context 'user_id, prompt_idを受け取った場合' do

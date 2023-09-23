@@ -6,6 +6,7 @@ require 'faker'
 
 describe ProfileService do
   include SessionModule
+
   describe '#self.create' do
     context '正常系' do
       context '必要なすべてのパラメータを受け取った場合' do

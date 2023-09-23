@@ -5,6 +5,7 @@ class CreatePrompts < ActiveRecord::Migration[7.0]
     create_table :prompts do |t|
       t.string :uuid, null: false
       t.references :category, foreign_key: true
+      t.string :title, null: false
       t.text :about
       t.text :input_example
       t.text :output_example

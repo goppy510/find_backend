@@ -72,7 +72,7 @@ describe Api::Prompts::PromptController, type: :request do
     end
   end
 
-  describe 'GET /api/prompts/:prompt_id' do
+  describe 'GET /api/prompts/:uuid' do
     context '正常系' do
       context '正しいuser_idを受け取った場合' do
         let!(:prompt) { create(:prompt, user_id: user.id) }
@@ -82,7 +82,8 @@ describe Api::Prompts::PromptController, type: :request do
         let!(:category_name) { Category.find(prompt.category_id).name }
         let!(:generative_ai_model_name) { GenerativeAiModel.find(prompt.generative_ai_model_id).name }
         before do
-          get "/api/prompts/#{prompt.id}", headers: { 'Authorization' => "Bearer #{token}" }
+          travel_to Time.zone.local(2021, 1, 1, 0, 0, 0)
+          get "/api/prompts/#{prompt.uuid}", headers: { 'Authorization' => "Bearer #{token}" }
         end
 
         it 'jsonであること' do
@@ -91,6 +92,7 @@ describe Api::Prompts::PromptController, type: :request do
         it 'jsonでprofilesの中身を受け取ること' do
           expect(JSON.parse(response.body)).to eq(
             {
+              'id' => prompt.id,
               'prompt_uuid' => prompt.uuid,
               'category' => category_name,
               'about' => prompt.about,
@@ -100,7 +102,8 @@ describe Api::Prompts::PromptController, type: :request do
               'generative_ai_model' => generative_ai_model_name,
               'nickname' => profile.nickname,
               'likes_count' => like.count,
-              'bookmarks_count' => bookmark.count
+              'bookmarks_count' => bookmark.count,
+              'updated_at' => prompt.updated_at.strftime('%Y-%m-%d %H:%M:%S')
             }
           )
         end
@@ -111,7 +114,7 @@ describe Api::Prompts::PromptController, type: :request do
     end
   end
 
-  describe 'PUT /api/prompts/:prompt_id' do
+  describe 'PUT /api/prompts/:uuid' do
     context '正常系' do
       context '正しい更新用パラメータを受け取った場合' do
         let!(:current_prompts) { create(:prompt, user_id: user.id) }
@@ -126,7 +129,7 @@ describe Api::Prompts::PromptController, type: :request do
         end
 
         before do
-          put "/api/prompts/#{current_prompts.id}", params: ,  headers: { 'Authorization' => "Bearer #{token}" }
+          put "/api/prompts/#{current_prompts.uuid}", params: ,  headers: { 'Authorization' => "Bearer #{token}" }
         end
         it 'status_code: okを返すこと' do
           expect(response).to have_http_status(:ok)
@@ -141,7 +144,7 @@ describe Api::Prompts::PromptController, type: :request do
       context 'パラメータがなかった場合' do
         let!(:current_prompts) { create(:prompt, user_id: user.id) }
         before do
-          put "/api/prompts/#{current_prompts.id}", params: {}
+          put "/api/prompts/#{current_prompts.uuid}", params: {}
         end
         it 'status_code: 400を返すこと' do
           expect(response).to have_http_status(400)
@@ -153,12 +156,12 @@ describe Api::Prompts::PromptController, type: :request do
     end
   end
 
-  describe 'DELETE /api/prompts/:prompt_id' do
+  describe 'DELETE /api/prompts/:uuid' do
     context '正常系' do
       let!(:current_prompts) { create(:prompt, user_id: user.id) }
       context '正しい現在のパスワードと更新用パスワードを受け取った場合' do
         before do
-          delete "/api/prompts/#{current_prompts.id}",  headers: { 'Authorization' => "Bearer #{token}" }
+          delete "/api/prompts/#{current_prompts.uuid}",  headers: { 'Authorization' => "Bearer #{token}" }
         end
         it 'status_code: okを返すこと' do
           expect(response).to have_http_status(:ok)

@@ -24,9 +24,9 @@ module Api
       # プロンプトの詳細を表示する
       def show
         token = header_token
-        raise ActionController::BadRequest if params[:prompt_id].blank?
+        raise ActionController::BadRequest if params[:uuid].blank?
 
-        res = PromptService.show(token, params[:prompt_id])
+        res = PromptService.show(token, params[:uuid])
         render json: res, status: :ok
       rescue StandardError => e
         Rails.logger.error e
@@ -36,9 +36,9 @@ module Api
       # プロンプトを更新する
       def update
         token = header_token
-        raise ActionController::BadRequest if params[:prompt_id].blank?
+        raise ActionController::BadRequest if params[:uuid].blank?
 
-        PromptService.update(token, params[:prompt_id], prompts: params[:prompts])
+        PromptService.update(token, params[:uuid], prompts: params[:prompts])
         render json: { status: 'success' }, status: :ok
       rescue StandardError => e
         Rails.logger.error e
@@ -48,9 +48,9 @@ module Api
       # プロンプトを削除する
       def delete
         token = header_token
-        raise ActionController::BadRequest if params[:prompt_id].blank?
+        raise ActionController::BadRequest if params[:uuid].blank?
 
-        PromptService.delete(token, params[:prompt_id])
+        PromptService.delete(token, params[:uuid])
         render json: { status: 'success' }, status: :ok
       rescue StandardError => e
         Rails.logger.error e

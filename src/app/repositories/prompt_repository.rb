@@ -1,52 +1,41 @@
 # frozen_string_literal: true
 
-class ProfileRepository
+class PromptRepository
   class << self
-    def create(user_id, profiles = {})
+    # プロンプトを登録する
+    def create(user_id, prompts = {})
       # ラジオボタンのvalueは各テーブルのidに対応
-      employee_count = EmployeeCount.find(profiles[:employee_count])
-      industry = Industry.find(profiles[:industry])
-      position = Position.find(profiles[:position])
-      business_model = BusinessModel.find(profiles[:business_model])
+      category = Category.find(prompts[:category_id])
+      generative_ai_model = GenerativeAiModel.find(prompts[:generative_ai_model_id])
 
-      Profile.create!(
+      Prompt.create!(
         user_id:,
-        full_name: profiles[:name],
-        phone_number: profiles[:phone_number],
-        company_name: profiles[:company_name],
-        employee_count_id: employee_count.id,
-        industry_id: industry.id,
-        position_id: position.id,
-        business_model_id: business_model.id
+        category_id: category.id,
+        about: prompts[:about],
+        input_example: prompts[:input_example],
+        output_example: prompts[:output_example],
+        prompt: prompts[:prompt],
+        generative_ai_model_id: generative_ai_model.id,
+        uuid: prompts[:uuid]
       )
     end
-
-    def update_profiles(user_id, profiles = {})
+  
+    # プロンプトを更新する
+    def update(user_id, uuid, prompts = {})
       updates = {}
-      updates[:employee_count_id] = EmployeeCount.find(profiles[:employee_count]).id if profiles.key?(:employee_count)
-      updates[:industry_id] = Industry.find(profiles[:industry]).id if profiles.key?(:industry)
-      updates[:position_id] = Position.find(profiles[:position]).id if profiles.key?(:position)
-      updates[:business_model_id] = BusinessModel.find(profiles[:business_model]).id if profiles.key?(:business_model)
+      updates[:category_id] = Category.find(prompts[:category]).id if prompts.key?(:category)
+      updates[:generative_ai_model_id] = GenerativeAiModel.find(prompts[:generative_ai_model]).id if prompts.key?(:generative_ai_model)
       # 残りのフィールドは直接更新します
-      updates[:full_name] = profiles[:name] if profiles.key?(:name)
-      updates[:phone_number] = profiles[:phone_number] if profiles.key?(:phone_number)
-      updates[:company_name] = profiles[:company_name] if profiles.key?(:company_name)
-      Profile.where(user_id:).update!(updates)
+      updates[:about] = prompts[:about] if prompts.key?(:about)
+      updates[:input_example] = prompts[:input_example] if prompts.key?(:input_example)
+      updates[:output_example] = prompts[:output_example] if prompts.key?(:output_example)
+      updates[:prompt] = prompts[:prompt] if prompts.key?(:prompt)
+      Prompt.where(user_id:, uuid:).update!(updates)
     end
 
-    def update_password(user_id, current_password, new_password)
-      user = User.find_by(id: user_id)
-      raise IncorrectPasswordError unless user.authenticate(current_password)
-
-      user.update(password: new_password, password_confirmation: new_password)
-    end
-
-    def show(user_id)
-      Profile.find_by(user_id:)
-    end
-
-    def find_by_user_id(user_id)
-      Profile.find_by(user_id:)
+    # プロンプトを取得する
+    def show(user_id, uuid)
+      Prompt.find_by(user_id:, uuid:)
     end
   end
 end

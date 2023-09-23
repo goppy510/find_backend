@@ -22,7 +22,7 @@ class PromptRepository
     end
   
     # プロンプトを更新する
-    def update(user_id, uuid, prompts = {})
+    def update(user_id, prompt_id, prompts = {})
       updates = {}
       updates[:category_id] = Category.find(prompts[:category]).id if prompts.key?(:category)
       updates[:generative_ai_model_id] = GenerativeAiModel.find(prompts[:generative_ai_model]).id if prompts.key?(:generative_ai_model)
@@ -31,18 +31,18 @@ class PromptRepository
       updates[:input_example] = prompts[:input_example] if prompts.key?(:input_example)
       updates[:output_example] = prompts[:output_example] if prompts.key?(:output_example)
       updates[:prompt] = prompts[:prompt] if prompts.key?(:prompt)
-      Prompt.where(user_id:, uuid:).update!(updates)
+      Prompt.where(id: prompt_id, user_id:).update!(updates)
     end
 
     # プロンプトを取得する
-    def prompt_only(uuid)
-      Prompt.find_by(uuid:)
+    def prompt_only(prompt_id)
+      Prompt.find_by(id: prompt_id)
     end
 
     # 詳細ページ用にプロンプトを取得する
-    def prompt_detail(uuid)
+    def prompt_detail(prompt_id)
       Prompt.left_outer_joins(:likes, :bookmarks, :category, :generative_ai_model, user: :profile)
-        .where(uuid: uuid).group('prompts.id', 'profiles.nickname', 'categories.name', 'generative_ai_models.name')
+        .where(id: prompt_id).group('prompts.id', 'profiles.nickname', 'categories.name', 'generative_ai_models.name')
         .select('prompts.*', 'profiles.nickname AS nickname', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
         .first
     end    

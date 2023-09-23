@@ -129,7 +129,7 @@ class PromptService
         nickname: res[:nickname],
         likes_count: res[:likes_count],
         bookmarks_count: res[:bookmarks_count],
-        updated_at: res[:updated_at]
+        updated_at: res[:updated_at].strftime('%Y-%m-%d %H:%M:%S')
       }
     end
 

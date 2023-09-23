@@ -99,7 +99,6 @@ describe PromptService do
         let!(:password) { 'P@ssw0rd' }
         let!(:user) { create(:user, email:, password:, activated: true) }
         let!(:current_prompts) { create(:prompt, user_id: user.id) }
-        let!(:prompt_id) { current_prompts.id }
         let!(:new_prompts) do
           {
             prompts: {
@@ -119,8 +118,8 @@ describe PromptService do
         let!(:token) { auth.token }
 
         it 'userのidでnew_promptsにあるものは更新され、それ以外は更新されないこと' do
-          PromptService.update(token, prompt_id, new_prompts)
-          prompt = Prompt.find_by(id: prompt_id, user_id: user.id)
+          PromptService.update(token, current_prompts.uuid, new_prompts)
+          prompt = Prompt.find_by(uuid: current_prompts.uuid, deleted: false)
           expect(prompt.user_id).to eq(user.id)
           expect(prompt.uuid).to eq(current_prompts.uuid)
           expect(prompt.category_id).to eq(current_prompts.category_id)
@@ -152,13 +151,13 @@ describe PromptService do
 
       context 'tokenがない場合' do
         it 'ArgumentErrorがスローされること' do
-          expect { PromptService.update(nil, current_prompts.id, new_prompts) }.to raise_error(ArgumentError, 'tokenがありません')
+          expect { PromptService.update(nil, current_prompts.uuid, new_prompts) }.to raise_error(ArgumentError, 'tokenがありません')
         end
       end
 
-      context 'prompt_idがない場合' do
+      context 'prompt_uuidがない場合' do
         it 'ArgumentErrorがスローされること' do
-          expect { PromptService.update(user.id, nil, new_prompts) }.to raise_error(ArgumentError, 'prompt_idがありません')
+          expect { PromptService.update(user.id, nil, new_prompts) }.to raise_error(ArgumentError, 'uuidがありません')
         end
       end
 
@@ -180,7 +179,6 @@ describe PromptService do
         let!(:password) { 'P@ssw0rd' }
         let!(:user) { create(:user, email:, password:, activated: true) }
         let!(:current_prompts) { create(:prompt, user_id: user.id) }
-        let!(:prompt_id) { current_prompts.id }
         let!(:payload) do
           {
             sub: user.id,
@@ -191,8 +189,8 @@ describe PromptService do
         let!(:token) { auth.token }
 
         it 'promptが削除されること' do
-          PromptService.delete(token, prompt_id)
-          prompt = Prompt.find_by(id: prompt_id, user_id: user.id, deleted: false)
+          PromptService.delete(token, current_prompts.uuid)
+          prompt = Prompt.find_by(uuid: current_prompts.uuid, deleted: false)
           expect(prompt).to eq(nil)
         end
       end
@@ -212,9 +210,9 @@ describe PromptService do
         end
       end
 
-      context 'prompt_idがない場合' do
+      context 'prompt_uuidがない場合' do
         it 'ArgumentErrorがスローされること' do
-          expect { PromptService.delete(user.id, nil) }.to raise_error(ArgumentError, 'prompt_idがありません')
+          expect { PromptService.delete(user.id, nil) }.to raise_error(ArgumentError, 'uuidがありません')
         end
       end
     end
@@ -248,7 +246,7 @@ describe PromptService do
         let!(:token) { auth.token }
 
         it 'promptsのデータがハッシュで返されること' do
-          res = PromptService.show(token, prompts.id)
+          res = PromptService.show(token, prompts.uuid)
           expect(res[:id]).to eq(prompts.id)
           expect(res[:prompt_uuid]).to eq(prompts.uuid)
           expect(res[:category]).to eq(category_name)
@@ -284,13 +282,13 @@ describe PromptService do
 
       context 'tokenがない場合' do
         it 'ArgumentErrorがスローされること' do
-          expect { PromptService.show(nil, prompt.id) }.to raise_error(ArgumentError, 'tokenがありません')
+          expect { PromptService.show(nil, prompt.uuid) }.to raise_error(ArgumentError, 'tokenがありません')
         end
       end
 
-      context 'prompt_idがない場合' do
+      context 'prompt_uuidがない場合' do
         it 'ArgumentErrorがスローされること' do
-          expect { PromptService.show(token, nil) }.to raise_error(ArgumentError, 'prompt_idがありません')
+          expect { PromptService.show(token, nil) }.to raise_error(ArgumentError, 'uuidがありません')
         end
       end
     end

@@ -8,10 +8,11 @@ class PromptService
               :prompts
 
   # フロントからは数値としてのIDを受け取る
-  def initialize(token, prompt_id: nil, prompts: nil)
+  def initialize(token, prompt_id: nil, uuid: nil, prompts: nil)
     hash_prompts = prompts[:prompts] if prompts.present?
     @user_id = authenticate_user(token)[:user_id]
     @prompt_id = prompt_id if prompt_id.present? # いいね、ブックマーク用
+    @uuid = uuid if uuid.present? # プロンプト表示用
   
     return if hash_prompts.blank?
 
@@ -43,17 +44,17 @@ class PromptService
 
   # プロンプト更新
   def update
-    PromptRepository.update(@user_id, @prompt_id, @prompts)
+    PromptRepository.update(@uuid, @prompts)
   end
 
   # プロンプト削除
   def delete
-    PromptRepository.delete(@user_id, @prompt_id)
+    PromptRepository.delete(@uuid)
   end
 
   # プロンプト表示
   def show
-    PromptRepository.prompt_detail(@prompt_id)
+    PromptRepository.prompt_detail(@uuid)
   end
 
   # いいね
@@ -92,30 +93,30 @@ class PromptService
       service&.create
     end
 
-    def update(token, prompt_id, prompts)
+    def update(token, uuid, prompts)
       raise ArgumentError, 'tokenがありません' if token.blank?
-      raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
+      raise ArgumentError, 'uuidがありません' if uuid.blank?
       raise ArgumentError, 'promptsがありません' if prompts.blank?
 
-      service = new(token, prompt_id:, prompts:)
+      service = new(token, uuid:, prompts:)
       service&.update
     end
 
-    def delete(token, prompt_id)
+    def delete(token, uuid)
       raise ArgumentError, 'tokenがありません' if token.blank?
-      raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
+      raise ArgumentError, 'uuidがありません' if uuid.blank?
 
-      service = new(token, prompt_id:)
+      service = new(token, uuid:)
       service&.delete
     end
 
     # プロンプト表示
-    def show(token, prompt_id)
+    def show(token, uuid)
       raise ArgumentError, 'tokenがありません' if token.blank?
-      raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
+      raise ArgumentError, 'uuidがありません' if uuid.blank?
 
       # promptデータを取得
-      res = new(token, prompt_id:)&.show
+      res = new(token, uuid:)&.show
       {
         id: res[:id],
         prompt_uuid: res[:uuid],

@@ -6,6 +6,7 @@ require 'faker'
 FactoryBot.define do
   factory :profile do
     association :user
+    nickname { Faker::Name.name }
     full_name { Faker::Name.name }
     phone_number { Faker::PhoneNumber.cell_phone }
     company_name { Faker::Company.name }

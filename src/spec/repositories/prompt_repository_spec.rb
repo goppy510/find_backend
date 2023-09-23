@@ -17,6 +17,7 @@ describe PromptRepository do
         let!(:prompts) do
           {
             about: 'about',
+            title: 'title',
             input_example: 'input_example',
             output_example: 'output_example',
             prompt: 'prompt',
@@ -119,8 +120,10 @@ describe PromptRepository do
 
         it '渡されたuser_idとuuidに紐づくプロンプトが返されること' do
           response = PromptRepository.prompt_detail(prompt.uuid)
-          expected = Prompt.left_outer_joins(:likes, :bookmarks).where(uuid: prompt.uuid).group(:id)
-            .select('prompts.*', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count').first
+          expected = Prompt.left_outer_joins(:likes, :bookmarks, :category, :generative_ai_model, user: :profile)
+          .where(uuid: prompt.uuid).group('prompts.id', 'profiles.nickname', 'categories.name', 'generative_ai_models.name')
+          .select('prompts.*', 'profiles.nickname AS nickname', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
+          .first
           expect(response).to eq(expected)
           expect(response.likes_count).to eq(2)
           expect(response.bookmarks_count).to eq(2)

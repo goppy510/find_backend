@@ -11,6 +11,7 @@ class PromptRepository
       Prompt.create!(
         user_id:,
         category_id: category.id,
+        title: prompts[:title],
         about: prompts[:about],
         input_example: prompts[:input_example],
         output_example: prompts[:output_example],
@@ -40,9 +41,11 @@ class PromptRepository
 
     # 詳細ページ用にプロンプトを取得する
     def prompt_detail(uuid)
-      Prompt.left_outer_joins(:likes, :bookmarks).where(uuid: uuid).group(:id)
-        .select('prompts.*', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count').first
-    end
+      Prompt.left_outer_joins(:likes, :bookmarks, :category, :generative_ai_model, user: :profile)
+        .where(uuid: uuid).group('prompts.id', 'profiles.nickname', 'categories.name', 'generative_ai_models.name')
+        .select('prompts.*', 'profiles.nickname AS nickname', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
+        .first
+    end    
   end
 end
 

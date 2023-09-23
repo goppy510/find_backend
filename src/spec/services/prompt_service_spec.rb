@@ -249,6 +249,7 @@ describe PromptService do
 
         it 'promptsのデータがハッシュで返されること' do
           res = PromptService.show(token, prompts.id)
+          expect(res[:id]).to eq(prompts.id)
           expect(res[:prompt_uuid]).to eq(prompts.uuid)
           expect(res[:category]).to eq(category_name)
           expect(res[:about]).to eq(prompts.about)

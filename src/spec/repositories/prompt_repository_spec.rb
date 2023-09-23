@@ -62,8 +62,8 @@ describe PromptRepository do
         end
 
         it 'user_idおよびuuidでnew_promptsにあるものは更新され、それ以外は更新されないこと' do
-          PromptRepository.update(user.id, current_prompts.id, new_prompts)
-          prompts = Prompt.find_by(id: current_prompts.id, user_id: user.id)
+          PromptRepository.update(current_prompts.uuid, new_prompts)
+          prompts = Prompt.find_by(uuid: current_prompts.uuid)
           expect(prompts.user_id).to eq(user.id)
           expect(prompts.uuid).to eq(current_prompts.uuid)
           expect(prompts.category_id).to eq(current_prompts.category_id)
@@ -86,8 +86,8 @@ describe PromptRepository do
     context '正常系' do
       context 'user_id, prompt_idを受け取った場合' do
         it 'prompt_idに紐づくプロンプトが削除されること' do
-          PromptRepository.delete(user_creator.id, prompts.id)
-          expect(Prompt.find_by(id: prompts.id, user_id: user_creator.id).deleted).to eq(true)
+          PromptRepository.delete(prompts.uuid)
+          expect(Prompt.find_by(uuid: prompts.uuid).deleted).to eq(true)
         end
       end
     end
@@ -106,8 +106,8 @@ describe PromptRepository do
         let!(:prompts) { create(:prompt, user_id: user.id) }
 
         it '渡されたuser_idとuuidに紐づくプロンプトが返されること' do
-          response = PromptRepository.prompt_only(prompts.id)
-          expected = Prompt.find_by(id: prompts.id, user_id: user.id)
+          response = PromptRepository.prompt_only(prompts.uuid)
+          expected = Prompt.find_by(uuid: prompts.uuid, deleted: false)
           expect(response).to eq(expected)
         end
       end
@@ -134,9 +134,9 @@ describe PromptRepository do
       context 'user_id, prompt_idを受け取った場合（有効なプロンプトが存在する場合）' do
         let!(:prompts) { create(:prompt, user_id: user_creator.id) }
         it '渡されたuser_idとuuidに紐づくプロンプトが返されること' do
-          response = PromptRepository.prompt_detail(prompts.id)
+          response = PromptRepository.prompt_detail(prompts.uuid)
           expected = Prompt.left_outer_joins(:likes, :bookmarks, :category, :generative_ai_model, user: :profile)
-                        .where(id: prompts.id, deleted: false)
+                        .where(uuid: prompts.uuid, deleted: false)
                         .group('prompts.id', 'profiles.nickname', 'categories.name', 'generative_ai_models.name')
                         .select('prompts.*', 'profiles.nickname AS nickname', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
                         .first
@@ -149,9 +149,9 @@ describe PromptRepository do
       context 'user_id, prompt_idを受け取った場合（プロンプトが削除済みの場合）' do
         let!(:prompts) { create(:prompt, user_id: user_creator.id, deleted: true) }
         it 'nilが返されること' do
-          response = PromptRepository.prompt_detail(prompts.id)
+          response = PromptRepository.prompt_detail(prompts.uuid)
           expected = Prompt.left_outer_joins(:likes, :bookmarks, :category, :generative_ai_model, user: :profile)
-                        .where(id: prompts.id, deleted: false)
+                        .where(uuid: prompts.uuid, deleted: false)
                         .group('prompts.id', 'profiles.nickname', 'categories.name', 'generative_ai_models.name')
                         .select('prompts.*', 'profiles.nickname AS nickname', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
                         .first

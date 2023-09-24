@@ -7,7 +7,13 @@ module Api
 
       # プロンプト一覧を表示する
       def index
+        raise ActionController::BadRequest if params[:page].blank?
 
+        res = PromptService.prompt_list(params[:page])
+        render json: res, status: :ok
+      rescue StandardError => e
+        Rails.logger.error e
+        raise ActionController::BadRequest
       end
 
       # プロンプト作成

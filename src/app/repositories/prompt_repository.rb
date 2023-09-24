@@ -2,6 +2,26 @@
 
 class PromptRepository
   class << self
+    # プロンプト一覧を取得する
+    def prompt_list(page: 1, per_page: 6, category: nil, generative_ai_model: nil, keyword: nil)
+      prompts = Prompt.left_outer_joins(:likes, :bookmarks, :category, :generative_ai_model, user: :profile)
+
+      # カテゴリーで絞り込み
+      prompts = prompts.where(categories: { name: category }) if category.present?
+      # AIモデルで絞り込み
+      prompts = prompts.where(generative_ai_models: { name: generative_ai_model }) if generative_ai_model.present?
+      # キーワードで絞り込み
+      prompts = prompts.where('prompts.title LIKE ? OR prompts.about LIKE ? OR prompts.input_example LIKE ? OR prompts.output_example LIKE ? OR prompts.prompt LIKE ?', "%#{keyword}%", "%#{keyword}%", "%#{keyword}%", "%#{keyword}%", "%#{keyword}%") if keyword.present?
+      
+      prompts = prompts.where(prompts: { deleted: false })
+
+      prompts = prompts.group('prompts.id', 'profiles.nickname', 'categories.name', 'generative_ai_models.name')
+        .select('prompts.*', 'profiles.nickname AS nickname', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
+        .order('prompts.created_at DESC')
+        .offset((page - 1) * per_page)
+        .limit(per_page)
+    end
+
     # プロンプトを登録する
     def create(user_id, prompts = {})
       # ラジオボタンのvalueは各テーブルのidに対応

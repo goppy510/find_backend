@@ -94,7 +94,7 @@ class PromptService
 
   class << self
     def prompt_list(page)
-      raise ArguentError, 'pageがありません' if page.blank?
+      raise ArgumentError, 'pageがありません' if page.blank?
 
       service = new(nil, page: page)
       prompt_list = service&.prompt_list

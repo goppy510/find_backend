@@ -79,6 +79,14 @@ describe PromptService do
         end
       end
     end
+
+    context '異常系' do
+      context 'pageがない場合' do
+        it 'ArgumentErrorがスローされること' do
+          expect { PromptService.prompt_list(nil) }.to raise_error(ArgumentError, 'pageがありません')
+        end
+      end
+    end
   end
 
   describe '#self.create' do

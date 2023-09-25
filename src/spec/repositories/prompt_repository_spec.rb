@@ -5,7 +5,7 @@ require 'rspec-rails'
 require 'faker'
 
 describe PromptRepository do
-  describe '#prompt_list' do
+  describe '#self.prompt_list' do
     context '正常系' do
       before do
         travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
@@ -65,8 +65,7 @@ describe PromptRepository do
     end
   end
 
-
-  describe '#create' do
+  describe '#self.create' do
     context '正常系' do
       context 'user_idとpromptsを受け取った場合' do
         before do
@@ -104,7 +103,7 @@ describe PromptRepository do
     end
   end
 
-  describe '#update' do
+  describe '#self.update' do
     context '正常系' do
       context 'user_id, prompt_id, profilesを受け取った場合' do
         before do
@@ -138,7 +137,7 @@ describe PromptRepository do
     end
   end
 
-  describe '#delete' do
+  describe '#self.delete' do
     let!(:email_creator) { Faker::Internet.email }
     let!(:password) { 'P@ssw0rd' }
     let!(:user_creator) { create(:user, email: email_creator, password:, activated: true) }
@@ -154,7 +153,7 @@ describe PromptRepository do
     end
   end
 
-  describe '#prompt_only' do
+  describe '#self.prompt_only' do
     context '正常系' do
       context 'user_id, prompt_idを受け取った場合' do
         before do
@@ -175,7 +174,7 @@ describe PromptRepository do
     end
   end
 
-  describe '#prompt_detail' do
+  describe '#self.prompt_detail' do
     context '正常系' do
       before do
         travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)

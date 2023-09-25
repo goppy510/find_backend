@@ -5,6 +5,67 @@ require 'rspec-rails'
 require 'faker'
 
 describe PromptRepository do
+  describe '#prompt_list' do
+    context '正常系' do
+      before do
+        travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
+      end
+      let!(:email) { Faker::Internet.email }
+      let!(:password) { 'P@ssw0rd' }
+      let!(:user) { create(:user, email:, password:, activated: true) }
+      let!(:profile) { create(:profile, user_id: user.id) }
+
+      context 'promptが1件ある場合' do
+        let!(:prompts) { create(:prompt, user_id: user.id) }
+        let!(:user_1) { create(:user, activated: true) }
+        let!(:user_2) { create(:user, activated: true) }
+        let!(:like_1) { create(:like, user_id: user_1.id, prompt_id: prompts.id) }
+        let!(:like_2) { create(:like, user_id: user_2.id, prompt_id: prompts.id) }
+        let!(:bookmark_2) { create(:bookmark, user_id: user_2.id, prompt_id: prompts.id) }
+
+        it '1件のpromptが返されること' do
+          response = PromptRepository.prompt_list(page: 1)
+          expect(response.length).to eq(1)
+          expect(response[0].id).to eq(prompts.id)
+          expect(response[0].uuid).to eq(prompts.uuid)
+          expect(response[0].category_name).to eq(Category.find(prompts.category_id).name)
+          expect(response[0].title).to eq(prompts.title)
+          expect(response[0].about).to eq(prompts.about)
+          expect(response[0].nickname).to eq(Profile.find_by(user_id: prompts.user_id).nickname)
+          expect(response[0].likes_count).to eq(2)
+          expect(response[0].bookmarks_count).to eq(1)
+          expect(response[0].generative_ai_model_name).to eq(GenerativeAiModel.find(prompts.generative_ai_model_id).name)
+          expect(response[0].updated_at).to eq(prompts.updated_at)
+        end
+      end
+
+      context 'promptが8件ある場合' do
+        let!(:prompt_1) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 1, 2, 0, 0, 0)) }
+        let!(:prompt_2) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 3, 2, 0, 0, 0)) }
+        let!(:prompt_3) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 9, 2, 0, 0, 0)) }
+        let!(:prompt_4) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 4, 2, 0, 0, 0)) }
+        let!(:prompt_5) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 8, 2, 0, 0, 0)) }
+        let!(:prompt_6) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 6, 2, 0, 0, 0)) }
+        let!(:prompt_7) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 7, 2, 0, 0, 0)) }
+        let!(:prompt_8) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 6, 20, 0, 0, 0)) }
+
+        context '1ページ目をリクエストした場合' do
+          it '6件のpromptが返されること' do
+            response = PromptRepository.prompt_list(page: 1)
+            expect(response.length).to eq(6)
+            expect(response[0].id).to eq(prompt_3.id)
+            expect(response[1].id).to eq(prompt_5.id)
+            expect(response[2].id).to eq(prompt_7.id)
+            expect(response[3].id).to eq(prompt_8.id)
+            expect(response[4].id).to eq(prompt_6.id)
+            expect(response[5].id).to eq(prompt_4.id)
+          end
+        end
+      end
+    end
+  end
+
+
   describe '#create' do
     context '正常系' do
       context 'user_idとpromptsを受け取った場合' do

@@ -22,6 +22,39 @@ describe Api::Prompts::PromptController, type: :request do
   let!(:auth) { generate_token(payload:) }
   let!(:token) { auth.token }
 
+  describe 'GET /api/prompts' do
+    context '正常系' do
+      let(:mocked_response) { double('Response') }
+      before do
+        allow(PromptService).to receive(:prompt_list).with('1').and_return(mocked_response)
+        get '/api/prompts', params: { page: 1 }
+      end
+    
+      it 'jsonであること' do
+        expect(response.content_type).to eq('application/json; charset=utf-8')
+      end
+      
+      it 'PromptService.prompt_listがparamsの値で呼ばれること' do
+        expect(PromptService).to have_received(:prompt_list).with('1')
+      end
+    end
+    
+
+    context '異常系' do
+      context 'パラメータがなかった場合' do
+        before do
+          get '/api/prompts', params: {}
+        end
+        it 'status_code: 400を返すこと' do
+          expect(response).to have_http_status(400)
+        end
+        it 'ActionController::BadRequestを返すこと' do
+          expect(JSON.parse(response.body)['error']['code']).to eq('ActionController::BadRequest')
+        end
+      end
+    end
+  end
+
   describe 'POST /api/prompts' do
     context '正常系' do
       context '正しいパラメータを受け取った場合' do

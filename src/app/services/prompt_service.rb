@@ -105,6 +105,7 @@ class PromptService
           id: prompt[:id],
           prompt_uuid: prompt[:uuid],
           category: prompt[:category_name],
+          generative_ai_model: prompt[:generative_ai_model_name],
           title: prompt[:title],
           about: prompt[:about],
           nickname: prompt[:nickname],

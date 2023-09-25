@@ -7,6 +7,80 @@ require 'faker'
 describe PromptService do
   include SessionModule
 
+  describe '#self.prompt_list' do
+    context '正常系' do
+      before do
+        travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
+      end
+      let!(:user) { create(:user, activated: true) }
+
+      context 'pageを指定し、かつ、レコードが1つだった場合' do
+        let!(:prompts) { create(:prompt, user_id: user.id) }
+        let!(:profile) { create(:profile, user_id: user.id) }
+        let!(:user_1) { create(:user, activated: true) }
+        let!(:user_2) { create(:user, activated: true) }
+        let!(:like_1) { create(:like, user_id: user_1.id, prompt_id: prompts.id) }
+        let!(:like_2) { create(:like, user_id: user_2.id, prompt_id: prompts.id) }
+        let!(:bookmark_2) { create(:bookmark, user_id: user_2.id, prompt_id: prompts.id) }
+        let!(:category_name) { Category.find(prompts.category_id).name }
+        let!(:generative_ai_model_name) { GenerativeAiModel.find(prompts.generative_ai_model_id).name }
+
+        it 'promptsのデータがハッシュで返されること' do
+          res = PromptService.prompt_list(1)
+          expect(res[:items][0][:id]).to eq(prompts.id)
+          expect(res[:items][0][:prompt_uuid]).to eq(prompts.uuid)
+          expect(res[:items][0][:category]).to eq(category_name)
+          expect(res[:items][0][:about]).to eq(prompts.about)
+          expect(res[:items][0][:generative_ai_model]).to eq(generative_ai_model_name)
+          expect(res[:items][0][:nickname]).to eq(profile.nickname)
+          expect(res[:items][0][:likes_count]).to eq(2)
+          expect(res[:items][0][:bookmarks_count]).to eq(1)
+        end
+      end
+
+      context 'pageを指定し、かつ、レコードが8件あった場合' do
+        let!(:prompt_1) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 1, 2, 0, 0, 0)) }
+        let!(:prompt_2) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 3, 2, 0, 0, 0)) }
+        let!(:prompt_3) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 9, 2, 0, 0, 0)) }
+        let!(:prompt_4) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 4, 2, 0, 0, 0)) }
+        let!(:prompt_5) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 8, 2, 0, 0, 0)) }
+        let!(:prompt_6) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 6, 2, 0, 0, 0)) }
+        let!(:prompt_7) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 7, 2, 0, 0, 0)) }
+        let!(:prompt_8) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 6, 20, 0, 0, 0)) }
+
+        context 'pageが1の場合' do
+          it 'created_atの降順で返ってくること' do
+            res = PromptService.prompt_list(1)
+            expect(res[:items][0][:id]).to eq(prompt_3.id)
+            expect(res[:items][1][:id]).to eq(prompt_5.id)
+            expect(res[:items][2][:id]).to eq(prompt_7.id)
+            expect(res[:items][3][:id]).to eq(prompt_8.id)
+            expect(res[:items][4][:id]).to eq(prompt_6.id)
+            expect(res[:items][5][:id]).to eq(prompt_4.id)
+          end
+
+          it 'total_countが6であること' do
+            res = PromptService.prompt_list(1)
+            expect(res[:total_count]).to eq(6)
+          end
+        end
+
+        context 'pageが2の場合' do
+          it 'created_atの降順で返ってくること' do
+            res = PromptService.prompt_list(2)
+            expect(res[:items][0][:id]).to eq(prompt_2.id)
+            expect(res[:items][1][:id]).to eq(prompt_1.id)
+          end
+
+          it 'total_countが2であること' do
+            res = PromptService.prompt_list(2)
+            expect(res[:total_count]).to eq(2)
+          end
+        end
+      end
+    end
+  end
+
   describe '#self.create' do
     context '正常系' do
       context '必要なすべてのパラメータを受け取った場合' do

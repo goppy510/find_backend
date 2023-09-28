@@ -6,11 +6,13 @@ module ErrorHandlers
   extend ActiveSupport::Concern
 
   included do
+    rescue_from SignupService::DuplicateEntry, with: :rescue409
+    rescue_from SignupService::EmailFormatError, with: :rescue422
+    rescue_from SignupService::PasswordFormatError, with: :rescue422
     rescue_from ActionController::BadRequest, with: :rescue400
     rescue_from ActionController::Unauthorized, with: :rescue401
     rescue_from ActionController::Forbidden, with: :rescue403
     rescue_from ActiveRecord::RecordNotFound, with: :rescue404
-    rescue_from SignupService::DuplicateEntry, with: :rescue409
   end
 
   private
@@ -60,5 +62,14 @@ module ErrorHandlers
         status: 409, code: err.message, message: I18n.t("errors.coderr.#{err.message}")
       }
     }, status: :conflict
+  end
+
+  def rescue422(err)
+    @exception = err
+    render json: {
+      error: {
+        status: 422, code: err.message, message: I18n.t("errors.coderr.#{err.message}")
+      }
+    }, status: :unprocessable_entity
   end
 end

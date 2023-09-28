@@ -4,6 +4,8 @@ class SignupService
   include SessionModule
   class DuplicateEntry < StandardError; end
   class Unauthorized < StandardError; end
+  class EmailFormatError < StandardError; end
+  class PasswordFormatError < StandardError; end
 
   attr_reader :email, :password, :token, :expires_at
 
@@ -61,6 +63,12 @@ class SignupService
       service = SignupService.new(signups:)
       service&.add
       service&.activation_email
+    rescue Account::Email::EmailFormatError => e
+      Rails.logger.error(e)
+      raise EmailFormatError
+    rescue Account::Password::PasswordFormatError => e
+      Rails.logger.error(e)
+      raise PasswordFormatError
     rescue StandardError => e
       Rails.logger.error(e)
       raise e

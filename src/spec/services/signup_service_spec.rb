@@ -181,5 +181,73 @@ describe SignupService do
         end
       end
     end
+
+    context '異常系' do
+      context 'emailが引数にない場合' do
+        let!(:password) { 'P@ssw0rd' }
+        let!(:signups) do
+          {
+            signups: {
+              email: nil,
+              password: password
+            }
+          }
+        end
+
+        it 'ArgumentErrorがスローされること' do
+          expect { SignupService.signup(signups) }.to raise_error(ArgumentError, 'emailがありません')
+        end
+      end
+
+      context 'passwordが引数にない場合' do
+        let!(:email) { Faker::Internet.email }
+        let!(:signups) do
+          {
+            signups: {
+              email: email,
+              password: nil
+            }
+          }
+        end
+
+        it 'ArgumentErrorがスローされること' do
+          expect { SignupService.signup(signups) }.to raise_error(ArgumentError, 'passwordがありません')
+        end
+      end
+
+      context 'emailのフォーマットが不正な場合' do
+        let!(:email) { 'test' }
+        let!(:password) { 'P@ssw0rd' }
+        let!(:signups) do
+          {
+            signups: {
+              email: email,
+              password: password
+            }
+          }
+        end
+
+        it 'EmailFormatErrorがスローされること' do
+          expect { SignupService.signup(signups) }.to raise_error(SignupService::EmailFormatError)
+        end
+      end
+
+      context 'passwordのフォーマットが不正な場合' do
+        let!(:email) { Faker::Internet.email }
+        let!(:password) { 'test' }
+        let!(:signups) do
+          {
+            signups: {
+              email: email,
+              password: password
+            }
+          }
+        end
+
+        it 'PasswordFormatErrorがスローされること' do
+          expect { SignupService.signup(signups) }.to raise_error(SignupService::PasswordFormatError)
+        end
+      end
+    end
   end
 end

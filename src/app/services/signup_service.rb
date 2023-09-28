@@ -2,14 +2,16 @@
 
 class SignupService
   include SessionModule
+  class DuplicateEntry < StandardError; end
+  class Unauthorized < StandardError; end
 
   attr_reader :email, :password, :token, :expires_at
 
-  def initialize(email, password)
-    raise ArgumentError, 'emailまたはpasswordがありません' if email.blank? || password.blank?
+  def initialize(signups: nil)
+    hash_signups = signups[:signups] if signups.present?
 
-    @email = Account::Email.from_string(email)
-    @password = Account::Password.from_string(password)
+    @email = Account::Email.from_string(hash_signups[:email]) if hash_signups&.key?(:email)
+    @password = Account::Password.from_string(hash_signups[:password]) if hash_signups&.key?(:password)
 
     freeze
   end
@@ -18,9 +20,11 @@ class SignupService
   def add
     UserRepository.create(@email, @password)
   rescue ActiveRecord::RecordNotUnique => e
-    raise DuplicateEntry, e.message
+    Rails.logger.error(e)
+    raise DuplicateEntry
   rescue ActiveRecord::RecordInvalid => e
-    raise SignupError, e.message
+    Rails.logger.error(e)
+    raise e
   end
   
 
@@ -50,18 +54,16 @@ class SignupService
   end
 
   class << self
-    def signup(email, password)
-      service = SignupService.new(email, password)
+    def signup(signups)
+      raise ArgumentError, 'emailがありません' if signups[:signups][:email].blank?
+      raise ArgumentError, 'passwordがありません' if signups[:signups][:password].blank?
+
+      service = SignupService.new(signups:)
       service&.add
       service&.activation_email
     rescue StandardError => e
-      Rails.logger.error e
+      Rails.logger.error(e)
       raise e
     end
   end
 end
-
-class SignupError < StandardError; end
-class DuplicateEntry < StandardError; end
-class Unauthorized < StandardError; end
-class SubmitVerifyEmailError < StandardError; end

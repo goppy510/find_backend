@@ -25,6 +25,10 @@ describe SignupService do
     end
 
     context '異常系' do
+      before do
+        travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
+      end
+
       context 'メールアドレスが引数にない場合' do
         let!(:password) { 'P@ssw0rd' }
 
@@ -38,6 +42,17 @@ describe SignupService do
 
         it 'ArgumentErrorがスローされること' do
           expect { SignupService.new(email, nil) }.to raise_error(ArgumentError, 'emailまたはpasswordがありません')
+        end
+      end
+
+      context 'メールアドレスが既に存在する場合' do
+        let!(:email) { Faker::Internet.email }
+        let!(:password) { 'P@ssw0rd' }
+        let!(:user) { create(:user, email:, password:) }
+
+        it 'DuplicateEntryがスローされること' do
+          service = SignupService.new(email, password)
+          expect { service.add }.to raise_error(DuplicateEntry)
         end
       end
     end

@@ -17,9 +17,12 @@ class SignupService
   # ユーザー情報をDBに登録する
   def add
     UserRepository.create(@email, @password)
+  rescue ActiveRecord::RecordNotUnique => e
+    raise DuplicateEntry, e.message
   rescue ActiveRecord::RecordInvalid => e
     raise SignupError, e.message
   end
+  
 
   # 本登録用のメールを送信する
   def activation_email
@@ -51,10 +54,14 @@ class SignupService
       service = SignupService.new(email, password)
       service&.add
       service&.activation_email
+    rescue StandardError => e
+      Rails.logger.error e
+      raise e
     end
   end
 end
 
 class SignupError < StandardError; end
+class DuplicateEntry < StandardError; end
 class Unauthorized < StandardError; end
 class SubmitVerifyEmailError < StandardError; end

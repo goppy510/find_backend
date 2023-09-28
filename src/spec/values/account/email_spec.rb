@@ -76,7 +76,7 @@ describe Account::Email do
         let!(:value) { 'invalid_email' }
 
         it 'EmailFormatErrorが発生すること' do
-          expect { Account::Email.from_string(value) }.to raise_error(EmailFormatError)
+          expect { Account::Email.from_string(value) }.to raise_error(Account::Email::EmailFormatError)
         end
       end
 
@@ -84,7 +84,7 @@ describe Account::Email do
         let!(:value) { 'user@-' }
 
         it 'EmailFormatErrorが発生すること' do
-          expect { Account::Email.from_string(value) }.to raise_error(EmailFormatError)
+          expect { Account::Email.from_string(value) }.to raise_error(Account::Email::EmailFormatError)
         end
       end
 
@@ -92,7 +92,7 @@ describe Account::Email do
         let!(:value) { '@example.com' }
 
         it 'EmailFormatErrorが発生すること' do
-          expect { Account::Email.from_string(value) }.to raise_error(EmailFormatError)
+          expect { Account::Email.from_string(value) }.to raise_error(Account::Email::EmailFormatError)
         end
       end
 
@@ -100,7 +100,7 @@ describe Account::Email do
         let!(:value) { 'user..name@example.com' }
 
         it 'EmailFormatErrorが発生すること' do
-          expect { Account::Email.from_string(value) }.to raise_error(EmailFormatError)
+          expect { Account::Email.from_string(value) }.to raise_error(Account::Email::EmailFormatError)
         end
       end
 
@@ -108,7 +108,7 @@ describe Account::Email do
         let!(:value) { 'user@example.com.' }
 
         it 'EmailFormatErrorが発生すること' do
-          expect { Account::Email.from_string(value) }.to raise_error(EmailFormatError)
+          expect { Account::Email.from_string(value) }.to raise_error(Account::Email::EmailFormatError)
         end
       end
 
@@ -116,7 +116,7 @@ describe Account::Email do
         let!(:value) { '.user@example.com' }
 
         it 'EmailFormatErrorが発生すること' do
-          expect { Account::Email.from_string(value) }.to raise_error(EmailFormatError)
+          expect { Account::Email.from_string(value) }.to raise_error(Account::Email::EmailFormatError)
         end
       end
 
@@ -130,7 +130,7 @@ describe Account::Email do
 
         it 'EmailFormatErrorが発生すること' do
           values.each do |value|
-            expect { Account::Email.from_string(value) }.to raise_error(EmailFormatError)
+            expect { Account::Email.from_string(value) }.to raise_error(Account::Email::EmailFormatError)
           end
         end
       end

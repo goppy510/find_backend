@@ -114,6 +114,56 @@ describe Api::Users::SignupController, type: :request do
           expect(JSON.parse(response.body)['error']['code']).to eq('SignupService::DuplicateEntry')
         end
       end
+
+      context 'emailのフォーマットが不正な場合' do
+        let!(:email) { 'test' }
+        let!(:password) { 'P@ssw0rd' }
+        let!(:params) do
+          {
+            signups: {
+              email:,
+              password:
+            }
+          }
+        end
+
+        before do
+          post '/api/users/signup', params:
+        end
+
+        it 'status_code: 422を返すこと' do
+          expect(response).to have_http_status(422)
+        end
+
+        it 'SignupService::EmailFormatErrorを返すこと' do
+          expect(JSON.parse(response.body)['error']['code']).to eq('SignupService::EmailFormatError')
+        end
+      end
+
+      context 'passwordのフォーマットが不正な場合' do
+        let!(:email) { Faker::Internet.email }
+        let!(:password) { 'test' }
+        let!(:params) do
+          {
+            signups: {
+              email:,
+              password:
+            }
+          }
+        end
+
+        before do
+          post '/api/users/signup', params:
+        end
+
+        it 'status_code: 422を返すこと' do
+          expect(response).to have_http_status(422)
+        end
+
+        it 'SignupService::PasswordFormatErrorを返すこと' do
+          expect(JSON.parse(response.body)['error']['code']).to eq('SignupService::PasswordFormatError')
+        end
+      end
     end
   end
 end

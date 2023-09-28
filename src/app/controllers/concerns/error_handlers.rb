@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_dependency 'signup_service'
+
 module ErrorHandlers
   extend ActiveSupport::Concern
 
@@ -8,6 +10,7 @@ module ErrorHandlers
     rescue_from ActionController::Unauthorized, with: :rescue401
     rescue_from ActionController::Forbidden, with: :rescue403
     rescue_from ActiveRecord::RecordNotFound, with: :rescue404
+    rescue_from SignupService::DuplicateEntry, with: :rescue409
   end
 
   private
@@ -48,5 +51,14 @@ module ErrorHandlers
         status: 404, code: err.message, message: I18n.t("errors.coderr.#{err.message}")
       }
     }, status: :not_found
+  end
+
+  def rescue409(err)
+    @exception = err
+    render json: {
+      error: {
+        status: 409, code: err.message, message: I18n.t("errors.coderr.#{err.message}")
+      }
+    }, status: :conflict
   end
 end

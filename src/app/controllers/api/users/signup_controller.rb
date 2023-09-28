@@ -7,20 +7,21 @@ module Api
 
       # 仮登録用
       def signup
-        if signup_params[:email].blank? || signup_params[:password].blank?
-          render_error(400, 'user', 'invalid_parameter')
-          return
-        end
-
-        SignupService.signup(signup_params[:email], signup_params[:password])
+        Rails.logger.info "signup_params: #{signup_params}"
+        SignupService.signup(signups: signup_params.to_unsafe_h)
 
         render json: { status: 'success' }, status: :ok
+
+      rescue SignupService::DuplicateEntry => e
+        rescue409(e)
+      rescue StandardError => e
+        rescue400(e)
       end
 
       private
 
       def signup_params
-        params.require(:signup).permit(:email, :password)
+        params.require(:signups).permit(:email, :password)
       end
     end
   end

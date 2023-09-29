@@ -266,6 +266,36 @@ describe Api::Prompts::PromptController, type: :request do
     end
   end
 
+  describe 'GET /api/prompts/:prompt_id/like' do
+    describe '正常系' do
+      let!(:current_prompts) { create(:prompt, user_id: user.id) }
+      let!(:user_1) { create(:user, activated: true) }
+      let!(:payload) do
+        {
+          sub: user_1.id,
+          type: 'api'
+        }
+      end
+      let!(:auth) { generate_token(payload:) }
+      let!(:token) { auth.token }
+      let!(:like) { create(:like, user_id: user_1.id, prompt_id: current_prompts.id) }
+
+      context '正しいuserの場合' do
+        before do
+          get "/api/prompts/#{current_prompts.id}/like", headers: { 'Authorization' => "Bearer #{token}" }
+        end
+
+        it 'status_code: okを返すこと' do
+          expect(response).to have_http_status(:ok)
+        end
+
+        it 'countが返ってくること' do
+          expect(JSON.parse(response.body)['count']).to eq(1)
+        end
+      end
+    end
+  end
+
   describe 'POST /api/prompts/:prompt_id/bookmark' do
     describe '正常系' do
       let!(:current_prompts) { create(:prompt, user_id: user.id) }
@@ -320,6 +350,36 @@ describe Api::Prompts::PromptController, type: :request do
 
         it 'statusがsuccessであること' do
           expect(JSON.parse(response.body)['status']).to eq('success')
+        end
+      end
+    end
+  end
+
+  describe 'GET /api/prompts/:prompt_id/bookmark' do
+    describe '正常系' do
+      let!(:current_prompts) { create(:prompt, user_id: user.id) }
+      let!(:user_1) { create(:user, activated: true) }
+      let!(:payload) do
+        {
+          sub: user_1.id,
+          type: 'api'
+        }
+      end
+      let!(:auth) { generate_token(payload:) }
+      let!(:token) { auth.token }
+      let!(:bookmark) { create(:bookmark, user_id: user_1.id, prompt_id: current_prompts.id) }
+
+      context '正しいuserの場合' do
+        before do
+          get "/api/prompts/#{current_prompts.id}/bookmark", headers: { 'Authorization' => "Bearer #{token}" }
+        end
+
+        it 'status_code: okを返すこと' do
+          expect(response).to have_http_status(:ok)
+        end
+
+        it 'countが返ってくること' do
+          expect(JSON.parse(response.body)['count']).to eq(1)
         end
       end
     end

@@ -83,6 +83,16 @@ module Api
         raise ActionController::BadRequest
       end
 
+      # いいね数
+      def like_count
+        token = header_token
+        res = PromptService.like_count(token, params[:prompt_id])
+        render json: { count: res }, status: :ok
+      rescue StandardError => e
+        Rails.logger.error e
+        raise ActionController::BadRequest
+      end
+
       # ブックマーク
       def bookmark
         token = header_token
@@ -98,6 +108,16 @@ module Api
         token = header_token
         PromptService.disbookmark(token, params[:prompt_id])
         render json: { status: 'success' }, status: :ok
+      rescue StandardError => e
+        Rails.logger.error e
+        raise ActionController::BadRequest
+      end
+
+      # ブックマーク数
+      def bookmark_count
+        token = header_token
+        res = PromptService.bookmark_count(token, params[:prompt_id])
+        render json: { count: res }, status: :ok
       rescue StandardError => e
         Rails.logger.error e
         raise ActionController::BadRequest

@@ -21,8 +21,10 @@ Rails.application.routes.draw do
       # いいね・ブックマーク
       post '/:prompt_id/like',       to: 'prompt#like'
       delete '/:prompt_id/like',     to: 'prompt#dislike'
+      get '/:prompt_id/like',        to: 'prompt#like_count'
       post '/:prompt_id/bookmark',   to: 'prompt#bookmark'
       delete '/:prompt_id/bookmark', to: 'prompt#disbookmark'
+      get '/:prompt_id/bookmark',    to: 'prompt#bookmark_count'
 
       # プロンプトのCRUD
       get '/',         to: 'prompt#index'

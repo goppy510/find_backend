@@ -75,6 +75,11 @@ class PromptService
     LikeRepository.delete(@user_id, @prompt_id)
   end
 
+  # いいね数
+  def like_count
+    LikeRepository.show_by_prompt_id(@prompt_id).count
+  end
+
   # ブックマーク
   def bookmark
     BookmarkRepository.create(@user_id, @prompt_id)
@@ -83,6 +88,11 @@ class PromptService
   # ブックマーク解除
   def disbookmark
     BookmarkRepository.delete(@user_id, @prompt_id)
+  end
+
+  # ブックマーク数
+  def bookmark_count
+    BookmarkRepository.show_by_prompt_id(@prompt_id).count
   end
 
   private
@@ -183,8 +193,16 @@ class PromptService
       service&.dislike
     end
 
+    # いいね数
+    def like_count(token, prompt_id)
+      raise ArgumentError, 'tokenがありません' if token.blank?
+      raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
+
+      service = new(token, prompt_id:)
+      service&.like_count
+    end
+
     # ブックマーク
-    # いいね
     def bookmark(token, prompt_id)
       raise ArgumentError, 'tokenがありません' if token.blank?
       raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
@@ -193,13 +211,22 @@ class PromptService
       service&.bookmark
     end
 
-    # いいね解除
+    # ブックマーク解除
     def disbookmark(token, prompt_id)
       raise ArgumentError, 'tokenがありません' if token.blank?
       raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
 
       service = new(token, prompt_id:)
       service&.disbookmark
+    end
+
+    # いいね数
+    def bookmark_count(token, prompt_id)
+      raise ArgumentError, 'tokenがありません' if token.blank?
+      raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
+
+      service = new(token, prompt_id:)
+      service&.bookmark_count
     end
   end
 end

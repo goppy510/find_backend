@@ -615,8 +615,13 @@ describe PromptService do
           let!(:bookmark_1) { create(:bookmark, user_id: user_1.id, prompt_id: prompt.id) }
   
           it 'ブックマーク数が1であること' do
-            res = PromptService.bookmark_count(token, prompt.id)
-            expect(res).to eq(1)
+            res = PromptService.bookmark_count(token_1, prompt.id)
+            expect(res[:count]).to eq(1)
+          end
+
+          it 'trueを返すこと' do
+            res = PromptService.bookmark_count(token_1, prompt.id)
+            expect(res[:is_bookmarked]).to eq(true)
           end
         end
   
@@ -626,7 +631,12 @@ describe PromptService do
   
           it 'ブックマーク数が2であること' do
             res = PromptService.bookmark_count(token, prompt.id)
-            expect(res).to eq(2)
+            expect(res[:count]).to eq(2)
+          end
+
+          it 'falseを返すこと' do
+            res = PromptService.bookmark_count(token, prompt.id)
+            expect(res[:is_bookmarked]).to eq(false)
           end
         end
       end

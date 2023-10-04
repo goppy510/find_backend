@@ -92,7 +92,7 @@ class PromptService
 
   # ブックマーク数
   def bookmark_count
-    BookmarkRepository.show_by_prompt_id(@prompt_id).count
+    BookmarkRepository.count(@user_id, @prompt_id)
   end
 
   private

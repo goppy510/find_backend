@@ -15,8 +15,11 @@ class LikeRepository
     end
 
     # 特定プロンプトのいいね数を取得する
-    def show_by_prompt_id(prompt_id)
-      Like.where(prompt_id:)
+    def count(user_id, prompt_id)
+      like_count = Like.where(prompt_id: prompt_id).count
+      is_liked_by_user = Like.exists?(user_id: user_id, prompt_id: prompt_id)
+      
+      { count: like_count, is_liked: is_liked_by_user }
     end
   end
 end

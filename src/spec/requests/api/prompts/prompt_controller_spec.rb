@@ -292,6 +292,10 @@ describe Api::Prompts::PromptController, type: :request do
         it 'countが返ってくること' do
           expect(JSON.parse(response.body)['count']).to eq(1)
         end
+
+        it 'is_bookmarkedが返ってくること' do
+          expect(JSON.parse(response.body)['is_liked']).to eq(true)
+        end
       end
     end
   end

@@ -87,7 +87,7 @@ module Api
       def like_count
         token = header_token
         res = PromptService.like_count(token, params[:prompt_id])
-        render json: { count: res }, status: :ok
+        render json: res, status: :ok
       rescue StandardError => e
         Rails.logger.error e
         raise ActionController::BadRequest

@@ -483,22 +483,32 @@ describe PromptService do
     let!(:token_2) { auth_2.token }
 
     context '正常系' do
-      context 'いいねが1件の場合' do
+      context 'likeが1件の場合' do
         let!(:like_1) { create(:like, user_id: user_1.id, prompt_id: prompt.id) }
 
-        it 'いいね数が1であること' do
-          res = PromptService.like_count(token, prompt.id)
-          expect(res).to eq(1)
+        it 'like数が1であること' do
+          res = PromptService.like_count(token_1, prompt.id)
+          expect(res[:count]).to eq(1)
+        end
+
+        it 'trueを返すこと' do
+          res = PromptService.like_count(token_1, prompt.id)
+          expect(res[:is_liked]).to eq(true)
         end
       end
 
-      context 'いいねが2件の場合' do
+      context 'likeが2件の場合' do
         let!(:like_1) { create(:like, user_id: user_1.id, prompt_id: prompt.id) }
         let!(:like_2) { create(:like, user_id: user_2.id, prompt_id: prompt.id) }
 
-        it 'いいね数が2であること' do
+        it 'like数が2であること' do
           res = PromptService.like_count(token, prompt.id)
-          expect(res).to eq(2)
+          expect(res[:count]).to eq(2)
+        end
+
+        it 'falseを返すこと' do
+          res = PromptService.like_count(token, prompt.id)
+          expect(res[:is_liked]).to eq(false)
         end
       end
     end

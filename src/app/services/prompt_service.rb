@@ -77,7 +77,7 @@ class PromptService
 
   # いいね数
   def like_count
-    LikeRepository.show_by_prompt_id(@prompt_id).count
+    LikeRepository.count(@user_id, @prompt_id)
   end
 
   # ブックマーク

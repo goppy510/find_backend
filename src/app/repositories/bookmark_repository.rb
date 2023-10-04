@@ -15,8 +15,11 @@ class BookmarkRepository
     end
 
     # 特定プロンプトのいいね数を取得する
-    def show_by_prompt_id(prompt_id)
-      Bookmark.where(prompt_id:)
+    def count(user_id, prompt_id)
+      bookmark_count = Bookmark.where(prompt_id: prompt_id).count
+      is_bookmarked_by_user = Bookmark.exists?(user_id: user_id, prompt_id: prompt_id)
+      
+      { count: bookmark_count, is_bookmarked: is_bookmarked_by_user }
     end
   end
 end

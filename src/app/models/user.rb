@@ -10,5 +10,9 @@ class User < ApplicationRecord
   has_many :bookmarks, dependent: :destroy
   has_many :bookmarked_prompts, through: :bookmarks, source: :prompt
   
-  has_many :prompts, dependent: :destroy
+  has_many :prompts, dependent: :nullify
+
+  has_many :permissions
+  has_many :resources, through: :permissions
+  belongs_to :contract, optional: true
 end

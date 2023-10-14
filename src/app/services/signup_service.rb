@@ -70,7 +70,7 @@ class SignupService
       service&.add
 
       # contract権限がなければメールアドレス登録直後にメールを送る
-      return if token and token[:token] and PermissionService.has_contract?(token[:token])
+      return if token and token[:token] and PermissionService.has_contract_role?(token[:token])
 
       service&.activation_email 
     rescue Account::Email::EmailFormatError => e

@@ -85,6 +85,7 @@ end
 # resources
 resources_data = [
   'contract',
+  'permission',
   'user',
   'create_prompt',
   'read_prompt',

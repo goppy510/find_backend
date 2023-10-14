@@ -5,13 +5,33 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :users do
       post '/signup',      to: 'signup#signup'
+
       post '/activation',  to: 'activation#activate'
+
       post '/profile',     to: 'profile#create'
       put  '/profile',     to: 'profile#update'
+      get '/profile',      to: 'profile#show'
+
       post '/login',       to: 'login#create'
       delete '/logout',    to: 'login#destroy'
-      get '/profile',      to: 'profile#show'
+
       put '/:id/password', to: 'profile#update_password'
+
+      # 契約
+      post '/contract',    to: 'contract#create'
+      get '/contract',     to: 'contract#show'
+      put '/contract',     to: 'contract#update'
+      delete '/contract',  to: 'contract#delete'
+
+      # メンバー
+      post '/user',        to: 'user#create'
+      get '/user',         to: 'user#show'
+      put '/user',         to: 'user#update'
+      delete '/user',      to: 'user#delete'
+
+      # 権限
+      post '/permission',  to: 'permission#upsert'
+      get '/permission',   to: 'permission#show'
     end
 
     namespace :prompts do

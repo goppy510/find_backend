@@ -9,10 +9,10 @@ class PermissionService
               :target_user_id,
               :permissions
 
-  def initialize(token, target_user_id: nil, permissions: {})
+  def initialize(token,  permissions: {})
     array_permissions = permissions[:permissions][:resource] if permissions.present? && permissions[:permissions].present? && permissions[:permissions][:resource].present?
+    @target_user_id = permissions[:permissions][:target_user_id] if permissions.present? && permissions[:permissions].present? && permissions[:permissions][:target_user_id].present?
     @user_id = authenticate_user(token)[:user_id]
-    @target_user_id = target_user_id if target_user_id.present?
 
     @permissions = {}
     @permissions[:resource] = array_permissions
@@ -36,22 +36,21 @@ class PermissionService
   end
 
   class << self
-    def upsert(token, target_user_id, permissions)
+    def upsert(token, permissions)
       raise ArgumentError, 'tokenがありません' if token.blank?
-      raise ArgumentError, 'target_user_idがありません' if target_user_id.blank?
       raise ArgumentError, 'permissionsがありません' if permissions.blank?
       raise Forbidden, '権限がありません' unless has_permisssion_role?(token)
 
-      service = new(token, target_user_id:, permissions:)
+      service = new(token, permissions:)
       service&.upsert
     end
 
-    def show(token, target_user_id)
+    def show(token, permissions)
       raise ArgumentError, 'tokenがありません' if token.blank?
-      raise ArgumentError, 'target_user_idがありません' if target_user_id.blank?
+      raise ArgumentError, 'permissionsがありません' if permissions.blank? || permissions[:permissions][:target_user_id].blank?
       raise Forbidden, '権限がありません' unless has_permisssion_role?(token)
 
-      res = new(token, target_user_id:)&.show
+      res = new(token, permissions:)&.show
       {
         resource: res
       }

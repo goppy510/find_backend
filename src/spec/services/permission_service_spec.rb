@@ -30,6 +30,7 @@ describe PermissionService do
           let!(:permissions) do
             {
               permissions: {
+                target_user_id: target_user.id,
                 resource: [
                   'user',
                   'contract'
@@ -39,7 +40,7 @@ describe PermissionService do
           end
 
           it 'permissionに登録されること' do
-            PermissionService.upsert(token, target_user.id, permissions)
+            PermissionService.upsert(token, permissions)
             actual = Permission.where(user_id: target_user.id)
             resource_1 = Resource.find_by(name: permissions[:permissions][:resource][0])
             resource_2 = Resource.find_by(name: permissions[:permissions][:resource][1])
@@ -57,6 +58,7 @@ describe PermissionService do
           let!(:permissions) do
             {
               permissions: {
+                target_user_id: target_user.id,
                 resource: [
                   'user',
                   'contract',
@@ -67,7 +69,7 @@ describe PermissionService do
           end
 
           it 'user_idとresource_idでインサートされること' do
-            PermissionService.upsert(token, target_user.id, permissions)
+            PermissionService.upsert(token, permissions)
             actual = Permission.where(user_id: target_user.id)
             resource_1 = Resource.find_by(name: permissions[:permissions][:resource][0])
             resource_2 = Resource.find_by(name: permissions[:permissions][:resource][1])
@@ -89,6 +91,7 @@ describe PermissionService do
           let!(:permissions) do
             {
               permissions: {
+                target_user_id: target_user.id,
                 resource: [
                   'user',
                   'read_prompt'
@@ -98,7 +101,7 @@ describe PermissionService do
           end
 
           it 'userはそのままでcontractがread_promptに変更されること' do
-            PermissionService.upsert(token, target_user.id, permissions)
+            PermissionService.upsert(token, permissions)
             actual = Permission.where(user_id: target_user.id)
             resource_1 = Resource.find_by(name: permissions[:permissions][:resource][0])
             resource_2 = Resource.find_by(name: permissions[:permissions][:resource][1])
@@ -120,6 +123,7 @@ describe PermissionService do
           let!(:permissions) do
             {
               permissions: {
+                target_user_id: target_user.id,
                 resource: [
                   'user'
                 ]
@@ -128,7 +132,7 @@ describe PermissionService do
           end
 
           it 'userはそのままでcontractが削除されること' do
-            PermissionService.upsert(token, target_user.id, permissions)
+            PermissionService.upsert(token, permissions)
             actual = Permission.where(user_id: target_user.id)
             resource_1 = Resource.find_by(name: permissions[:permissions][:resource][0])
             expect(actual.length).to eq(1)
@@ -156,6 +160,7 @@ describe PermissionService do
         let!(:permissions) do
           {
             permissions: {
+              target_user_id: target_user.id,
               resource: [
                 'user',
                 'contract'
@@ -165,25 +170,7 @@ describe PermissionService do
         end
 
         it 'ArgumentErrorが発生すること' do
-          expect { PermissionService.upsert(nil, target_user.id, permissions) }.to raise_error(ArgumentError)
-        end
-      end
-
-      context 'target_user_idがない場合' do
-        let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
-        let!(:permissions) do
-          {
-            permissions: {
-              resource: [
-                'user',
-                'contract'
-              ]
-            }
-          }
-        end
-
-        it 'ArgumentErrorが発生すること' do
-          expect { PermissionService.upsert(token, nil, permissions) }.to raise_error(ArgumentError)
+          expect { PermissionService.upsert(nil, permissions) }.to raise_error(ArgumentError)
         end
       end
 
@@ -192,7 +179,7 @@ describe PermissionService do
         let!(:target_user) { create(:user, activated: true) }
 
         it 'ArgumentErrorが発生すること' do
-          expect { PermissionService.upsert(token, target_user.id, nil) }.to raise_error(ArgumentError)
+          expect { PermissionService.upsert(token, nil) }.to raise_error(ArgumentError)
         end
       end
 
@@ -212,6 +199,7 @@ describe PermissionService do
         let!(:permissions) do
           {
             permissions: {
+              target_user_id: target_user.id,
               resource: [
                 'user',
                 'contract'
@@ -221,7 +209,7 @@ describe PermissionService do
         end
 
         it 'Forbiddenが発生すること' do
-          expect { PermissionService.upsert(token, target_user.id, permissions) }.to raise_error(PermissionService::Forbidden)
+          expect { PermissionService.upsert(token, permissions) }.to raise_error(PermissionService::Forbidden)
         end
       end
     end
@@ -251,9 +239,16 @@ describe PermissionService do
         end
         let!(:auth) { generate_token(payload:) }
         let!(:token) { auth.token }
+        let!(:permissions) do
+          {
+            permissions: {
+              target_user_id: target_user.id
+            }
+          }
+        end
 
         it 'user_idに紐づくPermissionオブジェクトが返ること' do
-          actual = PermissionService.show(token, target_user.id)
+          actual = PermissionService.show(token, permissions)
           expect(actual[:resource].length).to eq(2)
           expect(actual[:resource]).to include('user', 'contract')
         end
@@ -272,13 +267,20 @@ describe PermissionService do
           create(:permission, user_id: target_user.id, resource_id: contract_resource.id)
           create(:permission, user_id: target_user.id, resource_id: user_resource.id)
         end
+        let!(:permissions) do
+          {
+            permissions: {
+              target_user_id: target_user.id
+            }
+          }
+        end
 
         it 'ArgumentErrorが発生すること' do
-          expect { PermissionService.show(nil, target_user.id) }.to raise_error(ArgumentError)
+          expect { PermissionService.show(nil, permissions) }.to raise_error(ArgumentError)
         end
       end
 
-      context 'target_user_idがない場合' do
+      context 'permissionsがない場合' do
         let!(:user) { create(:user, activated: true) }
         let!(:permission_resource) { create(:resource, name: 'permission') }
         let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
@@ -297,9 +299,16 @@ describe PermissionService do
         end
         let!(:auth) { generate_token(payload:) }
         let!(:token) { auth.token }
+        let!(:permissions) do
+          {
+            permissions: {
+              target_user_id: nil
+            }
+          }
+        end
 
         it 'ArgumentErrorが発生すること' do
-          expect { PermissionService.show(token, nil) }.to raise_error(ArgumentError)
+          expect { PermissionService.show(token, permissions) }.to raise_error(ArgumentError)
         end
       end
 
@@ -319,16 +328,13 @@ describe PermissionService do
         let!(:permissions) do
           {
             permissions: {
-              resource: [
-                'user',
-                'contract'
-              ]
+              target_user_id: target_user.id
             }
           }
         end
         
         it 'Forbiddenが発生すること' do
-          expect { PermissionService.show(token, target_user.id) }.to raise_error(PermissionService::Forbidden)
+          expect { PermissionService.show(token, permissions) }.to raise_error(PermissionService::Forbidden)
         end
       end
     end

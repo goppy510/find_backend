@@ -12,8 +12,7 @@ module Api
           return
         end
 
-        service = LoginService.new(login_params[:email], login_params[:password])
-        response = service.login
+        response = LoginService.login(logins: login_params)
         if response
           render json: response, status: :ok
           return
@@ -27,7 +26,7 @@ module Api
       private
 
       def login_params
-        params.require(:login).permit(:email, :password)
+        params.require(:logins).permit(:email, :password)
       end
     end
   end

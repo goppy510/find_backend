@@ -39,7 +39,7 @@ class PermissionService
     def upsert(token, permissions)
       raise ArgumentError, 'tokenがありません' if token.blank?
       raise ArgumentError, 'permissionsがありません' if permissions.blank?
-      raise Forbidden, '権限がありません' unless has_permisssion_role?(token)
+      raise Forbidden unless has_permisssion_role?(token)
 
       service = new(token, permissions:)
       service&.upsert
@@ -48,7 +48,7 @@ class PermissionService
     def show(token, permissions)
       raise ArgumentError, 'tokenがありません' if token.blank?
       raise ArgumentError, 'permissionsがありません' if permissions.blank? || permissions[:permissions][:target_user_id].blank?
-      raise Forbidden, '権限がありません' unless has_permisssion_role?(token)
+      raise Forbidden unless has_permisssion_role?(token)
 
       res = new(token, permissions:)&.show
       {

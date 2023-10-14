@@ -81,3 +81,17 @@ generative_ai_model_data = [
 generative_ai_model_data.each do |name|
   GenerativeAiModel.find_or_create_by(name: name)
 end
+
+# resources
+resources_data = [
+  'contract',
+  'permission',
+  'user',
+  'create_prompt',
+  'read_prompt',
+  'update_prompt',
+  'delete_prompt'
+]
+resources_data.each do |name|
+  Resource.find_or_create_by(name: name)
+end

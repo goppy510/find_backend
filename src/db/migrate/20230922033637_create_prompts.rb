@@ -11,7 +11,7 @@ class CreatePrompts < ActiveRecord::Migration[7.0]
       t.text :output_example
       t.text :prompt
       t.references :generative_ai_model, foreign_key: true
-      t.references :user, foreign_key: true, null: false
+      t.references :user, foreign_key: { on_delete: :nullify }, null: true
       t.boolean :deleted, null: false, default: false
 
       t.timestamps

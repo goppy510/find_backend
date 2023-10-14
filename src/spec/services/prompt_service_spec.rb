@@ -7,6 +7,88 @@ require 'faker'
 describe PromptService do
   include SessionModule
 
+  describe '#self.prompt_list' do
+    context '正常系' do
+      before do
+        travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
+      end
+      let!(:user) { create(:user, activated: true) }
+
+      context 'pageを指定し、かつ、レコードが1つだった場合' do
+        let!(:prompts) { create(:prompt, user_id: user.id) }
+        let!(:profile) { create(:profile, user_id: user.id) }
+        let!(:user_1) { create(:user, activated: true) }
+        let!(:user_2) { create(:user, activated: true) }
+        let!(:like_1) { create(:like, user_id: user_1.id, prompt_id: prompts.id) }
+        let!(:like_2) { create(:like, user_id: user_2.id, prompt_id: prompts.id) }
+        let!(:bookmark_2) { create(:bookmark, user_id: user_2.id, prompt_id: prompts.id) }
+        let!(:category_name) { Category.find(prompts.category_id).name }
+        let!(:generative_ai_model_name) { GenerativeAiModel.find(prompts.generative_ai_model_id).name }
+
+        it 'promptsのデータがハッシュで返されること' do
+          res = PromptService.prompt_list(1)
+          expect(res[:items][0][:id]).to eq(prompts.id)
+          expect(res[:items][0][:prompt_uuid]).to eq(prompts.uuid)
+          expect(res[:items][0][:category]).to eq(category_name)
+          expect(res[:items][0][:about]).to eq(prompts.about)
+          expect(res[:items][0][:generative_ai_model]).to eq(generative_ai_model_name)
+          expect(res[:items][0][:nickname]).to eq(profile.nickname)
+          expect(res[:items][0][:likes_count]).to eq(2)
+          expect(res[:items][0][:bookmarks_count]).to eq(1)
+        end
+      end
+
+      context 'pageを指定し、かつ、レコードが8件あった場合' do
+        let!(:prompt_1) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 1, 2, 0, 0, 0)) }
+        let!(:prompt_2) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 3, 2, 0, 0, 0)) }
+        let!(:prompt_3) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 9, 2, 0, 0, 0)) }
+        let!(:prompt_4) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 4, 2, 0, 0, 0)) }
+        let!(:prompt_5) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 8, 2, 0, 0, 0)) }
+        let!(:prompt_6) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 6, 2, 0, 0, 0)) }
+        let!(:prompt_7) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 7, 2, 0, 0, 0)) }
+        let!(:prompt_8) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 6, 20, 0, 0, 0)) }
+
+        context 'pageが1の場合' do
+          it 'created_atの降順で返ってくること' do
+            res = PromptService.prompt_list(1)
+            expect(res[:items][0][:id]).to eq(prompt_3.id)
+            expect(res[:items][1][:id]).to eq(prompt_5.id)
+            expect(res[:items][2][:id]).to eq(prompt_7.id)
+            expect(res[:items][3][:id]).to eq(prompt_8.id)
+            expect(res[:items][4][:id]).to eq(prompt_6.id)
+            expect(res[:items][5][:id]).to eq(prompt_4.id)
+          end
+
+          it 'total_countが6であること' do
+            res = PromptService.prompt_list(1)
+            expect(res[:total_count]).to eq(6)
+          end
+        end
+
+        context 'pageが2の場合' do
+          it 'created_atの降順で返ってくること' do
+            res = PromptService.prompt_list(2)
+            expect(res[:items][0][:id]).to eq(prompt_2.id)
+            expect(res[:items][1][:id]).to eq(prompt_1.id)
+          end
+
+          it 'total_countが2であること' do
+            res = PromptService.prompt_list(2)
+            expect(res[:total_count]).to eq(2)
+          end
+        end
+      end
+    end
+
+    context '異常系' do
+      context 'pageがない場合' do
+        it 'ArgumentErrorがスローされること' do
+          expect { PromptService.prompt_list(nil) }.to raise_error(ArgumentError, 'pageがありません')
+        end
+      end
+    end
+  end
+
   describe '#self.create' do
     context '正常系' do
       context '必要なすべてのパラメータを受け取った場合' do
@@ -334,9 +416,8 @@ describe PromptService do
   end
 
   describe '#self.dislike' do
-    let!(:password) { 'P@ssw0rd' }
-    let!(:user_1) { create(:user, password:, activated: true) }
-    let!(:user_2) { create(:user, password:, activated: true) }
+    let!(:user_1) { create(:user, activated: true) }
+    let!(:user_2) { create(:user, activated: true) }
     let!(:prompt) { create(:prompt) }
 
     context '正常系' do
@@ -364,6 +445,70 @@ describe PromptService do
           PromptService.dislike(token_1, prompt.id)
           like = Like.where(prompt_id: prompt.id)
           expect(like.length).to eq(1)
+        end
+      end
+    end
+  end
+
+  describe '#self.like_count' do
+    let!(:user_creator) { create(:user, activated: true) }
+    let!(:payload) do
+      {
+        sub: user_creator.id,
+        type: 'api'
+      }
+    end
+    let!(:auth) { generate_token(payload: payload) }
+    let!(:token) { auth.token }
+
+    let!(:user_1) { create(:user, activated: true) }
+    let!(:user_2) { create(:user, activated: true) }
+    let!(:prompt) { create(:prompt) }
+
+    let!(:payload_1) do
+      {
+        sub: user_1.id,
+        type: 'api'
+      }
+    end
+    let!(:auth_1) { generate_token(payload: payload_1) }
+    let!(:token_1) { auth_1.token }
+    let!(:payload_2) do
+      {
+        sub: user_2.id,
+        type: 'api'
+      }
+    end
+    let!(:auth_2) { generate_token(payload: payload_2) }
+    let!(:token_2) { auth_2.token }
+
+    context '正常系' do
+      context 'likeが1件の場合' do
+        let!(:like_1) { create(:like, user_id: user_1.id, prompt_id: prompt.id) }
+
+        it 'like数が1であること' do
+          res = PromptService.like_count(token_1, prompt.id)
+          expect(res[:count]).to eq(1)
+        end
+
+        it 'trueを返すこと' do
+          res = PromptService.like_count(token_1, prompt.id)
+          expect(res[:is_liked]).to eq(true)
+        end
+      end
+
+      context 'likeが2件の場合' do
+        let!(:like_1) { create(:like, user_id: user_1.id, prompt_id: prompt.id) }
+        let!(:like_2) { create(:like, user_id: user_2.id, prompt_id: prompt.id) }
+
+        it 'like数が2であること' do
+          res = PromptService.like_count(token, prompt.id)
+          expect(res[:count]).to eq(2)
+        end
+
+        it 'falseを返すこと' do
+          res = PromptService.like_count(token, prompt.id)
+          expect(res[:is_liked]).to eq(false)
         end
       end
     end
@@ -439,6 +584,70 @@ describe PromptService do
           PromptService.disbookmark(token_1, prompt.id)
           bookmark = Bookmark.where(prompt_id: prompt.id)
           expect(bookmark.length).to eq(1)
+        end
+      end
+    end
+
+    describe '#self.bookmark_count' do
+      let!(:user_creator) { create(:user, activated: true) }
+      let!(:payload) do
+        {
+          sub: user_creator.id,
+          type: 'api'
+        }
+      end
+      let!(:auth) { generate_token(payload: payload) }
+      let!(:token) { auth.token }
+  
+      let!(:user_1) { create(:user, activated: true) }
+      let!(:user_2) { create(:user, activated: true) }
+      let!(:prompt) { create(:prompt) }
+  
+      let!(:payload_1) do
+        {
+          sub: user_1.id,
+          type: 'api'
+        }
+      end
+      let!(:auth_1) { generate_token(payload: payload_1) }
+      let!(:token_1) { auth_1.token }
+      let!(:payload_2) do
+        {
+          sub: user_2.id,
+          type: 'api'
+        }
+      end
+      let!(:auth_2) { generate_token(payload: payload_2) }
+      let!(:token_2) { auth_2.token }
+  
+      context '正常系' do
+        context 'ブックマークが1件の場合' do
+          let!(:bookmark_1) { create(:bookmark, user_id: user_1.id, prompt_id: prompt.id) }
+  
+          it 'ブックマーク数が1であること' do
+            res = PromptService.bookmark_count(token_1, prompt.id)
+            expect(res[:count]).to eq(1)
+          end
+
+          it 'trueを返すこと' do
+            res = PromptService.bookmark_count(token_1, prompt.id)
+            expect(res[:is_bookmarked]).to eq(true)
+          end
+        end
+  
+        context 'ブックマークが2件の場合' do
+          let!(:bookmark_1) { create(:bookmark, user_id: user_1.id, prompt_id: prompt.id) }
+          let!(:bookmark_2) { create(:bookmark, user_id: user_2.id, prompt_id: prompt.id) }
+  
+          it 'ブックマーク数が2であること' do
+            res = PromptService.bookmark_count(token, prompt.id)
+            expect(res[:count]).to eq(2)
+          end
+
+          it 'falseを返すこと' do
+            res = PromptService.bookmark_count(token, prompt.id)
+            expect(res[:is_bookmarked]).to eq(false)
+          end
         end
       end
     end

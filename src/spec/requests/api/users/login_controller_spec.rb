@@ -4,6 +4,7 @@ require 'rails_helper'
 
 describe Api::Users::LoginController, type: :request do
   include SessionModule
+
   describe 'POST /api/users/login' do
     context '正常系' do
       context '正しいパラメータを受け取った場合' do
@@ -21,7 +22,7 @@ describe Api::Users::LoginController, type: :request do
         let!(:expires) { Time.zone.at(auth.payload[:exp]).strftime('%Y-%m-%dT%H:%M:%S.%LZ') }
         let!(:valid_params) do
           {
-            login: {
+            logins: {
               email:,
               password:
             }

@@ -10,17 +10,18 @@ describe Api::Users::SignupController, type: :request do
       context '正しいパラメータを受け取った場合' do
         let!(:email) { Faker::Internet.email }
         let!(:password) { 'P@ssw0rd' }
-
-        let!(:valid_params) do
+        let!(:params) do
           {
-            email:,
-            password:
+            signups: {
+              email:,
+              password:
+            }
           }
         end
 
         before do
           travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
-          post '/api/users/signup', params: valid_params
+          post '/api/users/signup', params:
         end
 
         it 'status_code: okを返すこと' do
@@ -44,31 +45,123 @@ describe Api::Users::SignupController, type: :request do
         let!(:password) { 'P@ssw0rd' }
 
         context 'emailがなかった場合' do
+          let!(:params) do
+            {
+              signups: {
+                email: nil,
+                password:
+              }
+            }
+          end
           before do
-            post '/api/users/signup', params: { email: }
+            post '/api/users/signup', params:
           end
 
           it 'status_code: 400を返すこと' do
             expect(response).to have_http_status(400)
           end
 
-          it 'invalid_parameterを返すこと' do
-            expect(JSON.parse(response.body)['error']['code']).to eq('invalid_parameter')
+          it 'emailがありませんを返すこと' do
+            expect(JSON.parse(response.body)['error']['code']).to eq('emailがありません')
           end
         end
 
         context 'passwordがなかった場合' do
+          let!(:params) do
+            {
+              signups: {
+                email:,
+                password: nil
+              }
+            }
+          end
           before do
-            post '/api/users/signup', params: { password: }
+            post '/api/users/signup', params:
           end
 
           it 'status_code: 400を返すこと' do
             expect(response).to have_http_status(400)
           end
 
-          it 'invalid_parameterを返すこと' do
-            expect(JSON.parse(response.body)['error']['code']).to eq('invalid_parameter')
+          it 'passwordがありませんを返すこと' do
+            expect(JSON.parse(response.body)['error']['code']).to eq('passwordがありません')
           end
+        end
+      end
+
+      context 'emailが重複していた場合' do
+        let!(:email) { Faker::Internet.email }
+        let!(:password) { 'P@ssw0rd' }
+        let!(:params) do
+          {
+            signups: {
+              email:,
+              password:
+            }
+          }
+        end
+        let!(:user) { create(:user, email:) }
+
+        before do
+          post '/api/users/signup', params:
+        end
+
+        it 'status_code: 409を返すこと' do
+          expect(response).to have_http_status(409)
+        end
+
+        it 'SignupService::DuplicateEntryを返すこと' do
+          expect(JSON.parse(response.body)['error']['code']).to eq('SignupService::DuplicateEntry')
+        end
+      end
+
+      context 'emailのフォーマットが不正な場合' do
+        let!(:email) { 'test' }
+        let!(:password) { 'P@ssw0rd' }
+        let!(:params) do
+          {
+            signups: {
+              email:,
+              password:
+            }
+          }
+        end
+
+        before do
+          post '/api/users/signup', params:
+        end
+
+        it 'status_code: 422を返すこと' do
+          expect(response).to have_http_status(422)
+        end
+
+        it 'SignupService::EmailFormatErrorを返すこと' do
+          expect(JSON.parse(response.body)['error']['code']).to eq('SignupService::EmailFormatError')
+        end
+      end
+
+      context 'passwordのフォーマットが不正な場合' do
+        let!(:email) { Faker::Internet.email }
+        let!(:password) { 'test' }
+        let!(:params) do
+          {
+            signups: {
+              email:,
+              password:
+            }
+          }
+        end
+
+        before do
+          post '/api/users/signup', params:
+        end
+
+        it 'status_code: 422を返すこと' do
+          expect(response).to have_http_status(422)
+        end
+
+        it 'SignupService::PasswordFormatErrorを返すこと' do
+          expect(JSON.parse(response.body)['error']['code']).to eq('SignupService::PasswordFormatError')
         end
       end
     end

@@ -9,7 +9,6 @@ class ActionController::BadRequest < ActionController::ActionControllerError; en
 class ApplicationController < ActionController::Base
   protect_from_forgery with: :null_session
 
-  include ActionController::Cookies
   include SessionModule
   include ErrorHandlers
 

@@ -29,7 +29,7 @@ describe Account::Password do
 
         it 'PasswordFormatErrorが発生すること' do
           values.each do |value|
-            expect { Account::Password.from_string(value) }.to raise_error(PasswordFormatError)
+            expect { Account::Password.from_string(value) }.to raise_error(Account::Password::PasswordFormatError)
           end
         end
       end
@@ -38,7 +38,7 @@ describe Account::Password do
         let!(:value) { 123_456_789 }
 
         it 'PasswordFormatErrorが発生すること' do
-          expect { Account::Password.from_string(value) }.to raise_error(PasswordFormatError)
+          expect { Account::Password.from_string(value) }.to raise_error(Account::Password::PasswordFormatError)
         end
       end
 
@@ -46,7 +46,7 @@ describe Account::Password do
         let!(:value) { '1234a567B89' }
 
         it 'PasswordFormatErrorが発生すること' do
-          expect { Account::Password.from_string(value) }.to raise_error(PasswordFormatError)
+          expect { Account::Password.from_string(value) }.to raise_error(Account::Password::PasswordFormatError)
         end
       end
 
@@ -54,7 +54,7 @@ describe Account::Password do
         let!(:value) { 'aaaaaaa' }
 
         it 'PasswordFormatErrorが発生すること' do
-          expect { Account::Password.from_string(value) }.to raise_error(PasswordFormatError)
+          expect { Account::Password.from_string(value) }.to raise_error(Account::Password::PasswordFormatError)
         end
       end
 
@@ -62,7 +62,7 @@ describe Account::Password do
         let!(:value) { 'a' * 51 }
 
         it 'PasswordFormatErrorが発生すること' do
-          expect { Account::Password.from_string(value) }.to raise_error(PasswordFormatError)
+          expect { Account::Password.from_string(value) }.to raise_error(Account::Password::PasswordFormatError)
         end
       end
     end

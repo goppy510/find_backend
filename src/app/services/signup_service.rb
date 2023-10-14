@@ -3,13 +3,23 @@
 class SignupService
   include SessionModule
 
-  attr_reader :email, :password, :token, :expires_at
+  class DuplicateEntry < StandardError; end
+  class Unauthorized < StandardError; end
+  class EmailFormatError < StandardError; end
+  class PasswordFormatError < StandardError; end
 
-  def initialize(email, password)
-    raise ArgumentError, 'emailまたはpasswordがありません' if email.blank? || password.blank?
+  attr_reader :email,
+              :password,
+              :user_id,
+              :expires_at
 
-    @email = Account::Email.from_string(email)
-    @password = Account::Password.from_string(password)
+  def initialize(signups: nil, token: nil)
+    hash_signups = signups[:signups] if signups.present?
+    hash_token = token[:token] if token.present?
+    @user_id = authenticate_user(hash_token)[:user_id] if hash_token.present?
+
+    @email = Account::Email.from_string(hash_signups[:email]) if hash_signups&.key?(:email)
+    @password = Account::Password.from_string(hash_signups[:password]) if hash_signups&.key?(:password)
 
     freeze
   end
@@ -17,9 +27,14 @@ class SignupService
   # ユーザー情報をDBに登録する
   def add
     UserRepository.create(@email, @password)
+  rescue ActiveRecord::RecordNotUnique => e
+    Rails.logger.error(e)
+    raise DuplicateEntry
   rescue ActiveRecord::RecordInvalid => e
-    raise SignupError, e.message
+    Rails.logger.error(e)
+    raise e
   end
+  
 
   # 本登録用のメールを送信する
   def activation_email
@@ -47,14 +62,26 @@ class SignupService
   end
 
   class << self
-    def signup(email, password)
-      service = SignupService.new(email, password)
+    def signup(signups, token)
+      raise ArgumentError, 'emailがありません' if signups[:signups][:email].blank?
+      raise ArgumentError, 'passwordがありません' if signups[:signups][:password].blank?
+
+      service = SignupService.new(signups:, token:)
       service&.add
-      service&.activation_email
+
+      # contract権限がなければメールアドレス登録直後にメールを送る
+      return if token and token[:token] and PermissionService.has_contract_role?(token[:token])
+
+      service&.activation_email 
+    rescue Account::Email::EmailFormatError => e
+      Rails.logger.error(e)
+      raise EmailFormatError
+    rescue Account::Password::PasswordFormatError => e
+      Rails.logger.error(e)
+      raise PasswordFormatError
+    rescue StandardError => e
+      Rails.logger.error(e)
+      raise e
     end
   end
 end
-
-class SignupError < StandardError; end
-class Unauthorized < StandardError; end
-class SubmitVerifyEmailError < StandardError; end

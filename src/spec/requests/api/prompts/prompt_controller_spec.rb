@@ -22,6 +22,39 @@ describe Api::Prompts::PromptController, type: :request do
   let!(:auth) { generate_token(payload:) }
   let!(:token) { auth.token }
 
+  describe 'GET /api/prompts' do
+    context '正常系' do
+      let(:mocked_response) { double('Response') }
+      before do
+        allow(PromptService).to receive(:prompt_list).with('1').and_return(mocked_response)
+        get '/api/prompts', params: { page: 1 }
+      end
+    
+      it 'jsonであること' do
+        expect(response.content_type).to eq('application/json; charset=utf-8')
+      end
+      
+      it 'PromptService.prompt_listがparamsの値で呼ばれること' do
+        expect(PromptService).to have_received(:prompt_list).with('1')
+      end
+    end
+    
+
+    context '異常系' do
+      context 'パラメータがなかった場合' do
+        before do
+          get '/api/prompts', params: {}
+        end
+        it 'status_code: 400を返すこと' do
+          expect(response).to have_http_status(400)
+        end
+        it 'ActionController::BadRequestを返すこと' do
+          expect(JSON.parse(response.body)['error']['code']).to eq('ActionController::BadRequest')
+        end
+      end
+    end
+  end
+
   describe 'POST /api/prompts' do
     context '正常系' do
       context '正しいパラメータを受け取った場合' do
@@ -233,6 +266,40 @@ describe Api::Prompts::PromptController, type: :request do
     end
   end
 
+  describe 'GET /api/prompts/:prompt_id/like' do
+    describe '正常系' do
+      let!(:current_prompts) { create(:prompt, user_id: user.id) }
+      let!(:user_1) { create(:user, activated: true) }
+      let!(:payload) do
+        {
+          sub: user_1.id,
+          type: 'api'
+        }
+      end
+      let!(:auth) { generate_token(payload:) }
+      let!(:token) { auth.token }
+      let!(:like) { create(:like, user_id: user_1.id, prompt_id: current_prompts.id) }
+
+      context '正しいuserの場合' do
+        before do
+          get "/api/prompts/#{current_prompts.id}/like", headers: { 'Authorization' => "Bearer #{token}" }
+        end
+
+        it 'status_code: okを返すこと' do
+          expect(response).to have_http_status(:ok)
+        end
+
+        it 'countが返ってくること' do
+          expect(JSON.parse(response.body)['count']).to eq(1)
+        end
+
+        it 'is_bookmarkedが返ってくること' do
+          expect(JSON.parse(response.body)['is_liked']).to eq(true)
+        end
+      end
+    end
+  end
+
   describe 'POST /api/prompts/:prompt_id/bookmark' do
     describe '正常系' do
       let!(:current_prompts) { create(:prompt, user_id: user.id) }
@@ -287,6 +354,40 @@ describe Api::Prompts::PromptController, type: :request do
 
         it 'statusがsuccessであること' do
           expect(JSON.parse(response.body)['status']).to eq('success')
+        end
+      end
+    end
+  end
+
+  describe 'GET /api/prompts/:prompt_id/bookmark' do
+    describe '正常系' do
+      let!(:current_prompts) { create(:prompt, user_id: user.id) }
+      let!(:user_1) { create(:user, activated: true) }
+      let!(:payload) do
+        {
+          sub: user_1.id,
+          type: 'api'
+        }
+      end
+      let!(:auth) { generate_token(payload:) }
+      let!(:token) { auth.token }
+      let!(:bookmark) { create(:bookmark, user_id: user_1.id, prompt_id: current_prompts.id) }
+
+      context '正しいuserの場合' do
+        before do
+          get "/api/prompts/#{current_prompts.id}/bookmark", headers: { 'Authorization' => "Bearer #{token}" }
+        end
+
+        it 'status_code: okを返すこと' do
+          expect(response).to have_http_status(:ok)
+        end
+
+        it 'countが返ってくること' do
+          expect(JSON.parse(response.body)['count']).to eq(1)
+        end
+
+        it 'is_bookmarkedが返ってくること' do
+          expect(JSON.parse(response.body)['is_bookmarked']).to eq(true)
         end
       end
     end

@@ -2,6 +2,7 @@
 
 module Account
   class Email
+    class EmailFormatError < StandardError; end
     attr_reader :value
 
     def initialize(value)
@@ -25,5 +26,3 @@ module Account
     end
   end
 end
-
-class EmailFormatError < StandardError; end

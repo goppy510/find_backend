@@ -15,6 +15,11 @@ describe SignupService do
 
         let!(:email) { Faker::Internet.email }
         let!(:password) { 'P@ssw0rd' }
+        let!(:token) do
+          {
+            token: nil
+          }
+        end
         let!(:signups) do
           {
             signups: {
@@ -25,7 +30,7 @@ describe SignupService do
         end
 
         it 'usersにメールアドレスとハッシュ化されたパスワードがインサートされること' do
-          service = SignupService.new(signups:)
+          service = SignupService.new(signups:, token:)
           user = service.add
           expect(user.email).to eq(email)
           expect(user.authenticate(password)).to be_truthy
@@ -40,6 +45,11 @@ describe SignupService do
 
       context 'メールアドレスが引数にない場合' do
         let!(:password) { 'P@ssw0rd' }
+        let!(:token) do
+          {
+            token: nil
+          }
+        end
         let!(:signups) do
           {
             signups: {
@@ -50,12 +60,17 @@ describe SignupService do
         end
 
         it 'ArgumentErrorがスローされること' do
-          expect { SignupService.new(signups:) }.to raise_error(ArgumentError, 'emailがありません')
+          expect { SignupService.new(signups:, token:) }.to raise_error(ArgumentError, 'emailがありません')
         end
       end
 
       context 'パスワードが引数にない場合' do
         let!(:email) { Faker::Internet.email }
+        let!(:token) do
+          {
+            token: nil
+          }
+        end
         let!(:signups) do
           {
             signups: {
@@ -66,13 +81,18 @@ describe SignupService do
         end
 
         it 'ArgumentErrorがスローされること' do
-          expect { SignupService.new(signups:) }.to raise_error(ArgumentError, 'passwordがありません')
+          expect { SignupService.new(signups:, token:) }.to raise_error(ArgumentError, 'passwordがありません')
         end
       end
 
       context 'メールアドレスが既に存在する場合' do
         let!(:email) { Faker::Internet.email }
         let!(:password) { 'P@ssw0rd' }
+        let!(:token) do
+          {
+            token: nil
+          }
+        end
         let!(:signups) do
           {
             signups: {
@@ -84,7 +104,7 @@ describe SignupService do
         let!(:user) { create(:user, email:, password:) }
 
         it 'DuplicateEntryがスローされること' do
-          service = SignupService.new(signups:)
+          service = SignupService.new(signups:, token:)
           expect { service.add }.to raise_error(SignupService::DuplicateEntry)
         end
       end
@@ -107,6 +127,11 @@ describe SignupService do
         let!(:email) { Faker::Internet.email }
         let!(:password) { 'P@ssw0rd' }
         let!(:user) { create(:user, email:, password:) }
+        let!(:token) do
+          {
+            token: nil
+          }
+        end
         let!(:signups) do
           {
             signups: {
@@ -117,7 +142,7 @@ describe SignupService do
         end
 
         it 'メールが送られること' do
-          service = SignupService.new(signups:)
+          service = SignupService.new(signups:, token:)
           service.activation_email
           expect(ActivationMailer).to have_received(:send_activation_email)
           expect(mailer).to have_received(:deliver)
@@ -133,6 +158,11 @@ describe SignupService do
 
         let!(:email) { Faker::Internet.email }
         let!(:password) { 'P@ssw0rd' }
+        let!(:token) do
+          {
+            token: nil
+          }
+        end
         let!(:signups) do
           {
             signups: {
@@ -144,7 +174,7 @@ describe SignupService do
         let!(:user) { create(:user, email:, password:, activated: true) }
 
         it 'UserNotFoundがスローされること' do
-          service = SignupService.new(signups:)
+          service = SignupService.new(signups:, token:)
           expect { service.activation_email }.to raise_error(SignupService::Unauthorized)
         end
       end
@@ -175,10 +205,14 @@ describe SignupService do
             }
           end
           let!(:auth) { generate_token(payload:) }
-          let!(:token) { auth.token }
   
           let!(:email) { Faker::Internet.email }
           let!(:password) { 'P@ssw0rd'}
+          let!(:token) do
+            {
+              token: auth.token
+            }
+          end
           let!(:signups) do
             {
               signups: {
@@ -189,7 +223,7 @@ describe SignupService do
           end
 
           it 'メールが送られないこと' do
-            SignupService.signup(token, signups)
+            SignupService.signup(signups, token)
             expect(ActivationMailer).to_not have_received(:send_activation_email)
             expect(mailer).to_not have_received(:deliver)
           end
@@ -204,6 +238,11 @@ describe SignupService do
 
           let!(:email) { Faker::Internet.email }
           let!(:password) { 'P@ssw0rd'}
+          let!(:token) do
+            {
+              token: nil
+            }
+          end
           let!(:signups) do
             {
               signups: {
@@ -214,7 +253,7 @@ describe SignupService do
           end
 
           it 'メールが送られること' do
-            SignupService.signup(nil, signups)
+            SignupService.signup(signups, token)
             expect(ActivationMailer).to have_received(:send_activation_email)
             expect(mailer).to have_received(:deliver)
           end
@@ -225,6 +264,11 @@ describe SignupService do
     context '異常系' do
       context 'emailが引数にない場合' do
         let!(:password) { 'P@ssw0rd' }
+        let!(:token) do
+          {
+            token: nil
+          }
+        end
         let!(:signups) do
           {
             signups: {
@@ -235,12 +279,17 @@ describe SignupService do
         end
 
         it 'ArgumentErrorがスローされること' do
-          expect { SignupService.signup(nil, signups) }.to raise_error(ArgumentError, 'emailがありません')
+          expect { SignupService.signup(signups, token) }.to raise_error(ArgumentError, 'emailがありません')
         end
       end
 
       context 'passwordが引数にない場合' do
         let!(:email) { Faker::Internet.email }
+        let!(:token) do
+          {
+            token: nil
+          }
+        end
         let!(:signups) do
           {
             signups: {
@@ -251,13 +300,18 @@ describe SignupService do
         end
 
         it 'ArgumentErrorがスローされること' do
-          expect { SignupService.signup(nil, signups) }.to raise_error(ArgumentError, 'passwordがありません')
+          expect { SignupService.signup(signups, token) }.to raise_error(ArgumentError, 'passwordがありません')
         end
       end
 
       context 'emailのフォーマットが不正な場合' do
         let!(:email) { 'test' }
         let!(:password) { 'P@ssw0rd' }
+        let!(:token) do
+          {
+            token: nil
+          }
+        end
         let!(:signups) do
           {
             signups: {
@@ -268,13 +322,18 @@ describe SignupService do
         end
 
         it 'EmailFormatErrorがスローされること' do
-          expect { SignupService.signup(nil, signups) }.to raise_error(SignupService::EmailFormatError)
+          expect { SignupService.signup(signups, token) }.to raise_error(SignupService::EmailFormatError)
         end
       end
 
       context 'passwordのフォーマットが不正な場合' do
         let!(:email) { Faker::Internet.email }
         let!(:password) { 'test' }
+        let!(:token) do
+          {
+            token: nil
+          }
+        end
         let!(:signups) do
           {
             signups: {
@@ -285,7 +344,7 @@ describe SignupService do
         end
 
         it 'PasswordFormatErrorがスローされること' do
-          expect { SignupService.signup(nil, signups) }.to raise_error(SignupService::PasswordFormatError)
+          expect { SignupService.signup(signups, token) }.to raise_error(SignupService::PasswordFormatError)
         end
       end
     end

@@ -8,7 +8,11 @@ class SignupService
   class EmailFormatError < StandardError; end
   class PasswordFormatError < StandardError; end
 
-  attr_reader :email, :password, :token, :user_id, :expires_at
+  attr_reader :email,
+              :password,
+              :token,
+              :user_id,
+              :expires_at
 
   def initialize(token: nil, signups: nil)
     hash_signups = signups[:signups] if signups.present?
@@ -65,11 +69,8 @@ class SignupService
       service = SignupService.new(token:, signups:)
       service&.add
 
-      # contract権限があればメールアドレス登録直後にメールを送らないようにする
-      permission = PermissionRepository.show(service&.user_id)
-      return if permission.include?('contract')
-
-      service&.activation_email
+      # contract権限がなければメールアドレス登録直後にメールを送る
+      service&.activation_email if token.blank? or !PermissionService.has_contract?(token)
     rescue Account::Email::EmailFormatError => e
       Rails.logger.error(e)
       raise EmailFormatError

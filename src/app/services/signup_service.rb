@@ -2,15 +2,17 @@
 
 class SignupService
   include SessionModule
+
   class DuplicateEntry < StandardError; end
   class Unauthorized < StandardError; end
   class EmailFormatError < StandardError; end
   class PasswordFormatError < StandardError; end
 
-  attr_reader :email, :password, :token, :expires_at
+  attr_reader :email, :password, :token, :user_id, :expires_at
 
-  def initialize(signups: nil)
+  def initialize(token: nil, signups: nil)
     hash_signups = signups[:signups] if signups.present?
+    @user_id = authenticate_user(token)[:user_id] if token.present?
 
     @email = Account::Email.from_string(hash_signups[:email]) if hash_signups&.key?(:email)
     @password = Account::Password.from_string(hash_signups[:password]) if hash_signups&.key?(:password)
@@ -56,12 +58,17 @@ class SignupService
   end
 
   class << self
-    def signup(signups)
+    def signup(token, signups)
       raise ArgumentError, 'emailがありません' if signups[:signups][:email].blank?
       raise ArgumentError, 'passwordがありません' if signups[:signups][:password].blank?
 
-      service = SignupService.new(signups:)
+      service = SignupService.new(token:, signups:)
       service&.add
+
+      # contract権限があればメールアドレス登録直後にメールを送らないようにする
+      permission = PermissionRepository.show(service&.user_id)
+      return if permission.include?('contract')
+
       service&.activation_email
     rescue Account::Email::EmailFormatError => e
       Rails.logger.error(e)

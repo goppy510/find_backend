@@ -8,7 +8,7 @@ describe Api::Users::PermissionController, type: :request do
   describe 'POST /api/users/permission' do
     context '正常系' do
       let!(:user) { create(:user, activated: true) }
-      let!(:permission_resource) { create(:resource, name: 'permission') }
+      let!(:permission_resource) { Resource.find_by(name: 'permission') }
       let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
       let!(:payload) do
         {
@@ -25,10 +25,7 @@ describe Api::Users::PermissionController, type: :request do
           {
             permissions: {
               target_user_id: target_user.id,
-              resource: [
-                'user',
-                'contract'
-              ]
+              resource: 'contract'
             }
           }
         end
@@ -59,7 +56,7 @@ describe Api::Users::PermissionController, type: :request do
       let!(:token) { auth.token }
 
       context 'パラメータがなかった場合' do
-        let!(:permission_resource) { create(:resource, name: 'permission') }
+        let!(:permission_resource) { Resource.find_by(name: 'permission') }
         let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
         before do
           post '/api/users/permission', params: {},  headers: { 'Authorization' => "Bearer #{token}" }
@@ -80,10 +77,7 @@ describe Api::Users::PermissionController, type: :request do
           {
             permissions: {
               target_user_id: target_user.id,
-              resource: [
-                'user',
-                'contract'
-              ]
+              resource: 'user'
             }
           }
         end
@@ -103,7 +97,7 @@ describe Api::Users::PermissionController, type: :request do
   describe 'GET /api/users/permission' do
     context '正常系' do
       let!(:user) { create(:user, activated: true) }
-      let!(:permission_resource) { create(:resource, name: 'permission') }
+      let!(:permission_resource) { Resource.find_by(name: 'permission') }
       let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
       let!(:payload) do
         {
@@ -115,8 +109,8 @@ describe Api::Users::PermissionController, type: :request do
       let!(:token) { auth.token }
 
       context '正しいtarget_user_idを受け取った場合' do
-        let!(:contract_resource) { create(:resource, name: 'contract') }
-        let!(:user_resource) { create(:resource, name: 'user') }
+        let!(:contract_resource) { Resource.find_by(name: 'contract') }
+        let!(:user_resource) { Resource.find_by(name: 'user') }
         let!(:target_user) { create(:user, activated: true) }
         let!(:db_permissions) do
           create(:permission, user_id: target_user.id, resource_id: contract_resource.id)
@@ -147,7 +141,7 @@ describe Api::Users::PermissionController, type: :request do
 
     context '異常系' do
       let!(:user) { create(:user, activated: true) }
-      let!(:permission_resource) { create(:resource, name: 'permission') }
+      let!(:permission_resource) { Resource.find_by(name: 'permission') }
       let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
       let!(:payload) do
         {
@@ -171,7 +165,7 @@ describe Api::Users::PermissionController, type: :request do
       end
 
       context '権限がなかった場合' do
-        let!(:contract_resource) { create(:resource, name: 'contract') }
+        let!(:contract_resource) { Resource.find_by(name: 'contract') }
         let!(:permission) { create(:permission, user_id: user.id, resource_id: contract_resource.id) }
         let!(:target_user) { create(:user, activated: true) }
         let!(:permissions) do
@@ -183,6 +177,99 @@ describe Api::Users::PermissionController, type: :request do
         end
         before do
           get '/api/users/permission', params: permissions, headers: { 'Authorization' => "Bearer #{token}" }
+        end
+        it 'status_code: 403を返すこと' do
+          expect(response).to have_http_status(403)
+        end
+        it 'PermissionService::Forbiddenを返すこと' do
+          expect(JSON.parse(response.body)['error']['code']).to eq('PermissionService::Forbidden')
+        end
+      end
+    end
+  end
+
+  describe 'DELETE /api/users/permission' do
+    context '正常系' do
+      let!(:user) { create(:user, activated: true) }
+      let!(:permission_resource) { Resource.find_by(name: 'permission') }
+      let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
+      let!(:payload) do
+        {
+          sub: user.id,
+          type: 'api'
+        }
+      end
+      let!(:auth) { generate_token(payload:) }
+      let!(:token) { auth.token }
+
+      context '正しいパラメータを受け取った場合' do
+        let!(:contract_resource) { Resource.find_by(name: 'contract') }
+        let!(:user_resource) { Resource.find_by(name: 'user') }
+        let!(:target_user) { create(:user, activated: true) }
+        let!(:db_permissions) do
+          create(:permission, user_id: target_user.id, resource_id: contract_resource.id)
+          create(:permission, user_id: target_user.id, resource_id: user_resource.id)
+        end
+        let!(:permissions) do
+          {
+            permissions: {
+              target_user_id: target_user.id,
+              resource: 'contract'
+            }
+          }
+        end
+        before do
+          delete '/api/users/permission', params: permissions, headers: { 'Authorization' => "Bearer #{token}" }
+        end
+
+        it 'status_code: okを返すこと' do
+          expect(response).to have_http_status(:ok)
+        end
+
+        it 'statusがsuccessであること' do
+          expect(JSON.parse(response.body)['status']).to eq('success')
+        end
+      end
+    end
+
+    context '異常系' do
+      let!(:user) { create(:user, activated: true) }
+      let!(:permission_resource) { Resource.find_by(name: 'permission') }
+      let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
+      let!(:payload) do
+        {
+          sub: user.id,
+          type: 'api'
+        }
+      end
+      let!(:auth) { generate_token(payload:) }
+      let!(:token) { auth.token }
+      
+      context 'パラメータがなかった場合' do
+        before do
+          delete '/api/users/permission', params: {}, headers: { 'Authorization' => "Bearer #{token}" }
+        end
+        it 'status_code: 400を返すこと' do
+          expect(response).to have_http_status(400)
+        end
+        it 'ActionController::BadRequestを返すこと' do
+          expect(JSON.parse(response.body)['error']['code']).to eq('ActionController::BadRequest')
+        end
+      end
+
+      context '権限がなかった場合' do
+        let!(:contract_resource) { Resource.find_by(name: 'contract') }
+        let!(:permission) { create(:permission, user_id: user.id, resource_id: contract_resource.id) }
+        let!(:target_user) { create(:user, activated: true) }
+        let!(:permissions) do
+          {
+            permissions: {
+              target_user_id: target_user.id
+            }
+          }
+        end
+        before do
+          delete '/api/users/permission', params: permissions, headers: { 'Authorization' => "Bearer #{token}" }
         end
         it 'status_code: 403を返すこと' do
           expect(response).to have_http_status(403)

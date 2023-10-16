@@ -13,10 +13,9 @@ class AdminSignupService
               :user_id,
               :expires_at
 
-  def initialize(signups: nil, token: nil)
+  def initialize(token, signups: nil)
     hash_signups = signups[:signups] if signups.present?
-    hash_token = token[:token] if token.present?
-    @user_id = authenticate_user(hash_token)[:user_id] if hash_token.present?
+    @user_id = authenticate_user(token)[:user_id] if token.present?
 
     @email = Account::Email.from_string(hash_signups[:email]) if hash_signups&.key?(:email)
     @password = Account::Password.from_string(hash_signups[:password]) if hash_signups&.key?(:password)
@@ -36,15 +35,15 @@ class AdminSignupService
   end
 
   class << self
-    def signup(signups, token)
+    def signup(token, signups)
       raise ArgumentError, 'emailがありません' if signups[:signups][:email].blank?
       raise ArgumentError, 'passwordがありません' if signups[:signups][:password].blank?
-      raise ArgumentError, 'tokenがありません' if token[:token].blank?
+      raise ArgumentError, 'tokenがありません' if token.blank?
 
-      service = AdminSignupService.new(signups:, token:)
+      service = AdminSignupService.new(token, signups:)
 
       # contract権限がなければ登録させない
-      raise Forbidden if !PermissionService.has_contract_role?(token[:token])
+      raise Forbidden if !PermissionService.has_contract_role?(token)
 
       service&.add
       target_user = UserRepository.find_by_email(service.email)

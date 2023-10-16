@@ -12,15 +12,22 @@ describe AdminSignupService do
   end
 
   describe '#add' do
+    let!(:user) { create(:user, activated: true) }
+    let!(:payload) do
+      {
+        sub: user.id,
+        type: 'api'
+      }
+    end
+    let!(:auth) { generate_token(payload:) }
+    let!(:token) { auth.token }
+    let!(:contract_resource) { Resource.find_by(name: 'contract') }
+    let!(:permission) { create(:permission, user_id: user.id, resource_id: contract_resource.id) }
+
     context '正常系' do
       context '正しいメールアドレスとパスワードを受け取った場合' do
         let!(:email) { Faker::Internet.email }
         let!(:password) { 'P@ssw0rd' }
-        let!(:token) do
-          {
-            token: nil
-          }
-        end
         let!(:signups) do
           {
             signups: {
@@ -31,7 +38,7 @@ describe AdminSignupService do
         end
 
         it 'usersにメールアドレスとハッシュ化されたパスワードがインサートされること' do
-          service = AdminSignupService.new(signups:, token:)
+          service = AdminSignupService.new(token, signups:)
           user = service.add
           expect(user.email).to eq(email)
           expect(user.authenticate(password)).to be_truthy
@@ -42,11 +49,6 @@ describe AdminSignupService do
     context '異常系' do
       context 'メールアドレスが引数にない場合' do
         let!(:password) { 'P@ssw0rd' }
-        let!(:token) do
-          {
-            token: nil
-          }
-        end
         let!(:signups) do
           {
             signups: {
@@ -57,17 +59,12 @@ describe AdminSignupService do
         end
 
         it 'ArgumentErrorがスローされること' do
-          expect { AdminSignupService.new(signups:, token:) }.to raise_error(ArgumentError, 'emailがありません')
+          expect { AdminSignupService.new(token, signups:) }.to raise_error(ArgumentError, 'emailがありません')
         end
       end
 
       context 'パスワードが引数にない場合' do
         let!(:email) { Faker::Internet.email }
-        let!(:token) do
-          {
-            token: nil
-          }
-        end
         let!(:signups) do
           {
             signups: {
@@ -78,18 +75,13 @@ describe AdminSignupService do
         end
 
         it 'ArgumentErrorがスローされること' do
-          expect { AdminSignupService.new(signups:, token:) }.to raise_error(ArgumentError, 'passwordがありません')
+          expect { AdminSignupService.new(token, signups:) }.to raise_error(ArgumentError, 'passwordがありません')
         end
       end
 
       context 'メールアドレスが既に存在する場合' do
         let!(:email) { Faker::Internet.email }
         let!(:password) { 'P@ssw0rd' }
-        let!(:token) do
-          {
-            token: nil
-          }
-        end
         let!(:signups) do
           {
             signups: {
@@ -98,10 +90,10 @@ describe AdminSignupService do
             }
           }
         end
-        let!(:user) { create(:user, email:, password:) }
+        let!(:user_1) { create(:user, email:, password:) }
 
         it 'DuplicateEntryがスローされること' do
-          service = AdminSignupService.new(signups:, token:)
+          service = AdminSignupService.new(token, signups:)
           expect { service.add }.to raise_error(AdminSignupService::DuplicateEntry)
         end
       end
@@ -128,11 +120,8 @@ describe AdminSignupService do
   
           let!(:email) { Faker::Internet.email }
           let!(:password) { 'P@ssw0rd'}
-          let!(:token) do
-            {
-              token: auth.token
-            }
-          end
+          let!(:token) { auth.token }
+
           let!(:signups) do
             {
               signups: {
@@ -143,7 +132,7 @@ describe AdminSignupService do
           end
 
           it 'ContractService.createが呼ばれること' do
-            AdminSignupService.signup(signups, token)
+            AdminSignupService.signup(token, signups)
             expect(ContractRepository).to have_received(:create)
           end
         end
@@ -161,11 +150,7 @@ describe AdminSignupService do
             }
           end
           let!(:auth) { generate_token(payload:) }
-          let!(:token) do
-            {
-              token: auth.token
-            }
-          end
+          let!(:token) { auth.token }
           let!(:email) { Faker::Internet.email }
           let!(:password) { 'P@ssw0rd'}
           let!(:signups) do
@@ -179,14 +164,14 @@ describe AdminSignupService do
 
           it 'ContractService.createが呼ばれないこと' do
             begin
-              AdminSignupService.signup(signups, token)
+              AdminSignupService.signup(token, signups)
             rescue AdminSignupService::Forbidden
               expect(ContractRepository).not_to have_received(:create)
             end
           end
 
           it 'Forbiddenがraiseされること' do
-            expect { AdminSignupService.signup(signups, token) }.to raise_error(AdminSignupService::Forbidden)
+            expect { AdminSignupService.signup(token, signups) }.to raise_error(AdminSignupService::Forbidden)
           end
         end
       end
@@ -195,11 +180,17 @@ describe AdminSignupService do
     context '異常系' do
       context 'emailが引数にない場合' do
         let!(:password) { 'P@ssw0rd' }
-        let!(:token) do
+        let!(:user) { create(:user, activated: true) }
+        let!(:contract_resource) { Resource.find_by(name: 'contract') }
+        let!(:permission) { create(:permission, user_id: user.id, resource_id: contract_resource.id) }
+        let!(:payload) do
           {
-            token: nil
+            sub: user.id,
+            type: 'api'
           }
         end
+        let!(:auth) { generate_token(payload:) }
+        let!(:token) { auth.token }
         let!(:signups) do
           {
             signups: {
@@ -210,7 +201,7 @@ describe AdminSignupService do
         end
 
         it 'ArgumentErrorがスローされること' do
-          expect { AdminSignupService.signup(signups, token) }.to raise_error(ArgumentError, 'emailがありません')
+          expect { AdminSignupService.signup(token, signups) }.to raise_error(ArgumentError, 'emailがありません')
         end
       end
 
@@ -226,6 +217,7 @@ describe AdminSignupService do
           }
         end
         let!(:auth) { generate_token(payload:) }
+        let!(:token) { auth.token }
         let!(:token) do
           {
             token: auth.token
@@ -241,7 +233,7 @@ describe AdminSignupService do
         end
 
         it 'ArgumentErrorがスローされること' do
-          expect { AdminSignupService.signup(signups, token) }.to raise_error(ArgumentError, 'passwordがありません')
+          expect { AdminSignupService.signup(token, signups) }.to raise_error(ArgumentError, 'passwordがありません')
         end
       end
 
@@ -258,11 +250,7 @@ describe AdminSignupService do
           }
         end
         let!(:auth) { generate_token(payload:) }
-        let!(:token) do
-          {
-            token: auth.token
-          }
-        end
+        let!(:token) { auth.token }
         let!(:signups) do
           {
             signups: {
@@ -273,7 +261,7 @@ describe AdminSignupService do
         end
 
         it 'EmailFormatErrorがスローされること' do
-          expect { AdminSignupService.signup(signups, token) }.to raise_error(AdminSignupService::EmailFormatError)
+          expect { AdminSignupService.signup(token, signups) }.to raise_error(AdminSignupService::EmailFormatError)
         end
       end
 
@@ -290,11 +278,7 @@ describe AdminSignupService do
           }
         end
         let!(:auth) { generate_token(payload:) }
-        let!(:token) do
-          {
-            token: auth.token
-          }
-        end
+        let!(:token) { auth.token }
         let!(:signups) do
           {
             signups: {
@@ -305,7 +289,7 @@ describe AdminSignupService do
         end
 
         it 'PasswordFormatErrorがスローされること' do
-          expect { AdminSignupService.signup(signups, token) }.to raise_error(AdminSignupService::PasswordFormatError)
+          expect { AdminSignupService.signup(token, signups) }.to raise_error(AdminSignupService::PasswordFormatError)
         end
       end
     end

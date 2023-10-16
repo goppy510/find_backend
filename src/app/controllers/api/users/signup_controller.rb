@@ -7,9 +7,8 @@ module Api
 
       # 仮登録用
       def signup
-        token = header_token
         valid_params = { signups: signup_params.to_unsafe_h }
-        SignupService.signup(valid_params, token)
+        SignupService.signup(valid_params)
 
         render json: { status: 'success' }, status: :ok
 

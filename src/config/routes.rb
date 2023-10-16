@@ -4,7 +4,10 @@ Rails.application.routes.draw do
   mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
   namespace :api do
     namespace :users do
+      # 一般的な会員登録のAPI
       post '/signup',      to: 'signup#signup'
+      # contract権限を持つ人が契約を作成する場合のAPI
+      post '/admin_signup', to: 'admin_signup#signup'
 
       post '/activation',  to: 'activation#activate'
 
@@ -17,21 +20,15 @@ Rails.application.routes.draw do
 
       put '/:id/password', to: 'profile#update_password'
 
-      # 契約
-      post '/contract',    to: 'contract#create'
-      get '/contract',     to: 'contract#show'
-      put '/contract',     to: 'contract#update'
-      delete '/contract',  to: 'contract#delete'
-
       # メンバー
       post '/user',        to: 'user#create'
       get '/user',         to: 'user#show'
-      put '/user',         to: 'user#update'
       delete '/user',      to: 'user#delete'
 
       # 権限
-      post '/permission',  to: 'permission#upsert'
-      get '/permission',   to: 'permission#show'
+      post '/permission',   to: 'permission#create'
+      get '/permission',    to: 'permission#show'
+      delete '/permission', to: 'permission#delete'
     end
 
     namespace :prompts do

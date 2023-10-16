@@ -2,21 +2,22 @@
 
 module Api
   module Users
-    class SignupController < ApplicationController
+    class AdminSignupController < ApplicationController
       include SessionModule
 
       # 仮登録用
       def signup
+        token = header_token
         valid_params = { signups: signup_params.to_unsafe_h }
-        SignupService.signup(valid_params)
+        AdminSignupService.signup(token, valid_params)
 
         render json: { status: 'success' }, status: :ok
 
-      rescue SignupService::DuplicateEntry => e
+      rescue AdminSignupService::DuplicateEntry => e
         rescue409(e)
-      rescue SignupService::EmailFormatError => e
+      rescue AdminSignupService::EmailFormatError => e
         rescue422(e)
-      rescue SignupService::PasswordFormatError => e
+      rescue AdminSignupService::PasswordFormatError => e
         rescue422(e)
       rescue StandardError => e
         rescue400(e)

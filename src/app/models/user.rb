@@ -14,5 +14,5 @@ class User < ApplicationRecord
 
   has_many :permissions
   has_many :resources, through: :permissions
-  belongs_to :contract, optional: true
+  has_one :contract, dependent: :destroy
 end

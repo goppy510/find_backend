@@ -6,10 +6,10 @@ module Api
       include SessionModule
 
       # 権限追加
-      def upsert
+      def create
         token = header_token
         valid_params = { permissions: permission_params.to_unsafe_h }
-        PermissionService.upsert(token, valid_params)
+        PermissionService.create(token, valid_params)
         render json: { status: 'success' }, status: :ok
 
       rescue PermissionService::Forbidden => e
@@ -34,12 +34,26 @@ module Api
         raise ActionController::BadRequest
       end
 
+      # 権限削除
+      def delete
+        token = header_token
+        valid_params = { permissions: permission_params.to_unsafe_h }
+        PermissionService.delete(token, valid_params)
+        render json: { status: 'success' }, status: :ok
+      rescue PermissionService::Forbidden => e
+        Rails.logger.error e
+        rescue403(e)
+      rescue StandardError => e
+        Rails.logger.error e
+        raise ActionController::BadRequest
+      end
+
       private
 
       def permission_params
         params.require(:permissions).permit(
           :target_user_id,
-          resource: []
+          :resource
         )
       end
 

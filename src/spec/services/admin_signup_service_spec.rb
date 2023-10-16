@@ -1,4 +1,3 @@
-spec/services/admin_signup_service_spec.rb
 # frozen_string_literal: true
 
 require 'rails_helper'

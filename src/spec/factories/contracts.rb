@@ -5,7 +5,7 @@ require 'faker'
 
 FactoryBot.define do
   factory :contract do
-    association :admin_user, factory: :user
+    association :user, factory: :user
     max_member_count { 5 }
   end
 end

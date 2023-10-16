@@ -30,8 +30,9 @@ Rails.application.routes.draw do
       delete '/user',      to: 'user#delete'
 
       # 権限
-      post '/permission',  to: 'permission#upsert'
-      get '/permission',   to: 'permission#show'
+      post '/permission',   to: 'permission#create'
+      get '/permission',    to: 'permission#show'
+      delete '/permission', to: 'permission#delete'
     end
 
     namespace :prompts do

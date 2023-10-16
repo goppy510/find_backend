@@ -196,7 +196,7 @@ describe SignupService do
           end
 
           let!(:user) { create(:user, activated: true) }
-          let!(:contract_resource) { create(:resource, name: 'contract') }
+          let!(:contract_resource) { Resource.find_by(name: 'contract') }
           let!(:permission) { create(:permission, user_id: user.id, resource_id: contract_resource.id) }
           let!(:payload) do
             {

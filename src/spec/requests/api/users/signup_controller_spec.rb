@@ -3,38 +3,96 @@
 require 'rails_helper'
 
 describe Api::Users::SignupController, type: :request do
-  include ActionController::Cookies
+  include SessionModule
 
   describe 'POST /api/users/signup' do
     context '正常系' do
-      context '正しいパラメータを受け取った場合' do
-        let!(:email) { Faker::Internet.email }
-        let!(:password) { 'P@ssw0rd' }
-        let!(:params) do
+      context 'contract権限を持つユーザーがリクエストした場合' do
+        let!(:user) { create(:user, activated: true) }
+        let!(:payload) do
           {
-            signups: {
-              email:,
-              password:
-            }
+            sub: user.id,
+            type: 'api'
           }
         end
+        let!(:auth) { generate_token(payload:) }
+        let!(:token) { auth.token }
+        let!(:contract_resource) { Resource.find_by(name: 'contract') }
+        let!(:permission) { create(:permission, user_id: user.id, resource_id: contract_resource.id) }
 
-        before do
-          travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
-          post '/api/users/signup', params:
+        context '正しいパラメータを受け取った場合' do
+          let!(:email) { Faker::Internet.email }
+          let!(:password) { 'P@ssw0rd' }
+          let!(:params) do
+            {
+              signups: {
+                email:,
+                password:
+              }
+            }
+          end
+
+          before do
+            travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
+            post '/api/users/signup', params:, headers: { 'Authorization' => "Bearer #{token}" }
+          end
+
+          it 'status_code: okを返すこと' do
+            expect(response).to have_http_status(:ok)
+          end
+
+          it 'statusがsuccessであること' do
+            expect(JSON.parse(response.body)['status']).to eq('success')
+          end
+
+          it 'usersにemailが登録されていること' do
+            user = User.find_by(email:)
+            expect(user.email).to eq(email)
+          end
         end
+      end
 
-        it 'status_code: okを返すこと' do
-          expect(response).to have_http_status(:ok)
+      context 'contract権限を持たないユーザーがリクエストした場合' do
+        let!(:user) { create(:user, activated: true) }
+        let!(:payload) do
+          {
+            sub: user.id,
+            type: 'api'
+          }
         end
+        let!(:auth) { generate_token(payload:) }
+        let!(:token) { auth.token }
 
-        it 'statusがsuccessであること' do
-          expect(JSON.parse(response.body)['status']).to eq('success')
-        end
+        context '正しいパラメータを受け取った場合' do
+          let!(:email) { Faker::Internet.email }
+          let!(:password) { 'P@ssw0rd' }
+          let!(:params) do
+            {
+              signups: {
+                email:,
+                password:
+              }
+            }
+          end
 
-        it 'usersにemailが登録されていること' do
-          user = User.find_by(email:)
-          expect(user.email).to eq(email)
+          before do
+            travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
+            allow(ActivationMailService).to receive(:activation_email)
+            post '/api/users/signup', params:, headers: { 'Authorization' => "Bearer #{token}" }
+          end
+
+          it 'status_code: okを返すこと' do
+            expect(response).to have_http_status(:ok)
+          end
+
+          it 'statusがsuccessであること' do
+            expect(JSON.parse(response.body)['status']).to eq('success')
+          end
+
+          it 'usersにemailが登録されていること' do
+            user = User.find_by(email:)
+            expect(user.email).to eq(email)
+          end
         end
       end
     end
@@ -49,7 +107,7 @@ describe Api::Users::SignupController, type: :request do
             {
               signups: {
                 email: nil,
-                password:
+                password: password
               }
             }
           end
@@ -61,16 +119,17 @@ describe Api::Users::SignupController, type: :request do
             expect(response).to have_http_status(400)
           end
 
-          it 'emailがありませんを返すこと' do
+          it 'user_idがありませんを返すこと' do
             expect(JSON.parse(response.body)['error']['code']).to eq('emailがありません')
           end
         end
 
         context 'passwordがなかった場合' do
+          let!(:user) { create(:user, activated: true) }
           let!(:params) do
             {
               signups: {
-                email:,
+                email: email,
                 password: nil
               }
             }
@@ -111,7 +170,7 @@ describe Api::Users::SignupController, type: :request do
         end
 
         it 'SignupService::DuplicateEntryを返すこと' do
-          expect(JSON.parse(response.body)['error']['code']).to eq('SignupService::DuplicateEntry')
+          expect(JSON.parse(response.body)['error']['code']).to eq('Signup::SignupError::DuplicateEntry')
         end
       end
 
@@ -136,7 +195,7 @@ describe Api::Users::SignupController, type: :request do
         end
 
         it 'SignupService::EmailFormatErrorを返すこと' do
-          expect(JSON.parse(response.body)['error']['code']).to eq('SignupService::EmailFormatError')
+          expect(JSON.parse(response.body)['error']['code']).to eq('Signup::SignupError::EmailFormatError')
         end
       end
 
@@ -161,7 +220,7 @@ describe Api::Users::SignupController, type: :request do
         end
 
         it 'SignupService::PasswordFormatErrorを返すこと' do
-          expect(JSON.parse(response.body)['error']['code']).to eq('SignupService::PasswordFormatError')
+          expect(JSON.parse(response.body)['error']['code']).to eq('Signup::SignupError::PasswordFormatError')
         end
       end
     end

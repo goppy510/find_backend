@@ -34,27 +34,25 @@ class PermissionService
     PermissionRepository.delete(@target_user_id, @permissions)
   end
 
-  # 自分の権限表示
-  def self_permission
-    PermissionRepository.show(@user_id)
-  end
-
   class << self
     def create(token, permissions)
       raise ArgumentError, 'tokenがありません' if token.blank?
       raise ArgumentError, 'permissionsがありません' if permissions.blank?
-      raise Forbidden unless has_permisssion_role?(token)
 
       service = new(token, permissions:)
+      raise Forbidden unless has_permisssion_role?(service&.user_id)
+
       service&.create
     end
 
     def show(token, permissions)
       raise ArgumentError, 'tokenがありません' if token.blank?
       raise ArgumentError, 'permissionsがありません' if permissions.blank? || permissions[:permissions][:target_user_id].blank?
-      raise Forbidden unless has_permisssion_role?(token)
 
-      res = new(token, permissions:)&.show
+      service = new(token, permissions:)
+      raise Forbidden unless has_permisssion_role?(service&.user_id)
+
+      res = service&.show
       {
         resource: res
       }
@@ -63,28 +61,36 @@ class PermissionService
     def delete(token, permissions)
       raise ArgumentError, 'tokenがありません' if token.blank?
       raise ArgumentError, 'permissionsがありません' if permissions.blank?
-      raise Forbidden unless has_permisssion_role?(token)
 
       service = new(token, permissions:)
+      raise Forbidden unless has_permisssion_role?(service&.user_id)
+
       service&.delete
     end
 
-    def has_contract_role?(token)
-      raise ArgumentError, 'tokenがありません' if token.blank?
+    def has_contract_role?(user_id)
+      raise ArgumentError, 'user_idがありません' if user_id.blank?
 
-      new(token)&.self_permission.include?('contract')
+      self_permission(user_id).include?('contract')
     end
 
-    def has_permisssion_role?(token)
-      raise ArgumentError, 'tokenがありません' if token.blank?
+    def has_permisssion_role?(user_id)
+      raise ArgumentError, 'user_idがありません' if user_id.blank?
 
-      new(token)&.self_permission.include?('permission')
+      self_permission(user_id).include?('permission')
     end
 
-    def has_user_role?(token)
-      raise ArgumentError, 'tokenがありません' if token.blank?
+    def has_user_role?(user_id)
+      raise ArgumentError, 'user_idがありません' if user_id.blank?
 
-      new(token)&.self_permission.include?('user')
+      self_permission(user_id).include?('user')
+    end
+
+    private
+
+    # 自分の権限表示
+    def self_permission(user_id)
+      PermissionRepository.show(user_id)
     end
   end
 end

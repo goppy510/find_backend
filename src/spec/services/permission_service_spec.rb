@@ -390,17 +390,9 @@ describe PermissionService do
         let!(:user) { create(:user, activated: true) }
         let!(:contract_resource) { Resource.find_by(name: 'contract') }
         let!(:permission) { create(:permission, user_id: user.id, resource_id: contract_resource.id) }
-        let!(:payload) do
-          {
-            sub: user.id,
-            type: 'api'
-          }
-        end
-        let!(:auth) { generate_token(payload:) }
-        let!(:token) { auth.token }
 
         it 'trueが返ること' do
-          actual = PermissionService.has_contract_role?(token)
+          actual = PermissionService.has_contract_role?(user.id)
           expect(actual).to eq(true)
         end
       end
@@ -412,17 +404,9 @@ describe PermissionService do
         let!(:user) { create(:user, activated: true) }
         let!(:user_resource) { Resource.find_by(name: 'user') }
         let!(:permission) { create(:permission, user_id: user.id, resource_id: user_resource.id) }
-        let!(:payload) do
-          {
-            sub: user.id,
-            type: 'api'
-          }
-        end
-        let!(:auth) { generate_token(payload:) }
-        let!(:token) { auth.token }
 
         it 'falseが返ること' do
-          actual = PermissionService.has_contract_role?(token)
+          actual = PermissionService.has_contract_role?(user.id)
           expect(actual).to eq(false)
         end
       end
@@ -438,17 +422,9 @@ describe PermissionService do
         let!(:user) { create(:user, activated: true) }
         let!(:permission_resource) { Resource.find_by(name: 'permission') }
         let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
-        let!(:payload) do
-          {
-            sub: user.id,
-            type: 'api'
-          }
-        end
-        let!(:auth) { generate_token(payload:) }
-        let!(:token) { auth.token }
 
         it 'trueが返ること' do
-          actual = PermissionService.has_permisssion_role?(token)
+          actual = PermissionService.has_permisssion_role?(user.id)
           expect(actual).to eq(true)
         end
       end
@@ -460,17 +436,9 @@ describe PermissionService do
         let!(:user) { create(:user, activated: true) }
         let!(:user_resource) { Resource.find_by(name: 'user') }
         let!(:permission) { create(:permission, user_id: user.id, resource_id: user_resource.id) }
-        let!(:payload) do
-          {
-            sub: user.id,
-            type: 'api'
-          }
-        end
-        let!(:auth) { generate_token(payload:) }
-        let!(:token) { auth.token }
 
         it 'falseが返ること' do
-          actual = PermissionService.has_permisssion_role?(token)
+          actual = PermissionService.has_permisssion_role?(user.id)
           expect(actual).to eq(false)
         end
       end
@@ -486,17 +454,9 @@ describe PermissionService do
         let!(:user) { create(:user, activated: true) }
         let!(:user_resource) { Resource.find_by(name: 'user') }
         let!(:permission) { create(:permission, user_id: user.id, resource_id: user_resource.id) }
-        let!(:payload) do
-          {
-            sub: user.id,
-            type: 'api'
-          }
-        end
-        let!(:auth) { generate_token(payload:) }
-        let!(:token) { auth.token }
 
         it 'trueが返ること' do
-          actual = PermissionService.has_user_role?(token)
+          actual = PermissionService.has_user_role?(user.id)
           expect(actual).to eq(true)
         end
       end
@@ -508,17 +468,9 @@ describe PermissionService do
         let!(:user) { create(:user, activated: true) }
         let!(:contract_resource) { Resource.find_by(name: 'contract') }
         let!(:permission) { create(:permission, user_id: user.id, resource_id: contract_resource.id) }
-        let!(:payload) do
-          {
-            sub: user.id,
-            type: 'api'
-          }
-        end
-        let!(:auth) { generate_token(payload:) }
-        let!(:token) { auth.token }
 
         it 'falseが返ること' do
-          actual = PermissionService.has_user_role?(token)
+          actual = PermissionService.has_user_role?(user.id)
           expect(actual).to eq(false)
         end
       end

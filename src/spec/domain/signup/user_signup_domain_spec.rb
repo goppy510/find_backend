@@ -154,7 +154,7 @@ describe Signup::UserSignupDomain do
         end
 
         it 'EmailFormatErrorがスローされること' do
-          expect { Signup::UserSignupDomain.signup(signups) }.to raise_error(Signup::UserSignupDomain::EmailFormatError)
+          expect { Signup::UserSignupDomain.signup(signups) }.to raise_error(Signup::SignupError::EmailFormatError)
         end
       end
 
@@ -171,7 +171,7 @@ describe Signup::UserSignupDomain do
         end
 
         it 'PasswordFormatErrorがスローされること' do
-          expect { Signup::UserSignupDomain.signup(signups) }.to raise_error(Signup::UserSignupDomain::PasswordFormatError)
+          expect { Signup::UserSignupDomain.signup(signups) }.to raise_error(Signup::SignupError::PasswordFormatError)
         end
       end
     end

@@ -2,10 +2,7 @@
 
 module Signup
   class ContractSignupDomain
-    class DuplicateEntry < StandardError; end
-    class EmailFormatError < StandardError; end
-    class PasswordFormatError < StandardError; end
-    class Forbidden < StandardError; end
+    include Signup::SignupError
 
     attr_reader :email,
                 :password,
@@ -26,7 +23,7 @@ module Signup
       UserRepository.create(@email, @password)
     rescue ActiveRecord::RecordNotUnique => e
       Rails.logger.error(e)
-      raise DuplicateEntry
+      raise Signup::SignupError::DuplicateEntry
     rescue ActiveRecord::RecordInvalid => e
       Rails.logger.error(e)
       raise e
@@ -47,10 +44,10 @@ module Signup
         Rails.logger.info("Contract created_by: user_id: #{service.user_id}, target_user: #{target_user.id}")
       rescue Account::Email::EmailFormatError => e
         Rails.logger.error(e)
-        raise EmailFormatError
+        raise Signup::SignupError::EmailFormatError
       rescue Account::Password::PasswordFormatError => e
         Rails.logger.error(e)
-        raise PasswordFormatError
+        raise Signup::SignupError::PasswordFormatError
       rescue StandardError => e
         Rails.logger.error(e)
         raise e

@@ -11,7 +11,8 @@ class SignupService
       }
     
       user_id = authenticate_user(token)[:user_id] if token.present?
-      role = PermissionService.has_contract_role?(user_id) ? :contract : :user
+      role = :user if user_id.blank?
+      role = PermissionService.has_contract_role?(user_id) ? :contract : :user if user_id.present?
       domain_class = domain_map[role] || domain_map[:user] # デフォルトは UserSignupDomain
       domain_class.signup(signups)
     end

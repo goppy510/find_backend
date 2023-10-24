@@ -6,8 +6,7 @@ class ActivationService
     def activate(token)
       raise ArgumentError, 'tokenがありません' unless token
 
-      service = Activation::ActivationDomain.activate(token)
-      service&.activate
+      Activation::ActivationDomain&.activate(token)
     end
   end
 end

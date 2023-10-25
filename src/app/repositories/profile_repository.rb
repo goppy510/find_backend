@@ -30,6 +30,7 @@ class ProfileRepository
       updates[:business_model_id] = BusinessModel.find(profiles[:business_model]).id if profiles.key?(:business_model)
       # 残りのフィールドは直接更新します
       updates[:full_name] = profiles[:name] if profiles.key?(:name)
+      updates[:nickname] = profiles[:nickname] if profiles.key?(:nickname)
       updates[:phone_number] = profiles[:phone_number] if profiles.key?(:phone_number)
       updates[:company_name] = profiles[:company_name] if profiles.key?(:company_name)
       Profile.where(user_id:).update!(updates)

@@ -12,6 +12,7 @@ class ProfileRepository
       Profile.create!(
         user_id:,
         full_name: profiles[:name],
+        nickname: profiles[:nickname],
         phone_number: profiles[:phone_number],
         company_name: profiles[:company_name],
         employee_count_id: employee_count.id,
@@ -34,13 +35,6 @@ class ProfileRepository
       Profile.where(user_id:).update!(updates)
     end
 
-    def update_password(user_id, current_password, new_password)
-      user = User.find_by(id: user_id)
-      raise IncorrectPasswordError unless user.authenticate(current_password)
-
-      user.update(password: new_password, password_confirmation: new_password)
-    end
-
     def show(user_id)
       Profile.find_by(user_id:)
     end
@@ -50,5 +44,3 @@ class ProfileRepository
     end
   end
 end
-
-class IncorrectPasswordError < StandardError; end

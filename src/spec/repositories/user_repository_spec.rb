@@ -128,4 +128,38 @@ describe UserRepository do
       end
     end
   end
+
+  describe '#update_password' do
+    context '正常系' do
+      context 'user_idとcurrent_password, new_passwordを受け取った場合' do
+        before do
+          travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
+        end
+        let!(:current_password) { 'P@ssw0rd' }
+        let!(:new_password) { 'H$lloW0rld' }
+        let!(:user) { create(:user, password: current_password, activated: true) }
+
+        it 'new_passwordに更新されること' do
+          UserRepository.update_password(user.id, current_password, new_password)
+          actual = User.find(user.id)
+          expect(actual.authenticate(new_password)).to be_truthy
+        end
+      end
+    end
+    context '異常系' do
+      context 'current_passwordがDBと不一致の場合' do
+        before do
+          travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
+        end
+        let!(:current_password) { 'P@ssw0rd' }
+        let!(:dummy_password) { 'H$lloW0rld' }
+        let!(:user) { create(:user, password: dummy_password, activated: true) }
+
+        it 'IncorrectPasswordErrorがraiseされること' do
+          expect { UserRepository.update_password(user.id, current_password, 'hogehgoe') }
+            .to raise_error(IncorrectPasswordError)
+        end
+      end
+    end
+  end
 end

@@ -155,9 +155,9 @@ describe UserRepository do
         let!(:dummy_password) { 'H$lloW0rld' }
         let!(:user) { create(:user, password: dummy_password, activated: true) }
 
-        it 'IncorrectPasswordErrorがraiseされること' do
+        it 'SecurityErrorがraiseされること' do
           expect { UserRepository.update_password(user.id, current_password, 'hogehgoe') }
-            .to raise_error(IncorrectPasswordError)
+            .to raise_error(SecurityError)
         end
       end
     end

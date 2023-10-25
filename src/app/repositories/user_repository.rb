@@ -25,11 +25,9 @@ class UserRepository
 
     def update_password(user_id, current_password, new_password)
       user = User.find_by(id: user_id)
-      raise IncorrectPasswordError unless user.authenticate(current_password)
+      raise SecurityError unless user.authenticate(current_password)
 
       user.update(password: new_password, password_confirmation: new_password)
     end
   end
 end
-
-class IncorrectPasswordError < StandardError; end

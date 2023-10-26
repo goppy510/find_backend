@@ -26,8 +26,8 @@ module Password
         raise ArgumentError, 'current_passwordがありません' if current_password.blank?
         raise ArgumentError, 'new_passwordがありません' if new_password.blank?
 
-        service = new(user_id, current_password, new_password)
-        service&.update
+        domain = new(user_id, current_password, new_password)
+        domain&.update
       rescue Account::Password::PasswordFormatError => e
         Rails.logger.error(e)
         raise Password::PasswordError::PasswordFormatError

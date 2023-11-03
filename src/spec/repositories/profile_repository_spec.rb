@@ -41,7 +41,7 @@ describe ProfileRepository do
     end
   end
 
-  describe '#update_proiles' do
+  describe '#update' do
     context '正常系' do
       context 'user_idとprofilesを受け取った場合' do
         before do
@@ -60,7 +60,7 @@ describe ProfileRepository do
         end
 
         it 'userのidでnew_profilesにあるものは更新され、それ以外は更新されないこと' do
-          ProfileRepository.update_profiles(user.id, new_profiles)
+          ProfileRepository.update(user.id, new_profiles)
           profile = Profile.find_by(user_id: user.id)
           expect(profile.full_name).to eq(new_profiles[:name])
           expect(profile.phone_number).to eq(new_profiles[:phone_number])

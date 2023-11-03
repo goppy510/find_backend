@@ -21,7 +21,7 @@ class ProfileRepository
       )
     end
 
-    def update_profiles(user_id, profiles = {})
+    def update(user_id, profiles = {})
       updates = {}
       updates[:employee_count_id] = EmployeeCount.find(profiles[:employee_count]).id if profiles.key?(:employee_count)
       updates[:industry_id] = Industry.find(profiles[:industry]).id if profiles.key?(:industry)

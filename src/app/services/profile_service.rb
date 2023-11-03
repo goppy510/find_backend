@@ -35,13 +35,8 @@ class ProfileService
   end
 
   # プロフィール更新
-  def update_profiles
-    ProfileRepository.update_profiles(@user_id, @profiles)
-  end
-
-  # パスワード更新
-  def update_password
-    ProfileRepository.update_password(@user_id, @current_password, @new_password)
+  def update
+    ProfileRepository.update(@user_id, @profiles)
   end
 
   # プロファイル表示
@@ -58,24 +53,12 @@ class ProfileService
       service&.create
     end
 
-    def update_profiles(token, profiles)
+    def update(token, profiles)
       raise ArgumentError, 'tokenがありません' if token.blank?
       raise ArgumentError, 'profilesがありません' if profiles.blank?
 
       service = new(token, profiles:)
-      service&.update_profiles
-    end
-
-    def update_password(token, current_password, new_password)
-      raise ArgumentError, 'tokenがありません' if token.blank?
-      raise ArgumentError, 'current_passwordがありません' if current_password.blank?
-      raise ArgumentError, 'new_passwordがありません' if new_password.blank?
-
-      service = new(token, current_password:, new_password:)
-      service&.update_password
-    rescue StandardError => e
-      Rails.logger.error e
-      raise e
+      service&.update
     end
 
     def show(token)

@@ -89,7 +89,7 @@ describe ProfileService do
     end
   end
 
-  describe '#self.update_profiles' do
+  describe '#self.update' do
     context '正常系' do
       context '必要なすべてのパラメータを受け取った場合' do
         before do
@@ -118,7 +118,7 @@ describe ProfileService do
         let!(:token) { auth.token }
 
         it 'userのidでnew_profilesにあるものは更新され、それ以外は更新されないこと' do
-          ProfileService.update_profiles(token, new_profiles)
+          ProfileService.update(token, new_profiles)
           profile = Profile.find_by(user_id: user.id)
           expect(profile.full_name).to eq(new_profiles[:profiles][:name])
           expect(profile.phone_number).to eq(new_profiles[:profiles][:phone_number])
@@ -149,110 +149,13 @@ describe ProfileService do
 
       context 'tokenがない場合' do
         it 'ArgumentErrorがスローされること' do
-          expect { ProfileService.update_profiles(nil, profiles: new_profiles) }.to raise_error(ArgumentError, 'tokenがありません')
+          expect { ProfileService.update(nil, profiles: new_profiles) }.to raise_error(ArgumentError, 'tokenがありません')
         end
       end
 
       context 'profilesがない場合' do
         it 'ArgumentErrorがスローされること' do
-          expect { ProfileService.update_profiles(user.id, nil) }.to raise_error(ArgumentError, 'profilesがありません')
-        end
-      end
-    end
-  end
-
-  describe '#self.update_password' do
-    context '正常系' do
-      context '必要なすべてのパラメータを受け取った場合' do
-        before do
-          travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
-        end
-        let!(:current_password) { 'P@ssw0rd' }
-        let!(:new_password) { 'H$lloW0rld' }
-        let!(:user) { create(:user, password: current_password, activated: true) }
-        let!(:payload) do
-          {
-            sub: user.id,
-            type: 'api'
-          }
-        end
-        let!(:auth) { generate_token(payload:) }
-        let!(:token) { auth.token }
-
-        it 'new_passwordに更新されること' do
-          ProfileService.update_password(token, current_password, new_password)
-          actual = User.find(user.id)
-          expect(actual.authenticate(new_password)).to be_truthy
-        end
-      end
-    end
-
-    context '異常系' do
-      before do
-        travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
-      end
-
-      let!(:current_password) { 'P@ssw0rd' }
-
-      context 'current_passwordがDBと不一致の場合' do
-        let!(:dummy_password) { 'H$lloW0rld' }
-        let!(:user) { create(:user, password: dummy_password, activated: true) }
-        let!(:payload) do
-          {
-            sub: user.id,
-            type: 'api'
-          }
-        end
-        let!(:auth) { generate_token(payload:) }
-        let!(:token) { auth.token }
-        it 'IncorrectPasswordErrorがraiseされること' do
-          expect { ProfileService.update_password(token, current_password, 'hogehgoe') }
-            .to raise_error(IncorrectPasswordError)
-        end
-      end
-
-      context 'tokenがない場合' do
-        let!(:new_password) { 'H$lloW0rld' }
-        let!(:user) { create(:user, password: current_password, activated: true) }
-        it 'ArgumentErrorがスローされること' do
-          expect do
-            ProfileService.update_password(nil, current_password, new_password)
-          end.to raise_error(ArgumentError, 'tokenがありません')
-        end
-      end
-
-      context 'current_passwordがない場合' do
-        let!(:new_password) { 'H$lloW0rld' }
-        let!(:user) { create(:user, password: current_password, activated: true) }
-        let!(:payload) do
-          {
-            sub: user.id,
-            type: 'api'
-          }
-        end
-        let!(:auth) { generate_token(payload:) }
-        let!(:token) { auth.token }
-        it 'ArgumentErrorがスローされること' do
-          expect do
-            ProfileService.update_password(token, nil, new_password)
-          end.to raise_error(ArgumentError, 'current_passwordがありません')
-        end
-      end
-
-      context 'new_passwordがない場合' do
-        let!(:user) { create(:user, password: current_password, activated: true) }
-        let!(:payload) do
-          {
-            sub: user.id,
-            type: 'api'
-          }
-        end
-        let!(:auth) { generate_token(payload:) }
-        let!(:token) { auth.token }
-        it 'ArgumentErrorがスローされること' do
-          expect do
-            ProfileService.update_password(token, current_password, nil)
-          end.to raise_error(ArgumentError, 'new_passwordがありません')
+          expect { ProfileService.update(user.id, nil) }.to raise_error(ArgumentError, 'profilesがありません')
         end
       end
     end

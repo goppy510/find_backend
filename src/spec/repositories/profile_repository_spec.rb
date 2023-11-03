@@ -17,7 +17,6 @@ describe ProfileRepository do
         let!(:profiles) do
           {
             name: '田中 太郎',
-            nickname: 'hoge',
             phone_number: '08012345678',
             company_name: '株式会社makelead',
             employee_count: 1,
@@ -32,7 +31,6 @@ describe ProfileRepository do
           profile = Profile.find_by(user_id: user.id)
           expect(profile.user_id).to eq(user.id)
           expect(profile.full_name).to eq(profiles[:name])
-          expect(profile.nickname).to eq(profiles[:nickname])
           expect(profile.phone_number).to eq(profiles[:phone_number])
           expect(profile.company_name).to eq(profiles[:company_name])
           expect(profile.employee_count_id).to eq(profiles[:employee_count])
@@ -65,7 +63,6 @@ describe ProfileRepository do
           ProfileRepository.update_profiles(user.id, new_profiles)
           profile = Profile.find_by(user_id: user.id)
           expect(profile.full_name).to eq(new_profiles[:name])
-          expect(profile.nickname).to eq(current_profiles[:nickname])
           expect(profile.phone_number).to eq(new_profiles[:phone_number])
           expect(profile.company_name).to eq(current_profiles[:company_name])
           expect(profile.employee_count_id).to eq(new_profiles[:employee_count])

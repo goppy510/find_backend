@@ -25,8 +25,8 @@ describe Signup::UserSignupDomain do
         end
 
         it 'usersにメールアドレスとハッシュ化されたパスワードがインサートされること' do
-          service = Signup::UserSignupDomain.new(signups:)
-          user = service.add
+          domain = Signup::UserSignupDomain.new(signups:)
+          user = domain.add
           expect(user.email).to eq(email)
           expect(user.authenticate(password)).to be_truthy
         end
@@ -80,8 +80,8 @@ describe Signup::UserSignupDomain do
         let!(:user) { create(:user, email:, password:) }
 
         it 'DuplicateEntryがスローされること' do
-          service = Signup::UserSignupDomain.new(signups:)
-          expect { service.add }.to raise_error(Signup::UserSignupDomain::DuplicateEntry)
+          domain = Signup::UserSignupDomain.new(signups:)
+          expect { domain.add }.to raise_error(Signup::UserSignupDomain::DuplicateEntry)
         end
       end
     end

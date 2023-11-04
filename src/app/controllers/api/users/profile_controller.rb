@@ -19,17 +19,7 @@ module Api
       # プロフィール更新用
       def update
         token = header_token
-        ProfileService.update_profiles(token, profiles: params[:profiles])
-        render json: { status: 'success' }, status: :ok
-      rescue StandardError => e
-        Rails.logger.error e
-        raise ActionController::BadRequest
-      end
-
-      # パスワード更新用
-      def update_password
-        token = header_token
-        ProfileService.update_password(token, password_params[:current_password], password_params[:new_password])
+        ProfileService.update(token, profiles: params[:profiles])
         render json: { status: 'success' }, status: :ok
       rescue StandardError => e
         Rails.logger.error e

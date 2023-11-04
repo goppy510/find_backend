@@ -36,10 +36,10 @@ module Signup
         raise ArgumentError, 'emailがありません' if signups[:signups][:email].blank?
         raise ArgumentError, 'passwordがありません' if signups[:signups][:password].blank?
 
-        service = UserSignupDomain.new(signups:)
-        service&.add
+        domain = UserSignupDomain.new(signups:)
+        domain&.add
 
-        ActivationMailService.activation_email(service.email)
+        ActivationMailService.activation_email(domain.email)
       rescue Account::Email::EmailFormatError => e
         Rails.logger.error(e)
         raise Signup::SignupError::EmailFormatError

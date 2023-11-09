@@ -12,7 +12,7 @@ module Api
           return
         end
 
-        response = LoginService.login(logins: login_params)
+        response = LoginService.create(logins: login_params)
         if response
           render json: response, status: :ok
           return

@@ -9,18 +9,18 @@ class ContractRepository
       Contract.create!(user_id: user.id, max_member_count: max_member_count)
     end
 
-    def show_one(user_id)
+    def show(user_id)
       user = User.find_by(id: user_id)
       return if user.blank?
 
       Contract.find_by(user_id: user.id)
     end
 
-    def show_all
+    def index
       Contract.all.order(:id)
     end
 
-    def delete(user_id)
+    def destroy(user_id)
       user = User.find_by(id: user_id)
       return if user.blank?
 

@@ -5,5 +5,7 @@ module Signup
     class DuplicateEntry < StandardError; end
     class EmailFormatError < StandardError; end
     class PasswordFormatError < StandardError; end
+    class RecordLimitExceeded < StandardError; end
+    class Forbidden < StandardError; end
   end
 end

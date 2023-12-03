@@ -15,14 +15,7 @@ describe SignupService do
     context '正常系' do
       let!(:email) { Faker::Internet.email }
       let!(:password) { 'P@ssw0rd' }
-      let!(:signups) do
-        {
-          signups: {
-            email: email,
-            password: password
-          }
-        }
-      end
+
       context 'contract権限を持ったuserのtokenが渡された場合' do
         let!(:user) { create(:user, activated: true) }
         let!(:contract) { Resource.find_by(name: 'contract') }
@@ -35,6 +28,14 @@ describe SignupService do
         end
         let!(:auth) { generate_token(payload:) }
         let!(:token) { auth.token }
+        let!(:signups) do
+          {
+            signups: {
+              email: email,
+              password: password
+            }
+          }
+        end
 
         before do
           allow(Signup::ContractSignupDomain).to receive(:signup)
@@ -46,7 +47,51 @@ describe SignupService do
         end
       end
 
-      context 'contract権限を持たないuserのtokenが渡された場合' do
+      context 'user権限を持つuserのtokenが渡された場合' do
+        let!(:user) { create(:user, activated: true) }
+        let!(:contract) { Resource.find_by(name: 'user') }
+        let!(:permission) { create(:permission, user_id: user.id, resource_id: contract.id) }
+        let!(:payload) do
+          {
+            sub: user.id,
+            type: 'api'
+          }
+        end
+        let!(:auth) { generate_token(payload:) }
+        let!(:token) { auth.token }
+        let!(:signups) do
+          {
+            signups: {
+              email: email,
+              password: password,
+              user_id: user.id
+            }
+          }
+        end
+
+        before do
+          allow(Signup::UserSignupDomain).to receive(:signup)
+        end
+
+        it 'Signup::UserSignupDomain.signupが呼ばれること' do
+          SignupService.signup(token, signups)
+          expect(Signup::UserSignupDomain).to have_received(:signup)
+        end
+      end
+    end
+
+    context '異常系' do
+      context 'contractまたはuser権限を持たないtokenが渡された場合' do
+        let!(:email) { Faker::Internet.email }
+        let!(:password) { 'P@ssw0rd' }
+        let!(:signups) do
+          {
+            signups: {
+              email: email,
+              password: password
+            }
+          }
+        end
         let!(:user) { create(:user, activated: true) }
         let!(:payload) do
           {
@@ -57,13 +102,8 @@ describe SignupService do
         let!(:auth) { generate_token(payload:) }
         let!(:token) { auth.token }
 
-        before do
-          allow(Signup::UserSignupDomain).to receive(:signup)
-        end
-
-        it 'Signup::UserSignupDomain.signupが呼ばれること' do
-          SignupService.signup(token, signups)
-          expect(Signup::UserSignupDomain).to have_received(:signup)
+        it 'Forbiddenがスローされること' do
+          expect { SignupService.signup(token, signups) }.to raise_error(Signup::SignupError::Forbidden)
         end
       end
     end

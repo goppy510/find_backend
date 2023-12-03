@@ -291,6 +291,34 @@ describe Signup::UserSignupDomain do
           expect { Signup::UserSignupDomain.signup(signups) }.to raise_error(ArgumentError, 'user_idがありません')
         end
       end
+
+      context '登録数が上限に達している場合' do
+        let!(:email) { Faker::Internet.email }
+        let!(:password) { 'P@ssw0rd' }
+        let!(:already_user) { create(:user, activated: true) }
+        let!(:manager_user) { create(:user, activated: true) }
+        let!(:contract) { create(:contract, user_id: manager_user.id, max_member_count: 1) }
+        let!(:contract_membership) { create(:contract_membership, contract_id: contract.id, user_id: already_user.id) }
+        let!(:payload) do
+          {
+            sub: manager_user.id,
+            type: 'api'
+          }
+        end
+        let!(:signups) do
+          {
+            signups: {
+              email: email,
+              password: password,
+              user_id: manager_user.id
+            }
+          }
+        end
+
+        it 'RecordLimitExceededがスローされること' do
+          expect { Signup::UserSignupDomain.signup(signups) }.to raise_error(Signup::UserSignupDomain::RecordLimitExceeded)
+        end
+      end
     end
   end
 end

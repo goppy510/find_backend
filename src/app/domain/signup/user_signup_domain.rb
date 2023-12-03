@@ -17,6 +17,9 @@ module Signup
       @user_id = hash_signups[:user_id] if hash_signups&.key?(:user_id)
       @contract = ContractRepository.show(@user_id) if @user_id.present?
       @contract_id = @contract&.id
+      @current_member_count = ContractMembershipRepository.index(@contract_id)&.count || 0
+      @max_member_count = @contract&.max_member_count
+      raise RecordLimitExceeded if @current_member_count >= @max_member_count
 
       freeze
     end

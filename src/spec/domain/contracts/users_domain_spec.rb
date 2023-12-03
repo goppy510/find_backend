@@ -7,20 +7,17 @@ require 'faker'
 describe Contracts::UsersDomain do
   include SessionModule
 
-  before do
-    travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
-    allow(ContractMembershipRepository).to receive(:create)
-    allow(ContractMembershipRepository).to receive(:show)
-    allow(ContractMembershipRepository).to receive(:destroy)
-  end
-
   describe '#self.show' do
+    before do
+      travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
+      allow(ContractMembershipRepository).to receive(:show)
+    end
     context '正常系' do
       context '正しいuser_idとtarget_user_idを受け取った場合' do
         let!(:user) { create(:user, activated: true) }
         let!(:target_user) { create(:user, activated: true) }
         let!(:contract) { create(:contract, user_id: user.id) }
-        let!(:contract_membership) { create(:contract_membership, contract_id: contract.id) }
+        let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
 
         it 'ContractMembershipRepository.showが呼ばれること' do
           Contracts::UsersDomain.show(user.id, target_user.id)
@@ -51,7 +48,7 @@ describe Contracts::UsersDomain do
         let!(:target_user) { create(:user, activated: true) }
 
         it 'Forbbidenがスローされること' do
-          expect { Contracts::UsersDomain.show(user.id, target_user.id) }.to raise_error(Contracts::ContractsError::Forbbiden)
+          expect { Contracts::UsersDomain.show(user.id, target_user.id) }.to raise_error(Contracts::ContractsError::Forbidden)
         end
       end
     end
@@ -86,7 +83,7 @@ describe Contracts::UsersDomain do
         let!(:user) { create(:user, activated: true) }
 
         it 'Forbbidenがスローされること' do
-          expect { Contracts::UsersDomain.index(user.id) }.to raise_error(Contracts::ContractsError::Forbbiden)
+          expect { Contracts::UsersDomain.index(user.id) }.to raise_error(Contracts::ContractsError::Forbidden)
         end
       end
     end
@@ -98,11 +95,16 @@ describe Contracts::UsersDomain do
         let!(:user) { create(:user, activated: true) }
         let!(:target_user) { create(:user, activated: true) }
         let!(:contract) { create(:contract, user_id: user.id) }
-        let!(:contract_membership) { create(:contract_membership, contract_id: contract.id) }
+        let!(:contract_membership) { create(:contract_membership, contract_id: contract.id, user_id: target_user.id) }
 
-        it 'ContractMembershipRepository.destroyが呼ばれること' do
+        it 'ContractMembershipRepositoryからtarget_userが削除されること' do
           Contracts::UsersDomain.destroy(user.id, target_user.id)
-          expect(ContractMembershipRepository).to have_received(:destroy).with(target_user.id, contract.id)
+          expect(ContractMembership.find_by(user_id: target_user.id, contract_id: contract.id)).to be_nil
+        end
+
+        it 'usersテーブルからtarget_userが削除されること' do
+          Contracts::UsersDomain.destroy(user.id, target_user.id)
+          expect(User.find_by(id: target_user.id)).to be_nil
         end
       end
     end
@@ -129,7 +131,20 @@ describe Contracts::UsersDomain do
         let!(:target_user) { create(:user, activated: true) }
 
         it 'Forbbidenがスローされること' do
-          expect { Contracts::UsersDomain.destroy(user.id, target_user.id) }.to raise_error(Contracts::ContractsError::Forbbiden)
+          expect { Contracts::UsersDomain.destroy(user.id, target_user.id) }.to raise_error(Contracts::ContractsError::Forbidden)
+        end
+      end
+
+      context 'target_user_idがcontract_idに紐づいていない場合' do
+        let!(:user) { create(:user, activated: true) }
+        let!(:target_user) { create(:user, activated: true) }
+        let!(:contract) { create(:contract, user_id: user.id) }
+        let!(:other_user) { create(:user, activated: true) }
+        let!(:other_contract) { create(:contract, user_id: other_user.id) }
+        let!(:contract_membership) { create(:contract_membership, contract_id: other_contract.id, user_id: target_user.id) }
+
+        it 'Forbiddenがスローされること' do
+          expect { Contracts::UsersDomain.destroy(user.id, target_user.id) }.to raise_error(Contracts::ContractsError::Forbidden)
         end
       end
     end

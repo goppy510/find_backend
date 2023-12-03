@@ -15,7 +15,7 @@ module Contracts
       @contract = ContractRepository.show(@user_id) if @user_id.present?
       @contract_id = @contract&.id
 
-      raise Contracts::ContractsError::Forbbiden if @contract_id.blank?
+      raise Contracts::ContractsError::Forbidden if @contract_id.blank?
 
       freeze
     end
@@ -29,6 +29,8 @@ module Contracts
     end
 
     def destroy
+      record = ContractMembershipRepository.show(@target_user_id, @contract_id)
+      raise Contracts::ContractsError::Forbidden if record.blank?
       ContractMembershipRepository.destroy(@target_user_id, @contract_id)
     end
 

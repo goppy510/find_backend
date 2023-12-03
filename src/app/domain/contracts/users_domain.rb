@@ -20,18 +20,6 @@ module Contracts
       freeze
     end
 
-    def create
-      raise Contracts::ContractsError::RecordLimitExceeded if is_limit?
-
-      ContractMembershipRepository.create(@target_user_id, @contract_id)
-    rescue ActiveRecord::RecordNotUnique => e
-      Rails.logger.error(e)
-      raise DuplicateEntry
-    rescue ActiveRecord::RecordInvalid => e
-      Rails.logger.error(e)
-      raise e
-    end
-
     def show
       ContractMembershipRepository.show(@target_user_id, @contract_id)
     end
@@ -44,27 +32,7 @@ module Contracts
       ContractMembershipRepository.destroy(@target_user_id, @contract_id)
     end
 
-    private
-
-    def is_limit?
-      max_member_count = @contract&.max_member_count
-      current_count = ContractMembershipRepository.index(@contract_id)&.count || 0
-      current_count >= max_member_count
-    end
-    
-
     class << self
-      def create(user_id, target_user_id)
-        raise ArgumentError, 'user_idがありません' if user_id.blank?
-        raise ArgumentError, 'target_user_idがありません' if target_user_id.blank?
-
-        domain = Contracts::UsersDomain.new(user_id, target_user_id)
-        domain&.create
-      rescue StandardError => e
-        Rails.logger.error(e)
-        raise e
-      end
-
       def show(user_id, target_user_id)
         raise ArgumentError, 'user_idがありません' if user_id.blank?
         raise ArgumentError, 'target_user_idがありません' if target_user_id.blank?

@@ -3,5 +3,12 @@
 class ContractMembership < ApplicationRecord
   belongs_to :user
   belongs_to :contract
-end
 
+  before_destroy :destroy_user
+
+  private
+
+  def destroy_user
+    user.destroy
+  end
+end

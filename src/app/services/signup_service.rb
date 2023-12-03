@@ -14,6 +14,7 @@ class SignupService
       role = :user if user_id.blank?
       role = PermissionService.has_contract_role?(user_id) ? :contract : :user if user_id.present?
       domain_class = domain_map[role] || domain_map[:user] # デフォルトは UserSignupDomain
+      signups[:signups][:user_id] = user_id if user_id.present?
       domain_class.signup(signups)
     end
   end

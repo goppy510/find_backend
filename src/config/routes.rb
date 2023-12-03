@@ -16,20 +16,18 @@ Rails.application.routes.draw do
       resources :profile, only: [:create, :update, :show]
 
       # POST /api/users/login
-      # DELETE /api/users/login
-      resources :login, only: [:create, :destroy]
+      resources :login, only: [:create]
 
-      # PUT /api/users/profile/password/:id
-      resources :profile, only: [:update]
+      # PUT /api/users/password/:id
+      resources :password, only: [:update]
     end
 
-    # POST /api/contracts/:contract_id/users
     # GET /api/contracts/:contract_id/users
     # GET /api/contracts/:contract_id/users/:user_id
     # DELETE /api/contracts/:contract_id/users/:user_id
     namespace :contracts do
       resources :contracts do
-        resources :users, only: [:create, :index, :show, :destroy], param: :user_id
+        resources :users, only: [:index, :show, :destroy], param: :user_id
       end
     end
 

@@ -78,7 +78,7 @@ describe UsersService do
         let!(:target_user) { create(:user, activated: true) }
 
         it 'Forbiddenが発生すること' do
-          expect { UsersService.show(token, target_user.id) }.to raise_error(UsersService::Forbidden)
+          expect { UsersService.show(token, target_user.id) }.to raise_error(Contracts::ContractsError::Forbidden)
         end
       end
     end
@@ -133,7 +133,7 @@ describe UsersService do
         let!(:permission) { create(:permission, user_id: user.id, resource_id: create_prompt_resource.id) }
 
         it 'Forbiddenが発生すること' do
-          expect { UsersService.index(token) }.to raise_error(UsersService::Forbidden)
+          expect { UsersService.index(token) }.to raise_error(Contracts::ContractsError::Forbidden)
         end
       end
     end
@@ -216,7 +216,7 @@ describe UsersService do
         end
 
         it 'Forbiddenが発生すること' do
-          expect { UsersService.destroy(token, target_user.id) }.to raise_error(UsersService::Forbidden)
+          expect { UsersService.destroy(token, target_user.id) }.to raise_error(Contracts::ContractsError::Forbidden)
         end
       end
     end

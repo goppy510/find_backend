@@ -31,6 +31,7 @@ module Contracts
     def destroy
       record = ContractMembershipRepository.show(@target_user_id, @contract_id)
       raise Contracts::ContractsError::Forbidden if record.blank?
+
       ContractMembershipRepository.destroy(@target_user_id, @contract_id)
     end
 

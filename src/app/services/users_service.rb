@@ -12,8 +12,8 @@ class UsersService
       user_id = authenticate_user(token)[:user_id]
       raise Contracts::ContractsError::Forbidden if !PermissionService.has_user_role?(user_id)
 
-      user_data = Contracts::UsersDomain.show(user_id, target_user_id)
-      return nil if user_data.blank?
+      member_data = Contracts::UsersDomain.show(user_id, target_user_id)
+      return nil if member_data.blank?
 
       user = UserRepository.find_by_id(target_user_id)
       {
@@ -34,7 +34,21 @@ class UsersService
       user_id = authenticate_user(token)[:user_id]
       raise Contracts::ContractsError::Forbidden if !PermissionService.has_user_role?(user_id)
 
-      domain = Contracts::UsersDomain.index(user_id)
+      members_data = Contracts::UsersDomain.index(user_id)
+      return nil if members_data.blank?
+
+      response = []
+      users = User.where(id: members_data.map(&:user_id))
+      users.each do |user|
+        response << {
+          id: user.id,
+          email: user.email,
+          activated: user.activated,
+          created_at: user.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+          updated_at: user.updated_at.strftime('%Y-%m-%d %H:%M:%S')
+        }
+      end
+      response
     rescue StandardError => e
       Rails.logger.error(e)
       raise e
@@ -47,7 +61,7 @@ class UsersService
       user_id = authenticate_user(token)[:user_id]
       raise Contracts::ContractsError::Forbidden if !PermissionService.has_user_role?(user_id)
 
-      domain = Contracts::UsersDomain.destroy(user_id, target_user_id)
+      Contracts::UsersDomain.destroy(user_id, target_user_id)
     rescue StandardError => e
       Rails.logger.error(e)
       raise e

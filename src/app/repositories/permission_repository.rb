@@ -2,12 +2,14 @@
 
 class PermissionRepository
   class << self
-    def create(user_id, permissions = {})
-      # permissions[:resource] から resource_ids を取得します。
-      resource = Resource.find_by(name: permissions[:resource])
-      return if resource.blank?
+    def create(user_id, permissions = [])
+      return if permissions.blank?
 
-      Permission.create!(user_id:, resource_id: resource.id)
+      resources = Resource.where(name: permissions)
+      return if resources.blank?
+
+      permission_data = resources.map { |resource| { user_id: user_id, resource_id: resource.id } }
+      Permission.insert_all(permission_data)
     end
 
     def show(user_id)
@@ -16,9 +18,9 @@ class PermissionRepository
                 .pluck('resources.name')
     end
 
-    def delete(user_id, permissions = {})
-      resource = Resource.find_by(name: permissions[:resource])
-      Permission.where(user_id: user_id, resource_id: resource.id).destroy_all
+    def destroy(user_id, permissions = [])
+      resource_ids = Resource.where(name: permissions).pluck(:id)
+      Permission.where(user_id: user_id, resource_id: resource_ids).destroy_all
     end
   end
 end

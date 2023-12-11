@@ -271,6 +271,10 @@ describe Api::UsersController, type: :request do
           it 'target_userが削除されること' do
             expect(User.find_by(id: target_user.id)).to eq(nil)
           end
+
+          it 'contract_membershipが削除されること' do
+            expect(ContractMembership.find_by(user_id: target_user.id)).to eq(nil)
+          end
         end
       end
     end

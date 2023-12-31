@@ -19,8 +19,10 @@ describe PermissionService do
     let!(:auth) { generate_token(payload:) }
     let!(:token) { auth.token }
     let!(:target_user) { create(:user, activated: true) }
+    let!(:contract) { create(:contract, user_id: user.id) }
 
     context '正常系' do
+      let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
       context 'permission権限を持っている場合' do
         before do
           travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
@@ -89,6 +91,7 @@ describe PermissionService do
         end
       end
       context 'target_user_idがない場合' do
+        let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
         let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
         let!(:permissions) do
           [
@@ -101,8 +104,22 @@ describe PermissionService do
         end
       end
       context 'permission権限を持っていない場合' do
+        let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
         let!(:contract_resource) { create(:resource, name: 'contract') }
         let!(:permission) { create(:permission, user_id: user.id, resource_id: contract_resource.id) }
+        let!(:permissions) do
+          [
+            'user',
+            'contract'
+          ]
+        end
+        it 'Forbiddenが発生すること' do
+          expect { PermissionService.create(token, target_user.id, permissions) }.to raise_error(Permissions::PermissionError::Forbidden)
+        end
+      end
+      context 'target_user_idが権限者と異なるcontractsの場合' do
+        let!(:contract_resource) { create(:resource, name: 'contract') }
+        let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
         let!(:permissions) do
           [
             'user',
@@ -140,8 +157,10 @@ describe PermissionService do
         'contract'
       ]
     end
+    let!(:contract) { create(:contract, user_id: user.id) }
 
     context '正常系' do
+      let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
       context 'user_idを受け取った場合' do
         let!(:permission_resource) { create(:resource, name: 'permission') }
         before do
@@ -157,6 +176,7 @@ describe PermissionService do
 
     context '異常系' do
       context 'tokenがない場合' do
+        let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
         let!(:permission_resource) { create(:resource, name: 'permission') }
         let!(:db_permissions) do
           create(:permission, user_id: target_user.id, resource_id: contract_resource.id)
@@ -168,6 +188,7 @@ describe PermissionService do
       end
 
       context 'target_user_idがない場合' do
+        let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
         let!(:permission_resource) { create(:resource, name: 'permission') }
         let!(:db_permissions) do
           create(:permission, user_id: target_user.id, resource_id: contract_resource.id)
@@ -179,7 +200,15 @@ describe PermissionService do
       end
 
       context 'permission権限を持っていない場合' do
+        let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
         let!(:permission_resource) { create(:resource, name: 'contract') }        
+        it 'Forbiddenが発生すること' do
+          expect { PermissionService.show(token, target_user.id) }.to raise_error(Permissions::PermissionError::Forbidden)
+        end
+      end
+
+      context 'target_user_idが権限者と異なるcontractsの場合' do
+        let!(:permission_resource) { create(:resource, name: 'permission') }
         it 'Forbiddenが発生すること' do
           expect { PermissionService.show(token, target_user.id) }.to raise_error(Permissions::PermissionError::Forbidden)
         end
@@ -210,8 +239,10 @@ describe PermissionService do
         'user'
       ]
     end
+    let!(:contract) { create(:contract, user_id: user.id) }
 
     context '正常系' do
+      let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
       context 'permission権限を持っている場合' do
         let!(:permission_resource) { create(:resource, name: 'permission') }
         before do
@@ -228,25 +259,35 @@ describe PermissionService do
 
     context '異常系' do
       context 'tokenがない場合' do
+        let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
         let!(:permission_resource) { create(:resource, name: 'permission') }
         it 'ArgumentErrorが発生すること' do
           expect { PermissionService.destroy(nil, target_user.id, permissions) }.to raise_error(ArgumentError)
         end
       end
       context 'permissionsがない場合' do
+        let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
         let!(:permission_resource) { create(:resource, name: 'permission') }
         it 'ArgumentErrorが発生すること' do
           expect { PermissionService.destroy(token, target_user.id, nil) }.to raise_error(ArgumentError)
         end
       end
       context 'target_user_idがない場合' do
+        let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
         let!(:permission_resource) { create(:resource, name: 'permission') }
         it 'ArgumentErrorが発生すること' do
           expect { PermissionService.destroy(token, nil, permissions) }.to raise_error(ArgumentError)
         end
       end
       context 'permission権限を持っていない場合' do
+        let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
         let!(:permission_resource) { create(:resource, name: 'contract') }
+        it 'Forbiddenが発生すること' do
+          expect { PermissionService.destroy(token, target_user.id, permissions) }.to raise_error(Permissions::PermissionError::Forbidden)
+        end
+      end
+      context 'target_user_idが権限者と異なるcontractsの場合' do
+        let!(:permission_resource) { create(:resource, name: 'permission') }
         it 'Forbiddenが発生すること' do
           expect { PermissionService.destroy(token, target_user.id, permissions) }.to raise_error(Permissions::PermissionError::Forbidden)
         end

@@ -13,9 +13,7 @@ class PermissionRepository
     end
 
     def show(user_id)
-      Permission.joins(:resource)
-                .where(user_id: user_id)
-                .pluck('resources.name')
+      Permission.joins(:resource).where(user_id: user_id).pluck('resources.name')
     end
 
     def destroy(user_id, permissions = [])

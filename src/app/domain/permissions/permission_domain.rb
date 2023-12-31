@@ -41,10 +41,10 @@ module Permissions
       def show(target_user_id)
         raise ArgumentError, 'target_user_idがありません' if target_user_id.blank?
 
-        domain = new(token)
+        domain = new(target_user_id)
         res = domain&.show
         {
-          resource: res
+          permissions: res
         }
       end
 

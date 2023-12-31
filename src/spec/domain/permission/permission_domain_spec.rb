@@ -21,13 +21,10 @@ describe Permissions::PermissionDomain do
             'create_prompt'
           ]
         }
-
         it '権限が追加されること' do
-          domain = Permissions::PermissionDomain.new(target_user.id, permissions)
-          domain.create
+          domain = Permissions::PermissionDomain.create(target_user.id, permissions)
           user_resource_id = Resource.find_by(name: 'user').id
           create_prompt_resource_id = Resource.find_by(name: 'create_prompt').id
-
           expect(Permission.find_by(user_id: target_user.id, resource_id: user_resource_id)).to be_truthy
           expect(Permission.find_by(user_id: target_user.id, resource_id: create_prompt_resource_id)).to be_truthy
         end
@@ -43,16 +40,13 @@ describe Permissions::PermissionDomain do
             'create_prompt'
           ]
         }
-
         it 'ArgumentErrorがスローされること' do
           expect { Permissions::PermissionDomain.create(nil, permissions) }.to raise_error(ArgumentError, 'target_user_idがありません')
         end
       end
-
       context '権限が引数にない場合' do
         let!(:manager_user) { create(:user, activated: true) }
         let!(:target_user) { create(:user, activated: true) }
-
         it 'ArgumentErrorがスローされること' do
           expect { Permissions::PermissionDomain.create(target_user.id, nil) }.to raise_error(ArgumentError, 'permissionsがありません')
         end
@@ -65,28 +59,21 @@ describe Permissions::PermissionDomain do
       context '正しい対象のユーザーIDを受け取った場合' do
         let!(:manager_user) { create(:user, activated: true) }
         let!(:target_user) { create(:user, activated: true) }
-        let!(:permissions) { 
-          [
-            'user',
-            'create_prompt'
-          ]
+        let!(:permissions) {
+          create(:permission, user_id: target_user.id, resource_id: Resource.find_by(name: 'user').id)
+          create(:permission, user_id: target_user.id, resource_id: Resource.find_by(name: 'create_prompt').id)
         }
-
         it '権限が表示されること' do
-          domain = Permissions::PermissionDomain.new(target_user.id, permissions)
-          domain.create
+          actual = Permissions::PermissionDomain.show(target_user.id)
           user_resource_id = Resource.find_by(name: 'user').id
           create_prompt_resource_id = Resource.find_by(name: 'create_prompt').id
-
-          expect(domain.show).to eq(['user', 'create_prompt'])
+          expect(actual[:permissions]).to eq(["user", "create_prompt"])
         end
       end
     end
-
     context '異常系' do
       context '対象のユーザーIDが引数にない場合' do
         let!(:manager_user) { create(:user, activated: true) }
-
         it 'ArgumentErrorがスローされること' do
           expect { Permissions::PermissionDomain.show(nil) }.to raise_error(ArgumentError, 'target_user_idがありません')
         end
@@ -99,22 +86,22 @@ describe Permissions::PermissionDomain do
       context '正しい対象のユーザーIDと削除する正しい権限を受け取った場合' do
         let!(:manager_user) { create(:user, activated: true) }
         let!(:target_user) { create(:user, activated: true) }
-        let!(:permissions) { 
+        let!(:permissions) {
+          create(:permission, user_id: target_user.id, resource_id: Resource.find_by(name: 'user').id)
+          create(:permission, user_id: target_user.id, resource_id: Resource.find_by(name: 'create_prompt').id)
+        }
+        let!(:request_permissions) { 
           [
-            'user',
-            'create_prompt'
+            'user'
           ]
         }
-
-        it '権限が削除されること' do
-          domain = Permissions::PermissionDomain.new(target_user.id, permissions)
-          domain.create
+        it 'リクエストでもらった権限が削除されること' do
+          Permissions::PermissionDomain.destroy(target_user.id, request_permissions)
           user_resource_id = Resource.find_by(name: 'user').id
           create_prompt_resource_id = Resource.find_by(name: 'create_prompt').id
-          domain.destroy
-
+          expect(Permission.where(user_id: target_user.id).count).to eq(1)
           expect(Permission.find_by(user_id: target_user.id, resource_id: user_resource_id)).to be_falsey
-          expect(Permission.find_by(user_id: target_user.id, resource_id: create_prompt_resource_id)).to be_falsey
+          expect(Permission.find_by(user_id: target_user.id, resource_id: create_prompt_resource_id)).to be_truthy
         end
       end
     end
@@ -128,16 +115,13 @@ describe Permissions::PermissionDomain do
             'create_prompt'
           ]
         }
-
         it 'ArgumentErrorがスローされること' do
           expect { Permissions::PermissionDomain.destroy(nil, permissions) }.to raise_error(ArgumentError, 'target_user_idがありません')
         end
       end
-
       context '権限が引数にない場合' do
         let!(:manager_user) { create(:user, activated: true) }
         let!(:target_user) { create(:user, activated: true) }
-
         it 'ArgumentErrorがスローされること' do
           expect { Permissions::PermissionDomain.destroy(target_user.id, nil) }.to raise_error(ArgumentError, 'permissionsがありません')
         end

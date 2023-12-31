@@ -23,7 +23,7 @@ class PermissionService
       user_id = authenticate_user(token)[:user_id]
       raise Permissions::PermissionError::Forbidden unless has_permisssion_role?(user_id)
 
-      return Permissions::PermissionDomain.show(target_user_id)
+      Permissions::PermissionDomain.show(target_user_id)
     end
 
     def destroy(token, target_user_id, permissions)

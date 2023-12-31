@@ -1,71 +1,40 @@
 # frozen_string_literal: true
 
 class PermissionService
-  include SessionModule
-
-  class Forbidden < StandardError; end
-
-  attr_reader :user_id,
-              :target_user_id,
-              :permissions
-
-  def initialize(token,  permissions: {})
-    permission = permissions[:permissions][:resource] if permissions.present? && permissions[:permissions].present? && permissions[:permissions][:resource].present?
-    @target_user_id = permissions[:permissions][:target_user_id] if permissions.present? && permissions[:permissions].present? && permissions[:permissions][:target_user_id].present?
-    @user_id = authenticate_user(token)[:user_id]
-
-    @permissions = {}
-    @permissions[:resource] = permission
-
-    freeze
-  end
-
-  # 権限追加
-  def create
-    PermissionRepository.create(@target_user_id, @permissions)
-  end
-
-  # 権限表示
-  def show
-    PermissionRepository.show(@target_user_id)
-  end
-
-  def delete
-    PermissionRepository.delete(@target_user_id, @permissions)
-  end
-
   class << self
-    def create(token, permissions)
+    include SessionModule
+    include Permissions::PermissionError
+
+    def create(token, target_user_id, permissions)
       raise ArgumentError, 'tokenがありません' if token.blank?
+      raise ArgumentError, 'target_user_idがありません' if target_user_id.blank?
       raise ArgumentError, 'permissionsがありません' if permissions.blank?
 
-      service = new(token, permissions:)
-      raise Forbidden unless has_permisssion_role?(service&.user_id)
+      user_id = authenticate_user(token)[:user_id]
+      raise Permissions::PermissionError::Forbidden unless has_permisssion_role?(user_id)
 
-      service&.create
+      Permissions::PermissionDomain.create(target_user_id, permissions)
     end
 
-    def show(token, permissions)
+    def show(token, target_user_id)
       raise ArgumentError, 'tokenがありません' if token.blank?
-      raise ArgumentError, 'permissionsがありません' if permissions.blank? || permissions[:permissions][:target_user_id].blank?
+      raise ArgumentError, 'target_user_idがありません' if target_user_id.blank?
 
-      service = new(token, permissions:)
-      raise Forbidden unless has_permisssion_role?(service&.user_id)
+      user_id = authenticate_user(token)[:user_id]
+      raise Permissions::PermissionError::Forbidden unless has_permisssion_role?(user_id)
 
-      res = service&.show
-      {
-        resource: res
-      }
+      return Permissions::PermissionDomain.show(target_user_id)
     end
 
-    def delete(token, permissions)
+    def destroy(token, target_user_id, permissions)
       raise ArgumentError, 'tokenがありません' if token.blank?
+      raise ArgumentError, 'target_user_idがありません' if target_user_id.blank?
       raise ArgumentError, 'permissionsがありません' if permissions.blank?
 
-      service = new(token, permissions:)
-      raise Forbidden unless has_permisssion_role?(service&.user_id)
+      user_id = authenticate_user(token)[:user_id]
+      raise Permissions::PermissionError::Forbidden unless has_permisssion_role?(user_id)
 
-      service&.delete
+      Permissions::PermissionDomain.destroy(target_user_id, permissions)
     end
 
     def has_contract_role?(user_id)

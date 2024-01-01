@@ -10,7 +10,7 @@ class BookmarkRepository
       )
     end
 
-    def delete(user_id, prompt_id)
+    def destroy(user_id, prompt_id)
       Bookmark.find_by(user_id:, prompt_id:).destroy
     end
 

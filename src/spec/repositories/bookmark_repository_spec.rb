@@ -26,7 +26,7 @@ describe BookmarkRepository do
     end
   end
 
-  describe '#delete' do
+  describe '#destroy' do
     context '正常系' do
       context 'user_idとprompt_idを受け取った場合' do
         before do
@@ -40,7 +40,7 @@ describe BookmarkRepository do
         let!(:bookmark_2) { create(:bookmark, user_id: user_2.id, prompt_id: prompt.id) }
 
         it 'promptに対するbookmarksの個数が1であること' do
-          BookmarkRepository.delete(user_1.id, prompt.id)
+          BookmarkRepository.destroy(user_1.id, prompt.id)
           bookmarks = Bookmark.where(prompt_id: prompt.id)
           expect(bookmarks.length).to eq(1)
         end

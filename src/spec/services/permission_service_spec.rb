@@ -378,4 +378,93 @@ describe PermissionService do
       end
     end
   end
+
+  describe '#self.has_create_prompt_role?' do
+    let!(:user) { create(:user, activated: true) }
+    let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
+    context '正常系' do
+      context 'create_prompt権限を持つユーザーの場合' do
+        let!(:permission_resource) { Resource.find_by(name: 'create_prompt') }
+        it 'trueが返ること' do
+          actual = PermissionService.has_create_prompt_role?(user.id)
+          expect(actual).to eq(true)
+        end
+      end
+
+      context 'create_prompt権限を持たないユーザーの場合' do
+        let!(:permission_resource) { Resource.find_by(name: 'user') }
+        it 'falseが返ること' do
+          actual = PermissionService.has_create_prompt_role?(user.id)
+          expect(actual).to eq(false)
+        end
+      end
+    end
+  end
+
+  describe '#self.has_read_prompt_role?' do
+    let!(:user) { create(:user, activated: true) }
+    let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
+    context '正常系' do
+      context 'read_prompt権限を持つユーザーの場合' do
+        let!(:permission_resource) { Resource.find_by(name: 'read_prompt') }
+        it 'trueが返ること' do
+          actual = PermissionService.has_read_prompt_role?(user.id)
+          expect(actual).to eq(true)
+        end
+      end
+
+      context 'read_prompt権限を持たないユーザーの場合' do
+        let!(:permission_resource) { Resource.find_by(name: 'user') }
+        it 'falseが返ること' do
+          actual = PermissionService.has_read_prompt_role?(user.id)
+          expect(actual).to eq(false)
+        end
+      end
+    end
+  end
+
+  describe '#self.has_update_prompt_role?' do
+    let!(:user) { create(:user, activated: true) }
+    let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
+    context '正常系' do
+      context 'update_prompt権限を持つユーザーの場合' do
+        let!(:permission_resource) { Resource.find_by(name: 'update_prompt') }
+        it 'trueが返ること' do
+          actual = PermissionService.has_update_prompt_role?(user.id)
+          expect(actual).to eq(true)
+        end
+      end
+
+      context 'update_prompt権限を持たないユーザーの場合' do
+        let!(:permission_resource) { Resource.find_by(name: 'user') }
+        it 'falseが返ること' do
+          actual = PermissionService.has_update_prompt_role?(user.id)
+          expect(actual).to eq(false)
+        end
+      end
+    end
+  end
+
+  describe '#self.has_destroy_prompt_role?' do
+    let!(:user) { create(:user, activated: true) }
+    let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
+
+    context '正常系' do
+      context 'destroy_prompt権限を持つユーザーの場合' do
+        let!(:permission_resource) { Resource.find_by(name: 'destroy_prompt') }
+        it 'trueが返ること' do
+          actual = PermissionService.has_destroy_prompt_role?(user.id)
+          expect(actual).to eq(true)
+        end
+      end
+
+      context 'destroy_prompt権限を持たないユーザーの場合' do
+        let!(:permission_resource) { Resource.find_by(name: 'user') }
+        it 'falseが返ること' do
+          actual = PermissionService.has_destroy_prompt_role?(user.id)
+          expect(actual).to eq(false)
+        end
+      end
+    end
+  end
 end

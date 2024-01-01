@@ -64,6 +64,30 @@ class PermissionService
       self_permission(user_id).include?('user')
     end
 
+    def has_read_prompt_role?(user_id)
+      raise ArgumentError, 'user_idがありません' if user_id.blank?
+      
+      self_permission(user_id).include?('read_prompt')
+    end
+
+    def has_create_prompt_role?(user_id)
+      raise ArgumentError, 'user_idがありません' if user_id.blank?
+
+      self_permission(user_id).include?('create_prompt')
+    end
+
+    def has_update_prompt_role?(user_id)
+      raise ArgumentError, 'user_idがありません' if user_id.blank?
+
+      self_permission(user_id).include?('update_prompt')
+    end
+
+    def has_destroy_prompt_role?(user_id)
+      raise ArgumentError, 'user_idがありません' if user_id.blank?
+
+      self_permission(user_id).include?('destroy_prompt')
+    end
+
     private
 
     # 自分の権限表示

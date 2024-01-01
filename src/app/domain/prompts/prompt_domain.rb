@@ -55,7 +55,7 @@ module Prompts
 
     # プロンプト更新
     def update
-      PromptRepository.update(@uuid, @prompts)
+      PromptRepository.update(@user_id, @uuid, @prompts)
     end
 
     # プロンプト削除

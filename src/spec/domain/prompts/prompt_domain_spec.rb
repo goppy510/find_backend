@@ -157,9 +157,10 @@ describe Prompts::PromptDomain do
   end
 
   describe '#self.update' do
+    let!(:creator_user) { create(:user, activated: true) }
     let!(:user) { create(:user, activated: true) }
     let!(:contract) { create(:contract, user_id: user.id) }
-    let!(:current_prompts) { create(:prompt, user_id: user.id, contract_id: contract.id) }
+    let!(:current_prompts) { create(:prompt, user_id: creator_user.id, contract_id: contract.id) }
     before do
       travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
     end

@@ -2,6 +2,7 @@
 
 class Prompt < ApplicationRecord
   belongs_to :category
+  belongs_to :conract
   belongs_to :generative_ai_model
   belongs_to :user
 

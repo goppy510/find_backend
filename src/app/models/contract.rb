@@ -7,4 +7,5 @@ class Contract < ApplicationRecord
   # メンバーとしてのUserへの関連
   has_many :contract_memberships, dependent: :destroy
   has_many :users, through: :contract_memberships
+  has_many :prompts, dependent: :nullify
 end

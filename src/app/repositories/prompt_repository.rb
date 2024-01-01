@@ -43,8 +43,10 @@ class PromptRepository
     end
   
     # プロンプトを更新する
-    def update(uuid, prompts = {})
+    def update(user_id, uuid, prompts = {})
       updates = {}
+      updates[:title] = prompts[:title] if prompts.key?(:title)
+      updates[:user_id] = user_id
       updates[:category_id] = Category.find(prompts[:category]).id if prompts.key?(:category)
       updates[:generative_ai_model_id] = GenerativeAiModel.find(prompts[:generative_ai_model]).id if prompts.key?(:generative_ai_model)
       # 残りのフィールドは直接更新します

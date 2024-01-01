@@ -106,9 +106,10 @@ describe PromptRepository do
         before do
           travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
         end
+        let!(:creator_user) { create(:user, activated: true) }
         let!(:user) { create(:user, activated: true) }
         let!(:contract) { create(:contract, user_id: user.id) }
-        let!(:current_prompts) { create(:prompt, user_id: user.id, contract_id: contract.id) }
+        let!(:current_prompts) { create(:prompt, user_id: creator_user.id, contract_id: contract.id) }
         let!(:new_prompts) do
           {
             about: 'new_about',
@@ -118,7 +119,7 @@ describe PromptRepository do
         end
 
         it 'user_idおよびuuidでnew_promptsにあるものは更新され、それ以外は更新されないこと' do
-          PromptRepository.update(current_prompts.uuid, new_prompts)
+          PromptRepository.update(user.id, current_prompts.uuid, new_prompts)
           prompts = Prompt.find_by(uuid: current_prompts.uuid)
           expect(prompts.user_id).to eq(user.id)
           expect(prompts.uuid).to eq(current_prompts.uuid)

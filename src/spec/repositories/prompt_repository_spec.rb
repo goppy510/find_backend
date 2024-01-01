@@ -5,18 +5,17 @@ require 'rspec-rails'
 require 'faker'
 
 describe PromptRepository do
-  describe '#self.prompt_list' do
+  describe '#self.index' do
     context '正常系' do
       before do
         travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
       end
-      let!(:email) { Faker::Internet.email }
-      let!(:password) { 'P@ssw0rd' }
-      let!(:user) { create(:user, email:, password:, activated: true) }
+      let!(:user) { create(:user, activated: true) }
+      let!(:contract) { create(:contract, user_id: user.id) }
       let!(:profile) { create(:profile, user_id: user.id) }
 
       context 'promptが1件ある場合' do
-        let!(:prompts) { create(:prompt, user_id: user.id) }
+        let!(:prompts) { create(:prompt, user_id: user.id, contract_id: contract.id) }
         let!(:user_1) { create(:user, activated: true) }
         let!(:user_2) { create(:user, activated: true) }
         let!(:like_1) { create(:like, user_id: user_1.id, prompt_id: prompts.id) }
@@ -24,14 +23,13 @@ describe PromptRepository do
         let!(:bookmark_2) { create(:bookmark, user_id: user_2.id, prompt_id: prompts.id) }
 
         it '1件のpromptが返されること' do
-          response = PromptRepository.prompt_list(page: 1)
+          response = PromptRepository.index(contract.id, page: 1)
           expect(response.length).to eq(1)
           expect(response[0].id).to eq(prompts.id)
           expect(response[0].uuid).to eq(prompts.uuid)
           expect(response[0].category_name).to eq(Category.find(prompts.category_id).name)
           expect(response[0].title).to eq(prompts.title)
           expect(response[0].about).to eq(prompts.about)
-          expect(response[0].nickname).to eq(Profile.find_by(user_id: prompts.user_id).nickname)
           expect(response[0].likes_count).to eq(2)
           expect(response[0].bookmarks_count).to eq(1)
           expect(response[0].generative_ai_model_name).to eq(GenerativeAiModel.find(prompts.generative_ai_model_id).name)
@@ -40,18 +38,18 @@ describe PromptRepository do
       end
 
       context 'promptが8件ある場合' do
-        let!(:prompt_1) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 1, 2, 0, 0, 0)) }
-        let!(:prompt_2) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 3, 2, 0, 0, 0)) }
-        let!(:prompt_3) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 9, 2, 0, 0, 0)) }
-        let!(:prompt_4) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 4, 2, 0, 0, 0)) }
-        let!(:prompt_5) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 8, 2, 0, 0, 0)) }
-        let!(:prompt_6) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 6, 2, 0, 0, 0)) }
-        let!(:prompt_7) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 7, 2, 0, 0, 0)) }
-        let!(:prompt_8) { create(:prompt, user_id: user.id, created_at: Time.zone.local(2022, 6, 20, 0, 0, 0)) }
+        let!(:prompt_1) { create(:prompt, user_id: user.id, contract_id: contract.id, created_at: Time.zone.local(2022, 1, 2, 0, 0, 0)) }
+        let!(:prompt_2) { create(:prompt, user_id: user.id, contract_id: contract.id, created_at: Time.zone.local(2022, 3, 2, 0, 0, 0)) }
+        let!(:prompt_3) { create(:prompt, user_id: user.id, contract_id: contract.id, created_at: Time.zone.local(2022, 9, 2, 0, 0, 0)) }
+        let!(:prompt_4) { create(:prompt, user_id: user.id, contract_id: contract.id, created_at: Time.zone.local(2022, 4, 2, 0, 0, 0)) }
+        let!(:prompt_5) { create(:prompt, user_id: user.id, contract_id: contract.id, created_at: Time.zone.local(2022, 8, 2, 0, 0, 0)) }
+        let!(:prompt_6) { create(:prompt, user_id: user.id, contract_id: contract.id, created_at: Time.zone.local(2022, 6, 2, 0, 0, 0)) }
+        let!(:prompt_7) { create(:prompt, user_id: user.id, contract_id: contract.id, created_at: Time.zone.local(2022, 7, 2, 0, 0, 0)) }
+        let!(:prompt_8) { create(:prompt, user_id: user.id, contract_id: contract.id, created_at: Time.zone.local(2022, 6, 20, 0, 0, 0)) }
 
         context '1ページ目をリクエストした場合' do
           it '6件のpromptが返されること' do
-            response = PromptRepository.prompt_list(page: 1)
+            response = PromptRepository.index(contract.id, page: 1)
             expect(response.length).to eq(6)
             expect(response[0].id).to eq(prompt_3.id)
             expect(response[1].id).to eq(prompt_5.id)
@@ -71,9 +69,8 @@ describe PromptRepository do
         before do
           travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
         end
-        let!(:email) { Faker::Internet.email }
-        let!(:password) { 'P@ssw0rd' }
-        let!(:user) { create(:user, email:, password:, activated: true) }
+        let!(:user) { create(:user, activated: true) }
+        let!(:contract) { create(:contract, user_id: user.id) }
         let!(:prompts_for_create) do
           {
             about: 'about',
@@ -88,7 +85,7 @@ describe PromptRepository do
         end
 
         it 'userのidでpromptsにインサートされること' do
-          PromptRepository.create(user.id, prompts_for_create)
+          PromptRepository.create(user.id, contract.id, prompts_for_create)
           prompts = Prompt.find_by(user_id: user.id)
           expect(prompts.user_id).to eq(user.id)
           expect(prompts.uuid).to eq(prompts_for_create[:uuid])
@@ -109,10 +106,9 @@ describe PromptRepository do
         before do
           travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
         end
-        let!(:email) { Faker::Internet.email }
-        let!(:password) { 'P@ssw0rd' }
-        let!(:user) { create(:user, email:, password:, activated: true) }
-        let!(:current_prompts) { create(:prompt, user_id: user.id) }
+        let!(:user) { create(:user, activated: true) }
+        let!(:contract) { create(:contract, user_id: user.id) }
+        let!(:current_prompts) { create(:prompt, user_id: user.id, contract_id: contract.id) }
         let!(:new_prompts) do
           {
             about: 'new_about',
@@ -137,36 +133,34 @@ describe PromptRepository do
     end
   end
 
-  describe '#self.delete' do
-    let!(:email_creator) { Faker::Internet.email }
-    let!(:password) { 'P@ssw0rd' }
-    let!(:user_creator) { create(:user, email: email_creator, password:, activated: true) }
-    let!(:prompts) { create(:prompt, user_id: user_creator.id) }
+  describe '#self.destroy' do
+    let!(:user_creator) { create(:user, activated: true) }
+    let!(:contract) { create(:contract, user_id: user_creator.id) }
+    let!(:prompts) { create(:prompt, user_id: user_creator.id, contract_id: contract.id) }
 
     context '正常系' do
       context 'user_id, prompt_idを受け取った場合' do
         it 'prompt_idに紐づくプロンプトが削除されること' do
-          PromptRepository.delete(prompts.uuid)
+          PromptRepository.destroy(prompts.uuid)
           expect(Prompt.find_by(uuid: prompts.uuid).deleted).to eq(true)
         end
       end
     end
   end
 
-  describe '#self.prompt_only' do
+  describe '#self.show' do
     context '正常系' do
       context 'user_id, prompt_idを受け取った場合' do
         before do
           travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
         end
-        let!(:email) { Faker::Internet.email }
-        let!(:password) { 'P@ssw0rd' }
-        let!(:user) { create(:user, email:, password:, activated: true) }
+        let!(:user) { create(:user, activated: true) }
+        let!(:contract) { create(:contract, user_id: user.id) }
         # テーブル名とかぶるので複数形にする　
-        let!(:prompts) { create(:prompt, user_id: user.id) }
+        let!(:prompts) { create(:prompt, user_id: user.id, contract_id: contract.id) }
 
         it '渡されたuser_idとuuidに紐づくプロンプトが返されること' do
-          response = PromptRepository.prompt_only(prompts.uuid)
+          response = PromptRepository.show(prompts.uuid)
           expected = Prompt.find_by(uuid: prompts.uuid, deleted: false)
           expect(response).to eq(expected)
         end
@@ -179,26 +173,23 @@ describe PromptRepository do
       before do
         travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
       end
-      let!(:email_creator) { Faker::Internet.email }
-      let!(:email_1) { Faker::Internet.email }
-      let!(:email_2) { Faker::Internet.email }
-      let!(:password) { 'P@ssw0rd' }
-      let!(:user_creator) { create(:user, email: email_creator, password:, activated: true) }
-      let!(:user_1) { create(:user, email: email_1, password:, activated: true) }
-      let!(:user_2) { create(:user, email: email_2, password:, activated: true) }
+      let!(:user_creator) { create(:user, activated: true) }
+      let!(:contract) { create(:contract, user_id: user_creator.id) }
+      let!(:user_1) { create(:user, activated: true) }
+      let!(:user_2) { create(:user, activated: true) }
       let!(:like_1) { create(:like, user_id: user_1.id, prompt_id: prompts.id) }
       let!(:like_2) { create(:like, user_id: user_2.id, prompt_id: prompts.id) }
       let!(:bookmark_1) { create(:bookmark, user_id: user_1.id, prompt_id: prompts.id) }
       let!(:bookmark_2) { create(:bookmark, user_id: user_2.id, prompt_id: prompts.id) }
 
       context 'user_id, prompt_idを受け取った場合（有効なプロンプトが存在する場合）' do
-        let!(:prompts) { create(:prompt, user_id: user_creator.id) }
+        let!(:prompts) { create(:prompt, user_id: user_creator.id, contract_id: contract.id) }
         it '渡されたuser_idとuuidに紐づくプロンプトが返されること' do
           response = PromptRepository.prompt_detail(prompts.uuid)
           expected = Prompt.left_outer_joins(:likes, :bookmarks, :category, :generative_ai_model, user: :profile)
                         .where(uuid: prompts.uuid, deleted: false)
-                        .group('prompts.id', 'profiles.nickname', 'categories.name', 'generative_ai_models.name')
-                        .select('prompts.*', 'profiles.nickname AS nickname', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
+                        .group('prompts.id', 'categories.name', 'generative_ai_models.name')
+                        .select('prompts.*', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
                         .first
           expect(response).to eq(expected)
           expect(response.likes_count).to eq(2)
@@ -207,13 +198,13 @@ describe PromptRepository do
       end
 
       context 'user_id, prompt_idを受け取った場合（プロンプトが削除済みの場合）' do
-        let!(:prompts) { create(:prompt, user_id: user_creator.id, deleted: true) }
+        let!(:prompts) { create(:prompt, user_id: user_creator.id, contract_id: contract.id, deleted: true) }
         it 'nilが返されること' do
           response = PromptRepository.prompt_detail(prompts.uuid)
           expected = Prompt.left_outer_joins(:likes, :bookmarks, :category, :generative_ai_model, user: :profile)
                         .where(uuid: prompts.uuid, deleted: false)
-                        .group('prompts.id', 'profiles.nickname', 'categories.name', 'generative_ai_models.name')
-                        .select('prompts.*', 'profiles.nickname AS nickname', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
+                        .group('prompts.id', 'categories.name', 'generative_ai_models.name')
+                        .select('prompts.*', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
                         .first
           expect(response).to be_nil
         end

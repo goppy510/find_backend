@@ -90,7 +90,7 @@ resources_data = [
   'create_prompt',
   'read_prompt',
   'update_prompt',
-  'delete_prompt'
+  'destroy_prompt'
 ]
 resources_data.each do |name|
   Resource.find_or_create_by(name: name)

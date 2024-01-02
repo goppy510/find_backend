@@ -13,6 +13,8 @@ class PromptService
       raise Prompts::PromptError::Forbidden unless PermissionService.has_read_prompt_role?(user_id)
 
       contract_id = ContractRepository.show(user_id).id
+      raise Prompts::PromptError::Forbidden unless is_own_user?(user_id, contract_id)
+
       Prompts::PromptDomain.index(contract_id, page)
     end
 
@@ -35,6 +37,10 @@ class PromptService
       user_id = authenticate_user(token)[:user_id]
       raise Prompts::PromptError::Forbidden unless PermissionService.has_update_prompt_role?(user_id)
 
+      contract_id = ContractRepository.show(user_id).id
+      raise Prompts::PromptError::Forbidden unless is_own_user?(user_id, contract_id)
+      raise Prompts::PromptError::Forbidden unless is_own_prompt?(uuid, contract_id)
+
       Prompts::PromptDomain.update(user_id, uuid, prompts: prompts)
     end
 
@@ -44,6 +50,10 @@ class PromptService
 
       user_id = authenticate_user(token)[:user_id]
       raise Prompts::PromptError::Forbidden unless PermissionService.has_destroy_prompt_role?(user_id)
+
+      contract_id = ContractRepository.show(user_id).id
+      raise Prompts::PromptError::Forbidden unless is_own_user?(user_id, contract_id)
+      raise Prompts::PromptError::Forbidden unless is_own_prompt?(uuid, contract_id)
 
       Prompts::PromptDomain.destroy(user_id, uuid)
     end
@@ -55,6 +65,10 @@ class PromptService
 
       user_id = authenticate_user(token)[:user_id]
       raise Prompts::PromptError::Forbidden unless PermissionService.has_read_prompt_role?(user_id)
+
+      contract_id = ContractRepository.show(user_id).id
+      raise Prompts::PromptError::Forbidden unless is_own_user?(user_id, contract_id)
+      raise Prompts::PromptError::Forbidden unless is_own_prompt?(uuid, contract_id)
 
       # promptデータを取得
       Prompts::PromptDomain.show(user_id, uuid)
@@ -124,6 +138,20 @@ class PromptService
       raise Prompts::PromptError::Forbidden unless PermissionService.has_read_prompt_role?(user_id)
 
       Prompts::PromptDomain.bookmark_count(user_id, prompt_id)
+    end
+
+    private
+    # 契約IDとユーザーが正しい紐づけかチェックする
+    def is_own_user?(user_id, contract_id)
+      ContractMembershipRepository.show(user_id, contract_id).present? || ContractRepository.show(user_id).id == contract_id
+    end
+
+    # uuidとcontract_idが正しい紐づけかチェックする
+    def is_own_prompt?(uuid, contract_id)
+      prompt = PromptRepository.show(uuid)
+      return false if prompt.blank?
+
+      prompt.contract_id == contract_id
     end
   end
 end

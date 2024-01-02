@@ -191,6 +191,8 @@ describe PromptService do
       travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
     end
     let!(:user) { create(:user, activated: true) }
+    let!(:contract) { create(:contract, user_id: user.id) }
+    let!(:contract_membership) { create(:contract_membership, user_id: user.id, contract_id: contract.id) }
     let!(:payload) do
       {
         sub: user.id,
@@ -203,7 +205,7 @@ describe PromptService do
     context '正常系' do
       context '必要なすべてのパラメータを受け取った場合' do
         let!(:permission_resource) { Resource.find_by(name: 'update_prompt') }
-        let!(:current_prompts) { create(:prompt, user_id: user.id) }
+        let!(:current_prompts) { create(:prompt, user_id: user.id, contract_id: contract.id) }
         let!(:new_prompts) do
           {
             about: 'new_about',
@@ -244,19 +246,28 @@ describe PromptService do
       context 'prompt_uuidがない場合' do
         let!(:permission_resource) { Resource.find_by(name: 'update_prompt') }
         it 'ArgumentErrorがスローされること' do
-          expect { PromptService.update(user.id, nil, new_prompts) }.to raise_error(ArgumentError, 'uuidがありません')
+          expect { PromptService.update(token, nil, new_prompts) }.to raise_error(ArgumentError, 'uuidがありません')
         end
       end
       context 'promptsがない場合' do
         let!(:permission_resource) { Resource.find_by(name: 'update_prompt') }
         it 'ArgumentErrorがスローされること' do
-          expect { PromptService.update(user.id, current_prompts.id, nil) }.to raise_error(ArgumentError, 'promptsがありません')
+          expect { PromptService.update(token, current_prompts.uuid, nil) }.to raise_error(ArgumentError, 'promptsがありません')
         end
       end
       context '権限がない場合' do
         let!(:permission_resource) { Resource.find_by(name: 'contract') }
         it 'Prompts::PromptError::Forbiddenがスローされること' do
           expect { PromptService.update(token, current_prompts.uuid, new_prompts) }.to raise_error(Prompts::PromptError::Forbidden)
+        end
+      end
+      context 'uuidが自分と違う契約IDの場合' do
+        let!(:permission_resource) { Resource.find_by(name: 'update_prompt') }
+        let!(:other_user) { create(:user, activated: true) }
+        let!(:other_contract) { create(:contract, user_id: other_user.id) }
+        let!(:other_prompts) { create(:prompt, user_id: other_user.id, contract_id: other_contract.id) }
+        it 'Prompts::PromptError::Forbiddenがスローされること' do
+          expect { PromptService.update(token, other_prompts.uuid, new_prompts) }.to raise_error(Prompts::PromptError::Forbidden)
         end
       end
     end
@@ -267,7 +278,9 @@ describe PromptService do
       travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
     end
     let!(:user) { create(:user, activated: true) }
-    let!(:current_prompts) { create(:prompt, user_id: user.id) }
+    let!(:contract) { create(:contract, user_id: user.id) }
+    let!(:contract_membership) { create(:contract_membership, user_id: user.id, contract_id: contract.id) }
+    let!(:current_prompts) { create(:prompt, user_id: user.id, contract_id: contract.id) }
     let!(:payload) do
       {
         sub: user.id,
@@ -307,6 +320,15 @@ describe PromptService do
           expect { PromptService.destroy(token, current_prompts.uuid) }.to raise_error(Prompts::PromptError::Forbidden)
         end
       end
+      context 'uuidが自分と違う契約IDの場合' do
+        let!(:permission_resource) { Resource.find_by(name: 'destroy_prompt') }
+        let!(:other_user) { create(:user, activated: true) }
+        let!(:other_contract) { create(:contract, user_id: other_user.id) }
+        let!(:other_prompts) { create(:prompt, user_id: other_user.id, contract_id: other_contract.id) }
+        it 'Prompts::PromptError::Forbiddenがスローされること' do
+          expect { PromptService.destroy(token, other_prompts.uuid) }.to raise_error(Prompts::PromptError::Forbidden)
+        end
+      end
     end
   end
 
@@ -315,10 +337,12 @@ describe PromptService do
       travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
     end
     let!(:user_creator) { create(:user, activated: true) }
+    let!(:contract) { create(:contract, user_id: user_creator.id) }
+    let!(:contract_membership) { create(:contract_membership, user_id: user_creator.id, contract_id: contract.id) }
+    let!(:prompts) { create(:prompt, user_id: user_creator.id, contract_id: contract.id) }
     let!(:profile_creator) { create(:profile, user_id: user_creator.id) }
     let!(:user_1) { create(:user, activated: true) }
     let!(:user_2) { create(:user, activated: true) }
-    let!(:prompts) { create(:prompt, user_id: user_creator.id) }
     let!(:category_name) { Category.find(prompts.category_id).name }
     let!(:generative_ai_model_name) { GenerativeAiModel.find(prompts.generative_ai_model_id).name }
     let!(:like_1) { create(:like, user_id: user_1.id, prompt_id: prompts.id) }
@@ -334,6 +358,7 @@ describe PromptService do
     let!(:auth) { generate_token(payload:) }
     let!(:token) { auth.token }
     let!(:permission) { create(:permission, user_id: user_creator.id, resource_id: permission_resource.id) }
+
     context '正常系' do
       let!(:permission_resource) { Resource.find_by(name: 'read_prompt') }
       context '必要なすべてのパラメータを受け取った場合' do
@@ -353,7 +378,6 @@ describe PromptService do
         end
       end
     end
-
     context '異常系' do
       context 'tokenがない場合' do
         let!(:permission_resource) { Resource.find_by(name: 'read_prompt') }
@@ -371,6 +395,15 @@ describe PromptService do
         let!(:permission_resource) { Resource.find_by(name: 'contract') }
         it 'Prompts::PromptError::Forbiddenがスローされること' do
           expect { PromptService.show(token, prompts.uuid) }.to raise_error(Prompts::PromptError::Forbidden)
+        end
+      end
+      context 'uuidが自分と違う契約IDの場合' do
+        let!(:permission_resource) { Resource.find_by(name: 'read_prompt') }
+        let!(:other_user) { create(:user, activated: true) }
+        let!(:other_contract) { create(:contract, user_id: other_user.id) }
+        let!(:other_prompts) { create(:prompt, user_id: other_user.id, contract_id: other_contract.id) }
+        it 'Prompts::PromptError::Forbiddenがスローされること' do
+          expect { PromptService.show(token, other_prompts.uuid) }.to raise_error(Prompts::PromptError::Forbidden)
         end
       end
     end

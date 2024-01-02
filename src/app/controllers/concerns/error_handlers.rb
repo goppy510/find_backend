@@ -17,6 +17,7 @@ module ErrorHandlers
     rescue_from Activation::ActivationError::Unauthorized, with: :rescue401
     rescue_from Password::PasswordError::Unauthorized, with: :rescue401
     rescue_from Permissions::PermissionError::Forbidden, with: :rescue403
+    rescue_from Prompts::PromptError::Forbidden, with: :rescue403
     rescue_from ActionController::BadRequest, with: :rescue400
     rescue_from ActionController::Unauthorized, with: :rescue401
     rescue_from ActionController::Forbidden, with: :rescue403

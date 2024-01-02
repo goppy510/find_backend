@@ -20,6 +20,7 @@ class PromptRepository
         .order('prompts.created_at DESC')
         .offset((page - 1) * per_page)
         .limit(per_page)
+      prompts
     end
 
     # プロンプトを登録する

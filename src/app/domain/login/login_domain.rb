@@ -25,6 +25,7 @@ module Login
 
       {
         token: auth.token,
+        user_id: activated_user.id,
         expires: Time.zone.at(auth.payload[:exp])
       }
     end

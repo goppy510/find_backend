@@ -34,10 +34,11 @@ describe Login::LoginDomain do
         let!(:auth) { generate_token(payload:) }
         let!(:token) { auth.token }
 
-        it 'tokenとexpがレスポンスとして返ってくること' do
+        it 'tokenとexpires, user_idがレスポンスとして返ってくること' do
           res = Login::LoginDomain.create(logins)
           expect(res[:expires]).to eq(Time.zone.local(2023, 5, 24, 3, 0, 0))
           expect(res[:token]).to eq(token)
+          expect(res[:user_id]).to eq(user.id)
         end
       end
     end

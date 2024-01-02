@@ -27,7 +27,7 @@ describe ActivationMailer do
       let!(:auth) { Auth::AuthTokenService.new(lifetime: Auth.token_signup_lifetime, payload: { sub: user.id, type: 'activation' }) }
       let!(:token) { auth.token }
       let!(:expires_at) { Time.at(auth.payload[:exp]) }
-      let!(:url) { "http://localhost:3000/activation?token=#{token}" }
+      let!(:url) { "http://localhost:8080/activation?token=#{token}" }
       let!(:subject_content) { '【find-market】本登録のお願い' }
       let!(:body) do
         "#{email} 様\r\n\r\n" \
@@ -35,7 +35,7 @@ describe ActivationMailer do
         "この度は、ビジネス向け生成AIプロンプトデータベース「Find（ファインド）」へのご登録、誠にありがとうございます。\r\n\r\n" \
         "以下のリンクをクリックして本登録を完了してください。\r\n\r\n" \
         "#{url}\r\n\r\n" \
-        "有効期限（1時間）: #{expires_at.strftime('%Y-%m-%d %H:%M:%S')}\r\n\r\n" \
+        "有効期限（1時間）: #{expires_at.in_time_zone('Tokyo').strftime('%Y-%m-%d %H:%M:%S')}\r\n\r\n" \
         "もしこのメールに心当たりがない場合は、削除していただきますようお願い申し上げます。\r\n\r\n" \
         "ご不明な点がある場合は、下記の当サポートまでお問い合わせください。\r\n\r\n" \
         "#{signature}"

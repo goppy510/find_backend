@@ -14,31 +14,34 @@ describe PermissionRepository do
     context '正常系' do
       context 'user_idと存在するpermissionsを受け取った場合' do
         let!(:permissions) do
-          {
-            resource: 'user'
-          }
+          [
+            'user',
+            'contract'
+          ]
         end
 
         it 'user_idとresource_idでインサートされること' do
           PermissionRepository.create(user.id, permissions)
           actual = Permission.where(user_id: user.id)
-          resource = Resource.find_by(name: permissions[:resource])
-          expect(actual.length).to eq(1)
-          expect(actual).to include( have_attributes(resource_id: resource.id ) )
+          resource_1 = Resource.find_by(name: permissions[0])
+          resource_2 = Resource.find_by(name: permissions[1])
+          expect(actual.length).to eq(2)
+          expect(actual).to include( have_attributes(resource_id: resource_1.id ) )
+          expect(actual).to include( have_attributes(resource_id: resource_2.id ) )
         end
       end
 
       context 'user_idと存在しないpermissionsを受け取った場合' do
         let!(:permissions) do
-          {
-            resource: 'hoge'
-          }
+          [
+            'hoge'
+          ]
         end
 
         it 'user_idとresource_idでインサートされないこと' do
           PermissionRepository.create(user.id, permissions)
           actual = Permission.where(user_id: user.id)
-          resource = Resource.find_by(name: permissions[:resource])
+          resource = Resource.find_by(name: permissions[0])
           expect(actual.length).to eq(0)
         end
       end
@@ -64,7 +67,7 @@ describe PermissionRepository do
     end
   end
 
-  describe '#self.delete' do
+  describe '#self.destroy' do
     context 'contractを削除した場合' do
       let!(:user_resource) { Resource.find_by(name: 'user') }
       let!(:contract_resource) { Resource.find_by(name: 'contract') }
@@ -73,19 +76,16 @@ describe PermissionRepository do
         create(:permission, user_id: user.id, resource_id: contract_resource.id)
       end
       let!(:permissions) do
-        {
-          resource: [
-            'user'
-          ]
-        }
+        [
+          'contract',
+          'user'
+        ]
       end
 
       it 'userはそのままでcontractが削除されること' do
-        PermissionRepository.delete(user.id, permissions)
+        PermissionRepository.destroy(user.id, permissions)
         actual = Permission.where(user_id: user.id)
-        resource = Resource.find_by(name: permissions[:resource])
-        expect(actual.length).to eq(1)
-        expect(actual).to include( have_attributes(resource_id: contract_resource.id ) )
+        expect(actual).to be_empty
       end
     end
   end

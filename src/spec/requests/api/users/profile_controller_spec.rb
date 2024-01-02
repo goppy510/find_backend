@@ -95,7 +95,7 @@ describe Api::Users::ProfileController, type: :request do
         end
 
         before do
-          put "/api/users/profile", params: ,  headers: { 'Authorization' => "Bearer #{token}" }
+          put "/api/users/profile/#{1}", params: ,  headers: { 'Authorization' => "Bearer #{token}" }
         end
         it 'status_code: okを返すこと' do
           expect(response).to have_http_status(:ok)
@@ -109,48 +109,7 @@ describe Api::Users::ProfileController, type: :request do
     context '異常系' do
       context 'パラメータがなかった場合' do
         before do
-          put "/api/users/profile", params: {}
-        end
-        it 'status_code: 400を返すこと' do
-          expect(response).to have_http_status(400)
-        end
-        it 'ActionController::BadRequestを返すこと' do
-          expect(JSON.parse(response.body)['error']['code']).to eq('ActionController::BadRequest')
-        end
-      end
-    end
-  end
-
-  describe 'PUT /api/users/:id/password' do
-    context '正常系' do
-      context '正しい現在のパスワードと更新用パスワードを受け取った場合' do
-        let!(:current_password) { create(:profile, user_id: user.id) }
-        let!(:new_password) { 'NewP@ssW0rd' }
-        let!(:params) do
-          {
-            password: {
-              'current_password': password,
-              'new_password': new_password
-            }
-          }
-        end
-
-        before do
-          put "/api/users/#{user.id}/password", params: ,  headers: { 'Authorization' => "Bearer #{token}" }
-        end
-        it 'status_code: okを返すこと' do
-          expect(response).to have_http_status(:ok)
-        end
-        it 'statusがsuccessであること' do
-          expect(JSON.parse(response.body)['status']).to eq('success')
-        end
-      end
-    end
-
-    context '異常系' do
-      context 'パラメータがなかった場合' do
-        before do
-          put "/api/users/#{user.id}/password", params: {},  headers: { 'Authorization' => "Bearer #{token}" }
+          put "/api/users/profile/#{1}", params: {}
         end
         it 'status_code: 400を返すこと' do
           expect(response).to have_http_status(400)
@@ -167,7 +126,7 @@ describe Api::Users::ProfileController, type: :request do
       context '正しいuser_idを受け取った場合' do
         let!(:profile) { create(:profile, user_id: user.id) }
         before do
-          get '/api/users/profile', headers: { 'Authorization' => "Bearer #{token}" }
+          get "/api/users/profile/#{1}", headers: { 'Authorization' => "Bearer #{token}" }
         end
 
         it 'jsonであること' do

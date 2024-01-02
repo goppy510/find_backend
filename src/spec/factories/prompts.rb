@@ -6,6 +6,7 @@ require 'faker'
 FactoryBot.define do
   factory :prompt do
     uuid { SecureRandom.uuid }
+    association :contract
     about { Faker::Lorem.sentence }
     title { Faker::Lorem.sentence }
     input_example { Faker::Lorem.sentence }

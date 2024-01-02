@@ -14,5 +14,11 @@ class User < ApplicationRecord
 
   has_many :permissions
   has_many :resources, through: :permissions
-  has_one :contract, dependent: :destroy
+
+  # 中間テーブルとのアソシエーション
+  has_many :contract_memberships, dependent: :destroy
+  has_many :contracts, through: :contract_memberships
+
+  # UserがContractの管理者として関連付けられている場合のアソシエーション
+  has_one :contract, class_name: 'Contract', foreign_key: 'user_id', dependent: :destroy
 end

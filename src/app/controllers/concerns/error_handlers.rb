@@ -6,9 +6,10 @@ module ErrorHandlers
   extend ActiveSupport::Concern
 
   included do
-    rescue_from SignupService::DuplicateEntry, with: :rescue409
-    rescue_from SignupService::EmailFormatError, with: :rescue422
-    rescue_from SignupService::PasswordFormatError, with: :rescue422
+    rescue_from Signup::SignupError::DuplicateEntry, with: :rescue409
+    rescue_from Signup::SignupError::EmailFormatError, with: :rescue422
+    rescue_from Signup::SignupError::PasswordFormatError, with: :rescue422
+    rescue_from Activation::ActivationError::Unauthorized, with: :rescue401
     rescue_from PermissionService::Forbidden, with: :rescue403
     rescue_from ActionController::BadRequest, with: :rescue400
     rescue_from ActionController::Unauthorized, with: :rescue401

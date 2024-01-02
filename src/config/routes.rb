@@ -3,52 +3,59 @@
 Rails.application.routes.draw do
   mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
   namespace :api do
+    # ユーザ個人
     namespace :users do
-      # 一般的な会員登録のAPI
-      post '/signup',      to: 'signup#signup'
-      # contract権限を持つ人が契約を作成する場合のAPI
-      post '/admin_signup', to: 'admin_signup#signup'
+      # POST /api/users/signup
+      resources :signup, only: [:create]
 
-      post '/activation',  to: 'activation#activate'
+      # POST /api/users/activation
+      resources :activation, only: [:create]
 
-      post '/profile',     to: 'profile#create'
-      put  '/profile',     to: 'profile#update'
-      get '/profile',      to: 'profile#show'
+      # POST /api/users/profile/
+      # PUT /api/users/profile/:id
+      # GET /api/users/profile/:id
+      resources :profile, only: [:create, :update, :show]
 
-      post '/login',       to: 'login#create'
-      delete '/logout',    to: 'login#destroy'
+      # POST /api/users/login
+      resources :login, only: [:create]
 
-      put '/:id/password', to: 'profile#update_password'
-
-      # メンバー
-      post '/user',        to: 'user#create'
-      get '/user',         to: 'user#show'
-      delete '/user',      to: 'user#delete'
-
-      # 権限
-      post '/permission',   to: 'permission#create'
-      get '/permission',    to: 'permission#show'
-      delete '/permission', to: 'permission#delete'
+      # PUT /api/users/password/:id
+      resources :password, only: [:update]
     end
 
-    namespace :prompts do
-      # カテゴリの検索
-      get '/categories',  to: 'category#index'
+    # GET /api/users
+    # GET /api/users/:user_id
+    # DELETE /api/users/:user_id
+    resources :users, only: [:index, :show, :destroy]
 
-      # いいね・ブックマーク
-      post '/:prompt_id/like',       to: 'prompt#like'
-      delete '/:prompt_id/like',     to: 'prompt#dislike'
-      get '/:prompt_id/like',        to: 'prompt#like_count'
-      post '/:prompt_id/bookmark',   to: 'prompt#bookmark'
-      delete '/:prompt_id/bookmark', to: 'prompt#disbookmark'
-      get '/:prompt_id/bookmark',    to: 'prompt#bookmark_count'
+    # POST /api/permissions
+    # GET /api/permissions/:user_id
+    # DELETE /api/permissions/:user_id
+    resources :permissions, only: [:create, :show, :destroy]
 
-      # プロンプトのCRUD
-      get '/',         to: 'prompt#index'
-      post '/',        to: 'prompt#create'
-      get '/:uuid',    to: 'prompt#show'
-      put '/:uuid',    to: 'prompt#update'
-      delete '/:uuid', to: 'prompt#delete'
+    # POST /api/prompts
+    # GET /api/prompts
+    # GET /api/prompts/:uuid
+    # PUT /api/prompts/:uuid
+    # DELETE /api/prompts/:uuid
+    resources :prompts, only: [:index, :create, :show, :update, :destroy] do
+      member do
+        # POST /api/prompts/:prompt_id/like
+        post :like
+        # DELETE /api/prompts/:prompt_id/like
+        delete :like, action: :dislike
+        # GET /api/prompts/:prompt_id/like
+        get :like, action: :like_count
+        # POST /api/prompts/:prompt_id/bookmark
+        post :bookmark
+        # DELETE /api/prompts/:prompt_id/bookmark
+        delete :bookmark, action: :disbookmark
+        # GET /api/prompts/:prompt_id/bookmark
+        get :bookmark, action: :bookmark_count
+
+        # # GET /api/prompts/categories
+        # get :categories, action: :categories
+      end
     end
   end
 end

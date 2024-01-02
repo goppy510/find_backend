@@ -10,7 +10,7 @@ class LikeRepository
       )
     end
 
-    def delete(user_id, prompt_id)
+    def destroy(user_id, prompt_id)
       Like.find_by(user_id:, prompt_id:).destroy
     end
 

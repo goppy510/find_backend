@@ -21,7 +21,7 @@ class ProfileRepository
       )
     end
 
-    def update_profiles(user_id, profiles = {})
+    def update(user_id, profiles = {})
       updates = {}
       updates[:employee_count_id] = EmployeeCount.find(profiles[:employee_count]).id if profiles.key?(:employee_count)
       updates[:industry_id] = Industry.find(profiles[:industry]).id if profiles.key?(:industry)
@@ -34,13 +34,6 @@ class ProfileRepository
       Profile.where(user_id:).update!(updates)
     end
 
-    def update_password(user_id, current_password, new_password)
-      user = User.find_by(id: user_id)
-      raise IncorrectPasswordError unless user.authenticate(current_password)
-
-      user.update(password: new_password, password_confirmation: new_password)
-    end
-
     def show(user_id)
       Profile.find_by(user_id:)
     end
@@ -50,5 +43,3 @@ class ProfileRepository
     end
   end
 end
-
-class IncorrectPasswordError < StandardError; end

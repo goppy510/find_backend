@@ -26,7 +26,7 @@ describe LikeRepository do
     end
   end
 
-  describe '#delete' do
+  describe '#destroy' do
     context '正常系' do
       context 'user_idとprompt_idを受け取った場合' do
         before do
@@ -40,7 +40,7 @@ describe LikeRepository do
         let!(:like_2) { create(:like, user_id: user_2.id, prompt_id: prompt.id) }
 
         it 'promptに対するlikesの個数が1であること' do
-          LikeRepository.delete(user_1.id, prompt.id)
+          LikeRepository.destroy(user_1.id, prompt.id)
           likes = Like.where(prompt_id: prompt.id)
           expect(likes.length).to eq(1)
         end

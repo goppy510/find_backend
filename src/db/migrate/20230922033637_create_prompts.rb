@@ -4,7 +4,8 @@ class CreatePrompts < ActiveRecord::Migration[7.0]
   def change
     create_table :prompts do |t|
       t.string :uuid, null: false
-      t.references :category, foreign_key: true
+      t.bigint :category_id, foreign_key: true
+      t.bigint :contract_id, foreign_key: true, null: true
       t.string :title, null: false
       t.text :about
       t.text :input_example
@@ -20,5 +21,6 @@ class CreatePrompts < ActiveRecord::Migration[7.0]
     add_index :prompts, :uuid, unique: true
     add_index :prompts, [:user_id, :deleted, :category_id]
     add_index :prompts, [:deleted, :category_id]
+    add_index :prompts, [:contract_id, :deleted, :category_id]
   end
 end

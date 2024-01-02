@@ -25,12 +25,12 @@ describe PermissionRepository do
     end
   end
 
-  describe '#self.show_one' do
+  describe '#self.show' do
     context '正常系' do
       context 'target_user_idを受け取った場合' do
         let!(:target_user_contract) { create(:contract, user_id: target_user.id) }
         it 'target_user_idに紐づくContractオブジェクトが返ること' do
-          actual = ContractRepository.show_one(target_user.id)
+          actual = ContractRepository.show(target_user.id)
           expect(actual.user_id).to eq(target_user.id)
           expect(actual.max_member_count).to eq(5)
         end
@@ -38,7 +38,7 @@ describe PermissionRepository do
     end
   end
 
-  describe '#self.show_all' do
+  describe '#self.index' do
     context '正常系' do
       let!(:target_user_contract) { create(:contract, user_id: target_user.id) }
       let!(:target_user_2) { create(:user, activated: false) }
@@ -48,7 +48,7 @@ describe PermissionRepository do
 
       context '正しいデータが入っている場合受け取った場合' do
         it 'すべてのContractオブジェクトが返ること' do
-          actual = ContractRepository.show_all
+          actual = ContractRepository.index
           expect(actual.length).to eq(3)
           expect(actual).to include( have_attributes(user_id: target_user.id ) )
           expect(actual).to include( have_attributes(user_id: target_user_2.id ) )
@@ -58,17 +58,17 @@ describe PermissionRepository do
     end
   end
 
-  describe '#self.delete' do
+  describe '#self.destroy' do
     context '正常系' do
       let!(:target_user_contract) { create(:contract, user_id: target_user.id) }
       context '正しいtarget_user_idを受け取った場合' do
         it 'target_user_idに紐づくContractオブジェクトが削除されること' do
-          ContractRepository.delete(target_user.id)
+          ContractRepository.destroy(target_user.id)
           actual = Contract.where(user_id: target_user.id)
           expect(actual.length).to eq(0)
         end
         it 'target_userは消えないこと' do
-          ContractRepository.delete(target_user.id)
+          ContractRepository.destroy(target_user.id)
           actual = User.where(id: target_user.id)
           expect(actual.length).to eq(1)
         end

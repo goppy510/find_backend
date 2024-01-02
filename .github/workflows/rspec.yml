@@ -23,21 +23,21 @@ jobs:
         DATABASE_CLEANER_ALLOW_REMOTE_DATABASE_URL: true
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Cache gems
-        uses: actions/cache@v1
+        uses: ruby/setup-ruby@v1
         with:
-          path: src/vendor/bundle
-          key: ${{ runner.os }}-gem-${{ hashFiles('**/Gemfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-gem-
+          ruby-version: '3.2.2'
+      - name: Install Bundler
+        run: gem install bundler -v 2.3.26
       - name: Create log directory
         run: mkdir -p ./src/log
       - name: Build and Setup
         run: |
-          gem install bundler -v 2.3.26
           bundle config set --local path 'vendor/bundle'
           bundle install --jobs 4 --retry 3
+      - name: Setup Database
+        run:
           bundle exec rake db:create RAILS_ENV=test
           bundle exec rake db:migrate RAILS_ENV=test
         working-directory: ./src

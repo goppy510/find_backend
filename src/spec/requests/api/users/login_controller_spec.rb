@@ -40,7 +40,8 @@ describe Api::Users::LoginController, type: :request do
         let!(:expected_response) do
           {
             'token' => token,
-            'expires' => expires
+            'expires' => expires,
+            'user_id' => user1.id
           }
         end
         it 'responseに当該のtokenとexpが記載されていること' do

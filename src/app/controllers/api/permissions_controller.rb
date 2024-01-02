@@ -7,7 +7,7 @@ module Api
     # 権限追加
     def create
       token = header_token
-      target_user_id = params[:target_user_id]
+      target_user_id = params[:user_id]
       permissions = params[:permissions]
       raise ActionController::BadRequest if target_user_id.blank? || permissions.blank?
 
@@ -25,7 +25,8 @@ module Api
     # 権限読み込み
     def show
       token = header_token
-      target_user_id = params[:target_user_id]
+      target_user_id = params[:user_id]
+      Rails.logger.debug target_user_id
       raise ActionController::BadRequest if target_user_id.blank?
 
       res = PermissionService.show(token, target_user_id)
@@ -41,7 +42,7 @@ module Api
     # 権限削除
     def destroy
       token = header_token
-      target_user_id = params[:target_user_id]
+      target_user_id = params[:user_id]
       permissions = params[:permissions]
       raise ActionController::BadRequest if target_user_id.blank? || permissions.blank?
 

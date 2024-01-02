@@ -31,7 +31,7 @@ describe Api::PermissionsController, type: :request do
         end
         let!(:params) do
           {
-            target_user_id: target_user.id,
+            user_id: target_user.id,
             permissions: permissions
             
           }
@@ -74,7 +74,7 @@ describe Api::PermissionsController, type: :request do
         end
         let!(:params) do
           {
-            target_user_id: target_user.id,
+            user_id: target_user.id,
             permissions: permissions
             
           }
@@ -99,7 +99,7 @@ describe Api::PermissionsController, type: :request do
         end
         let!(:params) do
           {
-            target_user_id: target_user.id,
+            user_id: target_user.id,
             permissions: permissions
             
           }
@@ -139,13 +139,8 @@ describe Api::PermissionsController, type: :request do
       context '正しいtarget_user_idを受け取った場合' do
         let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
         let!(:permission_resource) { Resource.find_by(name: 'permission') }
-        let!(:params) do
-          {
-            target_user_id: target_user.id
-          }
-        end
         before do
-          get "/api/permissions/#{target_user.id}", params: params, headers: { 'Authorization' => "Bearer #{token}" }
+          get "/api/permissions/#{target_user.id}", headers: { 'Authorization' => "Bearer #{token}" }
         end
         it 'jsonであること' do
           expect(response.content_type).to eq('application/json; charset=utf-8')
@@ -160,30 +155,11 @@ describe Api::PermissionsController, type: :request do
     end
 
     context '異常系' do
-      context 'パラメータがなかった場合' do
-        let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
-        let!(:permission_resource) { Resource.find_by(name: 'permission') }
-        let!(:params) { {} }
-        before do
-          get "/api/permissions/#{target_user.id}", params: params, headers: { 'Authorization' => "Bearer #{token}" }
-        end
-        it 'status_code: 400を返すこと' do
-          expect(response).to have_http_status(400)
-        end
-        it 'ActionController::BadRequestを返すこと' do
-          expect(JSON.parse(response.body)['error']['code']).to eq('ActionController::BadRequest')
-        end
-      end
       context '権限がなかった場合' do
         let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
         let!(:permission_resource) { Resource.find_by(name: 'contract') }
-        let!(:params) do
-          {
-            target_user_id: target_user.id
-          }
-        end
         before do
-          get "/api/permissions/#{target_user.id}", params: params, headers: { 'Authorization' => "Bearer #{token}" }
+          get "/api/permissions/#{target_user.id}", headers: { 'Authorization' => "Bearer #{token}" }
         end
         it 'status_code: 403を返すこと' do
           expect(response).to have_http_status(403)
@@ -194,13 +170,8 @@ describe Api::PermissionsController, type: :request do
       end
       context 'target_user_idが権限者に紐づいていない場合' do
         let!(:permission_resource) { Resource.find_by(name: 'permission') }
-        let!(:params) do
-          {
-            target_user_id: target_user.id
-          }
-        end
         before do
-          get "/api/permissions/#{target_user.id}", params: params, headers: { 'Authorization' => "Bearer #{token}" }
+          get "/api/permissions/#{target_user.id}", headers: { 'Authorization' => "Bearer #{token}" }
         end
         it 'status_code: 403を返すこと' do
           expect(response).to have_http_status(403)
@@ -243,7 +214,6 @@ describe Api::PermissionsController, type: :request do
         end
         let!(:params) do
           {
-            target_user_id: target_user.id,
             permissions: permissions
           }
         end
@@ -285,7 +255,6 @@ describe Api::PermissionsController, type: :request do
         end
         let!(:params) do
           {
-            target_user_id: target_user.id,
             permissions: permissions
           }
         end
@@ -308,7 +277,6 @@ describe Api::PermissionsController, type: :request do
         end
         let!(:params) do
           {
-            target_user_id: target_user.id,
             permissions: permissions
           }
         end

@@ -5,57 +5,40 @@ Rails.application.routes.draw do
   namespace :api do
     # ユーザ個人
     namespace :users do
-      # POST /api/users/signup
-      resources :signup, only: [:create]
+      post '/signup', to: 'signup#create'
 
-      # POST /api/users/activation
-      resources :activation, only: [:create]
+      post '/activation', to: 'activation#create'
 
-      # POST /api/users/profile/
-      # PUT /api/users/profile/:id
-      # GET /api/users/profile/:id
-      resources :profile, only: [:create, :update, :show]
+      post '/profile', to: 'profile#create'
+      put '/profile/:user_id', to: 'profile#update'
+      get '/profile/:user_id', to: 'profile#show'
 
-      # POST /api/users/login
-      resources :login, only: [:create]
+      post '/login', to: 'login#create'
 
-      # PUT /api/users/password/:id
-      resources :password, only: [:update]
+      put '/password/:user_id', to: 'password#update'
+
+      post '/', to: 'user#create'
+      get '/', to: 'user#index'
+      get '/:user_id', to: 'user#show'
+      delete '/:user_id', to: 'user#destroy'
     end
 
-    # GET /api/users
-    # GET /api/users/:user_id
-    # DELETE /api/users/:user_id
-    resources :users, only: [:index, :show, :destroy]
+    post '/permissions', to: 'permissions#create'
+    get '/permissions/:user_id', to: 'permissions#show'
+    delete '/permissions/:user_id', to: 'permissions#destroy'
 
-    # POST /api/permissions
-    # GET /api/permissions/:user_id
-    # DELETE /api/permissions/:user_id
-    resources :permissions, only: [:create, :show, :destroy]
+    post '/prompts', to: 'prompts#create'
+    get '/prompts', to: 'prompts#index'
+    get '/prompts/:uuid', to: 'prompts#show'
+    put '/prompts/:uuid', to: 'prompts#update'
+    delete '/prompts/:uuid', to: 'prompts#destroy'
 
-    # POST /api/prompts
-    # GET /api/prompts
-    # GET /api/prompts/:uuid
-    # PUT /api/prompts/:uuid
-    # DELETE /api/prompts/:uuid
-    resources :prompts, only: [:index, :create, :show, :update, :destroy] do
-      member do
-        # POST /api/prompts/:prompt_id/like
-        post :like
-        # DELETE /api/prompts/:prompt_id/like
-        delete :like, action: :dislike
-        # GET /api/prompts/:prompt_id/like
-        get :like, action: :like_count
-        # POST /api/prompts/:prompt_id/bookmark
-        post :bookmark
-        # DELETE /api/prompts/:prompt_id/bookmark
-        delete :bookmark, action: :disbookmark
-        # GET /api/prompts/:prompt_id/bookmark
-        get :bookmark, action: :bookmark_count
-
-        # # GET /api/prompts/categories
-        # get :categories, action: :categories
-      end
-    end
+    post '/prompts/:prompt_id/like', to: 'prompts#like'
+    delete '/prompts/:prompt_id/like', to: 'prompts#dislike'
+    get '/prompts/:prompt_id/like', to: 'prompts#like_count'
+    
+    post '/prompts/:prompt_id/bookmark', to: 'prompts#bookmark'
+    delete '/prompts/:prompt_id/bookmark', to: 'prompts#disbookmark'
+    get '/prompts/:prompt_id/bookmark', to: 'prompts#bookmark_count'
   end
 end

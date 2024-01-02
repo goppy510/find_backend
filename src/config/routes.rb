@@ -52,11 +52,10 @@ Rails.application.routes.draw do
         delete :bookmark, action: :disbookmark
         # GET /api/prompts/:prompt_id/bookmark
         get :bookmark, action: :bookmark_count
+
+        # # GET /api/prompts/categories
+        # get :categories, action: :categories
       end
-    end
-    namespace :prompts do
-      # GET /api/prompts/categories
-      resources :categories, only: [:index]
     end
   end
 end

@@ -161,15 +161,23 @@ describe PermissionService do
 
     context '正常系' do
       let!(:contract_membership) { create(:contract_membership, user_id: target_user.id, contract_id: contract.id) }
+      before do
+        travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
+      end
       context 'user_idを受け取った場合' do
         let!(:permission_resource) { create(:resource, name: 'permission') }
-        before do
-          travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
-        end
         it 'user_idに紐づくPermissionオブジェクトが返ること' do
           actual = PermissionService.show(token, target_user.id)
           expect(actual[:permissions].length).to eq(2)
           expect(actual[:permissions]).to include('user', 'contract')
+        end
+      end
+      context '権限はないが対象ユーザーが自分自身の場合' do
+        let!(:permission_resource) { create(:resource, name: 'contract') }
+        it 'user_idに紐づくPermissionオブジェクトが返ること' do
+          actual = PermissionService.show(token, user.id)
+          expect(actual[:permissions].length).to eq(1)
+          expect(actual[:permissions]).to include('contract')
         end
       end
     end

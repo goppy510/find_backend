@@ -24,6 +24,8 @@ class PermissionService
       raise ArgumentError, 'target_user_idがありません' if target_user_id.blank?
 
       user_id = authenticate_user(token)[:user_id]
+      return Permissions::PermissionDomain.show(target_user_id) if user_id == target_user_id
+
       raise Permissions::PermissionError::Forbidden unless has_permisssion_role?(user_id)
 
       is_own_user = is_own_user?(user_id, target_user_id)

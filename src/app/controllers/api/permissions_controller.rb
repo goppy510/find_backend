@@ -26,7 +26,6 @@ module Api
     def show
       token = header_token
       target_user_id = params[:user_id]
-      Rails.logger.debug target_user_id
       raise ActionController::BadRequest if target_user_id.blank?
 
       res = PermissionService.show(token, target_user_id)

@@ -1,8 +1,8 @@
-FROM ruby:3.1.1
+FROM ruby:3.2.2
 
 RUN echo "deb http://deb.debian.org/debian buster main" > /etc/apt/sources.list \
-    && echo "deb http://security.debian.org/debian-security buster/updates main" >> /etc/apt/sources.list \
-    && apt-get update -qq
+  && echo "deb http://security.debian.org/debian-security buster/updates main" >> /etc/apt/sources.list \
+  && apt-get update -qq
 
 RUN apt-get install -y build-essential \
   openssl \

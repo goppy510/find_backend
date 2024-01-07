@@ -17,7 +17,7 @@ class ContractRepository
     end
 
     def index
-      Contract.all.order(:id)
+      Contract.includes(:user).order(:id)
     end
 
     def update(user_id, max_member_count)

@@ -1,3 +1,4 @@
+config/routes.rb
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
@@ -22,6 +23,12 @@ Rails.application.routes.draw do
       get '/:user_id', to: 'user#show'
       delete '/:user_id', to: 'user#destroy'
     end
+
+    post '/contracts', to: 'contract#create'
+    get '/contracts', to: 'contract#index'
+    get '/contracts/:user_id', to: 'contract#show'
+    put '/contracts/:user_id', to: 'contract#update'
+    delete '/contracts/:user_id', to: 'contract#destroy'
 
     post '/permissions', to: 'permissions#create'
     get '/permissions/:user_id', to: 'permissions#show'

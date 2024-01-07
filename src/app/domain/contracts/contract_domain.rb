@@ -21,17 +21,11 @@ module Contracts
     end
 
     def show
-      res = ContractRepository.show(@target_user_id)
-      {
-        contract: res
-      }
+      ContractRepository.show(@target_user_id)
     end
 
     def index
-      res = ContractRepository.index
-      {
-        contracts: res
-      }
+      ContractRepository.index
     end
 
     def update

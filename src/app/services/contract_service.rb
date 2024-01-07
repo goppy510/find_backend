@@ -30,7 +30,9 @@ class ContractService
       return nil if contract.blank?
 
       user = UserRepository.find_by_id(target_user_id)
-      {
+      return nil if user.blank?
+
+      res = {
         user_id: user.id,
         email: user.email,
         activated: user.activated,
@@ -39,6 +41,7 @@ class ContractService
         created_at: contract.created_at.strftime('%Y-%m-%d %H:%M:%S'),
         updated_at: contract.updated_at.strftime('%Y-%m-%d %H:%M:%S')
       }
+      return res
     rescue StandardError => e
       Rails.logger.error(e)
       raise e
@@ -53,11 +56,10 @@ class ContractService
       contracts = Contracts::ContractDomain.index
       return nil if contracts.blank?
 
-      response = []
-      contracts.each do |contract|
-        user = User.where(id: contract.map(&:user_id))
-        response << {
-          id: user.id,
+      response = contracts.map do |contract|
+        user = contract.user
+        {
+          user_id: user.id,
           email: user.email,
           activated: user.activated,
           contract_id: contract.id,

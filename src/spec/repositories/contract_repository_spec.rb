@@ -4,17 +4,27 @@ require 'rails_helper'
 require 'rspec-rails'
 require 'faker'
 
-describe PermissionRepository do
+describe ContractRepository do
   before do
     travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
   end
-  let!(:user) { create(:user, activated: true) }
   let!(:target_user) { create(:user, activated: false) }
 
   describe '#self.create' do
     context '正常系' do
-      context 'user_idと存在するpermissionsを受け取った場合' do
-        it 'target_user_idがインサートされること' do
+      context 'target_user_idとmax_member_countを受け取った場合' do
+        let!(:max_member_count) { 10 }
+        it 'レコードが作成されること' do
+          ContractRepository.create(target_user.id, max_member_count)
+          actual = Contract.where(user_id: target_user.id)
+          expect(actual.length).to eq(1)
+          expect(actual).to include( have_attributes(user_id: target_user.id ) )
+          expect(actual).to include( have_attributes(max_member_count: 10 ) )
+        end
+      end
+
+      context 'max_member_countを受け取らなかった場合' do
+        it 'max_member_countが5でレコードが作成されること' do
           ContractRepository.create(target_user.id)
           actual = Contract.where(user_id: target_user.id)
           expect(actual.length).to eq(1)
@@ -53,6 +63,22 @@ describe PermissionRepository do
           expect(actual).to include( have_attributes(user_id: target_user.id ) )
           expect(actual).to include( have_attributes(user_id: target_user_2.id ) )
           expect(actual).to include( have_attributes(user_id: target_user_3.id ) )
+        end
+      end
+    end
+  end
+
+  describe '#self.update' do
+    context '正常系' do
+      let!(:target_user_contract) { create(:contract, user_id: target_user.id) }
+      context '正しいtarget_user_idとmax_member_countを受け取った場合' do
+        let!(:max_member_count) { 10 }
+        it 'target_user_idに紐づくContractオブジェクトが更新されること' do
+          ContractRepository.update(target_user.id, max_member_count)
+          actual = Contract.where(user_id: target_user.id)
+          expect(actual.length).to eq(1)
+          expect(actual).to include( have_attributes(user_id: target_user.id ) )
+          expect(actual).to include( have_attributes(max_member_count: 10 ) )
         end
       end
     end

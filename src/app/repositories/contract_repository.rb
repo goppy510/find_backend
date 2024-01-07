@@ -20,6 +20,16 @@ class ContractRepository
       Contract.all.order(:id)
     end
 
+    def update(user_id, max_member_count)
+      user = User.find_by(id: user_id)
+      return if user.blank?
+
+      contract = Contract.find_by(user_id: user.id)
+      return if contract.blank?
+
+      contract.update!(max_member_count: max_member_count)
+    end
+
     def destroy(user_id)
       user = User.find_by(id: user_id)
       return if user.blank?

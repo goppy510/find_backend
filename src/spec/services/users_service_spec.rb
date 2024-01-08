@@ -23,15 +23,23 @@ describe UsersService do
         end
         let!(:auth) { generate_token(payload:) }
         let!(:token) { auth.token }
-        let!(:user_resource) { Resource.find_by(name: 'user') }
-        let!(:permission) { create(:permission, user_id: user.id, resource_id: user_resource.id) }
+        let!(:permission) { create(:permission, user_id: user.id, resource_id: resource.id) }
         let!(:target_user) { create(:user, activated: true) }
         let!(:contract) { create(:contract, user_id: user.id) }
         let!(:contract_membership) { create(:contract_membership, user_id: user.id, contract_id: contract.id) }
-
-        it 'Contracts::UsersDomain.showが呼ばれること' do
-          UsersService.show(token, target_user.id)
-          expect(Contracts::UsersDomain).to have_received(:show).with(user.id, target_user.id)
+        context 'user権限を持っている場合' do
+          let!(:resource) { Resource.find_by(name: 'user') }
+          it 'Contracts::UsersDomain.showが呼ばれること' do
+            UsersService.show(token, target_user.id)
+            expect(Contracts::UsersDomain).to have_received(:show).with(user.id, target_user.id)
+          end
+        end
+        context 'admin権限を持っている場合' do
+          let!(:resource) { Resource.find_by(name: 'admin') }
+          it 'Contracts::UsersDomain.showが呼ばれること' do
+            UsersService.show(token, target_user.id)
+            expect(Contracts::UsersDomain).to have_received(:show).with(user.id, target_user.id)
+          end
         end
       end
     end
@@ -39,12 +47,10 @@ describe UsersService do
     context '異常系' do
       context 'tokenがなかった場合' do
         let!(:target_user) { create(:user, activated: true) }
-
         it 'ArgumentErrorが発生すること' do
           expect { UsersService.show(nil, target_user.id) }.to raise_error(ArgumentError)
         end
       end
-
       context 'target_user_idがなかった場合' do
         let!(:user) { create(:user, activated: true) }
         let!(:payload) do
@@ -57,12 +63,10 @@ describe UsersService do
         let!(:token) { auth.token }
         let!(:user_resource) { Resource.find_by(name: 'user') }
         let!(:permission) { create(:permission, user_id: user.id, resource_id: user_resource.id) }
-
         it 'ArgumentErrorが発生すること' do
           expect { UsersService.show(token, nil) }.to raise_error(ArgumentError)
         end
       end
-
       context 'tokenが不正だった場合' do
         let!(:user) { create(:user, activated: true) }
         let!(:payload) do
@@ -76,7 +80,6 @@ describe UsersService do
         let!(:create_prompt_resource) { Resource.find_by(name: 'create_prompt') }
         let!(:permission) { create(:permission, user_id: user.id, resource_id: create_prompt_resource.id) }
         let!(:target_user) { create(:user, activated: true) }
-
         it 'Forbiddenが発生すること' do
           expect { UsersService.show(token, target_user.id) }.to raise_error(Contracts::ContractsError::Forbidden)
         end
@@ -100,14 +103,23 @@ describe UsersService do
         end
         let!(:auth) { generate_token(payload:) }
         let!(:token) { auth.token }
-        let!(:user_resource) { Resource.find_by(name: 'user') }
-        let!(:permission) { create(:permission, user_id: user.id, resource_id: user_resource.id) }
+        let!(:permission) { create(:permission, user_id: user.id, resource_id: resource.id) }
         let!(:contract) { create(:contract, user_id: user.id) }
         let!(:contract_membership) { create(:contract_membership, user_id: user.id, contract_id: contract.id) }
 
-        it 'Contracts::UsersDomain.indexが呼ばれること' do
-          UsersService.index(token)
-          expect(Contracts::UsersDomain).to have_received(:index).with(user.id)
+        context 'user権限を持っている場合' do
+          let!(:resource) { Resource.find_by(name: 'user') }
+          it 'Contracts::UsersDomain.indexが呼ばれること' do
+            UsersService.index(token)
+            expect(Contracts::UsersDomain).to have_received(:index).with(user.id)
+          end
+        end
+        context 'admin権限を持っている場合' do
+          let!(:resource) { Resource.find_by(name: 'admin') }
+          it 'Contracts::UsersDomain.indexが呼ばれること' do
+            UsersService.index(token)
+            expect(Contracts::UsersDomain).to have_received(:index).with(user.id)
+          end
         end
       end
     end
@@ -118,7 +130,6 @@ describe UsersService do
           expect { UsersService.index(nil) }.to raise_error(ArgumentError)
         end
       end
-
       context 'tokenが不正だった場合' do
         let!(:user) { create(:user, activated: true) }
         let!(:payload) do
@@ -131,7 +142,6 @@ describe UsersService do
         let!(:token) { auth.token }
         let!(:create_prompt_resource) { Resource.find_by(name: 'create_prompt') }
         let!(:permission) { create(:permission, user_id: user.id, resource_id: create_prompt_resource.id) }
-
         it 'Forbiddenが発生すること' do
           expect { UsersService.index(token) }.to raise_error(Contracts::ContractsError::Forbidden)
         end
@@ -155,17 +165,26 @@ describe UsersService do
         end
         let!(:auth) { generate_token(payload:) }
         let!(:token) { auth.token }
-        let!(:user_resource) { Resource.find_by(name: 'user') }
-        let!(:permission) { create(:permission, user_id: user.id, resource_id: user_resource.id) }
+        let!(:permission) { create(:permission, user_id: user.id, resource_id: resource.id) }
         let!(:target_user) { create(:user, activated: true) }
         let!(:contract) { create(:contract, user_id: user.id) }
         let!(:contract_membership) do
           create(:contract_membership, user_id: target_user.id, contract_id: contract.id)
         end
 
-        it 'Contracts::UsersDomain.destroyが呼ばれること' do
-          UsersService.destroy(token, target_user.id)
-          expect(Contracts::UsersDomain).to have_received(:destroy).with(user.id, target_user.id)
+        context 'user権限を持っている場合' do
+          let!(:resource) { Resource.find_by(name: 'user') }
+          it 'Contracts::UsersDomain.destroyが呼ばれること' do
+            UsersService.destroy(token, target_user.id)
+            expect(Contracts::UsersDomain).to have_received(:destroy).with(user.id, target_user.id)
+          end
+        end
+        context 'admin権限を持っている場合' do
+          let!(:resource) { Resource.find_by(name: 'admin') }
+          it 'Contracts::UsersDomain.destroyが呼ばれること' do
+            UsersService.destroy(token, target_user.id)
+            expect(Contracts::UsersDomain).to have_received(:destroy).with(user.id, target_user.id)
+          end
         end
       end
     end
@@ -173,12 +192,10 @@ describe UsersService do
     context '異常系' do
       context 'tokenがなかった場合' do
         let!(:target_user) { create(:user, activated: true) }
-
         it 'ArgumentErrorが発生すること' do
           expect { UsersService.destroy(nil, target_user.id) }.to raise_error(ArgumentError)
         end
       end
-
       context 'target_user_idがなかった場合' do
         let!(:user) { create(:user, activated: true) }
         let!(:payload) do
@@ -191,12 +208,10 @@ describe UsersService do
         let!(:token) { auth.token }
         let!(:user_resource) { Resource.find_by(name: 'user') }
         let!(:permission) { create(:permission, user_id: user.id, resource_id: user_resource.id) }
-
         it 'ArgumentErrorが発生すること' do
           expect { UsersService.destroy(token, nil) }.to raise_error(ArgumentError)
         end
       end
-
       context 'tokenが不正だった場合' do
         let!(:user) { create(:user, activated: true) }
         let!(:payload) do
@@ -214,7 +229,6 @@ describe UsersService do
         let!(:contract_membership) do
           create(:contract_membership, user_id: target_user.id, contract_id: contract.id)
         end
-
         it 'Forbiddenが発生すること' do
           expect { UsersService.destroy(token, target_user.id) }.to raise_error(Contracts::ContractsError::Forbidden)
         end

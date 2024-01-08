@@ -10,7 +10,9 @@ class UsersService
       raise ArgumentError, 'target_user_idがありません' if target_user_id.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Contracts::ContractsError::Forbidden if !PermissionService.has_user_role?(user_id)
+      if !PermissionService.has_user_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Contracts::ContractsError::Forbidden
+      end
 
       member_data = Contracts::UsersDomain.show(user_id, target_user_id)
       return nil if member_data.blank?
@@ -32,7 +34,9 @@ class UsersService
       raise ArgumentError, 'tokenがありません' if token.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Contracts::ContractsError::Forbidden if !PermissionService.has_user_role?(user_id)
+      if !PermissionService.has_user_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Contracts::ContractsError::Forbidden
+      end
 
       members_data = Contracts::UsersDomain.index(user_id)
       return nil if members_data.blank?
@@ -59,7 +63,9 @@ class UsersService
       raise ArgumentError, 'target_user_idがありません' if target_user_id.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Contracts::ContractsError::Forbidden if !PermissionService.has_user_role?(user_id)
+      if !PermissionService.has_user_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Contracts::ContractsError::Forbidden
+      end
 
       Contracts::UsersDomain.destroy(user_id, target_user_id)
     rescue StandardError => e

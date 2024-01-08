@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+app/services/permission_service.rb# frozen_string_literal: true
 
 class PermissionService
   class << self
@@ -11,7 +11,9 @@ class PermissionService
       raise ArgumentError, 'permissionsがありません' if permissions.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Permissions::PermissionError::Forbidden unless has_permisssion_role?(user_id)
+      if !PermissionService.has_permisssion_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Permissions::PermissionError::Forbidden
+      end
 
       is_own_user = is_own_user?(user_id, target_user_id)
       raise Permissions::PermissionError::Forbidden unless is_own_user
@@ -27,7 +29,9 @@ class PermissionService
       # 自分自身の場合は権限チェックせずにレスポンスを返す
       return Permissions::PermissionDomain.show(target_user_id) if user_id == target_user_id.to_i
 
-      raise Permissions::PermissionError::Forbidden unless has_permisssion_role?(user_id)
+      if !PermissionService.has_permisssion_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Permissions::PermissionError::Forbidden
+      end
 
       is_own_user = is_own_user?(user_id, target_user_id)
       raise Permissions::PermissionError::Forbidden unless is_own_user
@@ -41,7 +45,9 @@ class PermissionService
       raise ArgumentError, 'permissionsがありません' if permissions.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Permissions::PermissionError::Forbidden unless has_permisssion_role?(user_id)
+      if !PermissionService.has_permisssion_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Permissions::PermissionError::Forbidden
+      end
 
       is_own_user = is_own_user?(user_id, target_user_id)
       raise Permissions::PermissionError::Forbidden unless is_own_user

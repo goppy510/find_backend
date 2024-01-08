@@ -1,5 +1,4 @@
-spec/services/permission_service_spec.rb
-# frozen_string_literal: true
+spec/services/permission_service_spec.rb# frozen_string_literal: true
 
 require 'rails_helper'
 require 'rspec-rails'
@@ -66,6 +65,24 @@ describe PermissionService do
             expect(actual).to include( have_attributes(resource_id: user_resource.id ) )
             expect(actual).to include( have_attributes(resource_id: contract_resource.id ) )
           end
+        end
+      end
+      context 'admin権限を持っている場合' do
+        let!(:permission_resource) { Resource.find_by(name: 'admin') }
+        let!(:permissions) do
+          [
+            'user',
+            'contract'
+          ]
+        end
+        it 'permissionに登録されること' do
+          PermissionService.create(token, target_user.id, permissions)
+          actual = Permission.where(user_id: target_user.id)
+          user_resource = Resource.find_by(name: permissions[0])
+          contract_resource = Resource.find_by(name: permissions[1])
+          expect(actual.length).to eq(2)
+          expect(actual).to include( have_attributes(resource_id: user_resource.id ) )
+          expect(actual).to include( have_attributes(resource_id: contract_resource.id ) )
         end
       end
     end
@@ -165,12 +182,14 @@ describe PermissionService do
       before do
         travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
       end
-      context 'user_idを受け取った場合' do
-        let!(:permission_resource) { create(:resource, name: 'permission') }
-        it 'user_idに紐づくPermissionオブジェクトが返ること' do
-          actual = PermissionService.show(token, target_user.id)
-          expect(actual[:permissions].length).to eq(2)
-          expect(actual[:permissions]).to include('user', 'contract')
+      context 'permission権限を持っている場合' do
+        context 'user_idを受け取った場合' do
+          let!(:permission_resource) { create(:resource, name: 'permission') }
+          it 'user_idに紐づくPermissionオブジェクトが返ること' do
+            actual = PermissionService.show(token, target_user.id)
+            expect(actual[:permissions].length).to eq(2)
+            expect(actual[:permissions]).to include('user', 'contract')
+          end
         end
       end
       context '権限はないが対象ユーザーが自分自身の場合' do
@@ -179,6 +198,14 @@ describe PermissionService do
           actual = PermissionService.show(token, user.id)
           expect(actual[:permissions].length).to eq(1)
           expect(actual[:permissions]).to include('contract')
+        end
+      end
+      context 'admin権限を持っている場合' do
+        let!(:permission_resource) { create(:resource, name: 'admin') }
+        it 'user_idに紐づくPermissionオブジェクトが返ること' do
+          actual = PermissionService.show(token, target_user.id)
+          expect(actual[:permissions].length).to eq(2)
+          expect(actual[:permissions]).to include('user', 'contract')
         end
       end
     end
@@ -257,6 +284,15 @@ describe PermissionService do
         before do
           travel_to Time.zone.local(2023, 5, 10, 3, 0, 0)
         end
+        it 'user_idに紐づくPermissionオブジェクトが削除されること' do
+          PermissionService.destroy(token, target_user.id, permissions)
+          actual = Permission.where(user_id: target_user.id)
+          expect(actual.length).to eq(1)
+          expect(actual).to include( have_attributes(resource_id: contract_resource.id ) )
+        end
+      end
+      context 'admin権限を持っている場合' do
+        let!(:permission_resource) { create(:resource, name: 'admin') }
         it 'user_idに紐づくPermissionオブジェクトが削除されること' do
           PermissionService.destroy(token, target_user.id, permissions)
           actual = Permission.where(user_id: target_user.id)

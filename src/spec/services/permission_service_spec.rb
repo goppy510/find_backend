@@ -1,3 +1,4 @@
+spec/services/permission_service_spec.rb
 # frozen_string_literal: true
 
 require 'rails_helper'
@@ -298,6 +299,29 @@ describe PermissionService do
         let!(:permission_resource) { create(:resource, name: 'permission') }
         it 'Forbiddenが発生すること' do
           expect { PermissionService.destroy(token, target_user.id, permissions) }.to raise_error(Permissions::PermissionError::Forbidden)
+        end
+      end
+    end
+  end
+
+  describe '#self.has_admin_role?' do
+    let!(:user) { create(:user, activated: true) }
+    let!(:permission) { create(:permission, user_id: user.id, resource_id: permission_resource.id) }
+
+    context '正常系' do
+      context 'admin権限を持つユーザーの場合' do
+        let!(:permission_resource) { Resource.find_by(name: 'admin') }
+        it 'trueが返ること' do
+          actual = PermissionService.has_admin_role?(user.id)
+          expect(actual).to eq(true)
+        end
+      end
+
+      context 'admin権限を持たないユーザーの場合' do
+        let!(:permission_resource) { Resource.find_by(name: 'user') }
+        it 'falseが返ること' do
+          actual = PermissionService.has_admin_role?(user.id)
+          expect(actual).to eq(false)
         end
       end
     end

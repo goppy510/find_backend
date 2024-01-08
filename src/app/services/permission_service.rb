@@ -49,6 +49,12 @@ class PermissionService
       Permissions::PermissionDomain.destroy(target_user_id, permissions)
     end
 
+    def has_admin_role?(user_id)
+      raise ArgumentError, 'user_idがありません' if user_id.blank?
+
+      self_permission(user_id).include?('admin')
+    end
+
     def has_contract_role?(user_id)
       raise ArgumentError, 'user_idがありません' if user_id.blank?
 

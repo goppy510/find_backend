@@ -84,6 +84,7 @@ end
 
 # resources
 resources_data = [
+  'admin',
   'contract',
   'permission',
   'user',

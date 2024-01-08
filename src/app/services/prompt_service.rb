@@ -10,8 +10,9 @@ class PromptService
       raise ArgumentError, 'pageがありません' if page.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Prompts::PromptError::Forbidden unless PermissionService.has_read_prompt_role?(user_id)
-
+      if !PermissionService.has_read_prompt_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Prompts::PromptError::Forbidden
+      end
       contract_id = ContractRepository.show(user_id).id
       raise Prompts::PromptError::Forbidden unless is_own_user?(user_id, contract_id)
 
@@ -23,8 +24,9 @@ class PromptService
       raise ArgumentError, 'promptsがありません' if prompts.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Prompts::PromptError::Forbidden unless PermissionService.has_create_prompt_role?(user_id)
-
+      if !PermissionService.has_create_prompt_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Prompts::PromptError::Forbidden
+      end
       contract_id = ContractRepository.show(user_id).id
       Prompts::PromptDomain.create(user_id, contract_id, prompts: prompts)
     end
@@ -35,8 +37,9 @@ class PromptService
       raise ArgumentError, 'promptsがありません' if prompts.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Prompts::PromptError::Forbidden unless PermissionService.has_update_prompt_role?(user_id)
-
+      if !PermissionService.has_update_prompt_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Prompts::PromptError::Forbidden
+      end
       contract_id = ContractRepository.show(user_id).id
       raise Prompts::PromptError::Forbidden unless is_own_user?(user_id, contract_id)
       raise Prompts::PromptError::Forbidden unless is_own_prompt?(uuid, contract_id)
@@ -49,8 +52,9 @@ class PromptService
       raise ArgumentError, 'uuidがありません' if uuid.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Prompts::PromptError::Forbidden unless PermissionService.has_destroy_prompt_role?(user_id)
-
+      if !PermissionService.has_destroy_prompt_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Prompts::PromptError::Forbidden
+      end
       contract_id = ContractRepository.show(user_id).id
       raise Prompts::PromptError::Forbidden unless is_own_user?(user_id, contract_id)
       raise Prompts::PromptError::Forbidden unless is_own_prompt?(uuid, contract_id)
@@ -64,7 +68,9 @@ class PromptService
       raise ArgumentError, 'uuidがありません' if uuid.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Prompts::PromptError::Forbidden unless PermissionService.has_read_prompt_role?(user_id)
+      if !PermissionService.has_read_prompt_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Prompts::PromptError::Forbidden
+      end
 
       contract_id = ContractRepository.show(user_id).id
       raise Prompts::PromptError::Forbidden unless is_own_user?(user_id, contract_id)
@@ -80,7 +86,9 @@ class PromptService
       raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Prompts::PromptError::Forbidden unless PermissionService.has_read_prompt_role?(user_id)
+      if !PermissionService.has_read_prompt_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Prompts::PromptError::Forbidden
+      end
 
       Prompts::PromptDomain.like(user_id, prompt_id)
     end
@@ -91,7 +99,9 @@ class PromptService
       raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Prompts::PromptError::Forbidden unless PermissionService.has_read_prompt_role?(user_id)
+      if !PermissionService.has_read_prompt_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Prompts::PromptError::Forbidden
+      end
 
       Prompts::PromptDomain.dislike(user_id, prompt_id)
     end
@@ -102,7 +112,9 @@ class PromptService
       raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Prompts::PromptError::Forbidden unless PermissionService.has_read_prompt_role?(user_id)
+      if !PermissionService.has_read_prompt_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Prompts::PromptError::Forbidden
+      end
 
       Prompts::PromptDomain.like_count(user_id, prompt_id)
     end
@@ -113,7 +125,9 @@ class PromptService
       raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Prompts::PromptError::Forbidden unless PermissionService.has_read_prompt_role?(user_id)
+      if !PermissionService.has_read_prompt_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Prompts::PromptError::Forbidden
+      end
 
       Prompts::PromptDomain.bookmark(user_id, prompt_id)
     end
@@ -124,7 +138,9 @@ class PromptService
       raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Prompts::PromptError::Forbidden unless PermissionService.has_read_prompt_role?(user_id)
+      if !PermissionService.has_read_prompt_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Prompts::PromptError::Forbidden
+      end
 
       Prompts::PromptDomain.disbookmark(user_id, prompt_id)
     end
@@ -135,7 +151,9 @@ class PromptService
       raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Prompts::PromptError::Forbidden unless PermissionService.has_read_prompt_role?(user_id)
+      if !PermissionService.has_read_prompt_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Prompts::PromptError::Forbidden
+      end
 
       Prompts::PromptDomain.bookmark_count(user_id, prompt_id)
     end

@@ -1,4 +1,4 @@
-app/services/contract_service.rb# frozen_string_literal: true
+# frozen_string_literal: true
 
 class ContractService
   class << self

@@ -27,7 +27,8 @@ describe Api::Users::SignupController, type: :request do
             {
               signups: {
                 email:,
-                password:
+                password:,
+                max_member_count: 10
               }
             }
           end
@@ -110,7 +111,8 @@ describe Api::Users::SignupController, type: :request do
             {
               signups: {
                 email: nil,
-                password: password
+                password: password,
+                max_member_count: 10
               }
             }
           end
@@ -145,7 +147,8 @@ describe Api::Users::SignupController, type: :request do
             {
               signups: {
                 email: email,
-                password: nil
+                password: nil,
+                max_member_count: 10
               }
             }
           end
@@ -174,6 +177,42 @@ describe Api::Users::SignupController, type: :request do
             expect(JSON.parse(response.body)['error']['code']).to eq('passwordがありません')
           end
         end
+
+        context 'max_member_countがなかった場合' do
+          let!(:params) do
+            {
+              signups: {
+                email: email,
+                password: password,
+                max_member_count: nil
+              }
+            }
+          end
+          let!(:user) { create(:user, email:, activated: true) }
+          let!(:contract) { create(:contract, user_id: user.id) }
+          let!(:resource) { Resource.find_by(name: 'contract') }
+          let!(:permission) { create(:permission, user_id: user.id, resource_id: resource.id) }
+          let!(:payload) do
+            {
+              sub: user.id,
+              type: 'api'
+            }
+          end
+          let!(:auth) { generate_token(payload:) }
+          let!(:token) { auth.token }
+
+          before do
+            post '/api/users/signup', params:, headers: { 'Authorization' => "Bearer #{token}" }
+          end
+
+          it 'status_code: 400を返すこと' do
+            expect(response).to have_http_status(400)
+          end
+
+          it 'max_member_countがありませんを返すこと' do
+            expect(JSON.parse(response.body)['error']['code']).to eq('max_member_countがありません')
+          end
+        end
       end
 
       context 'emailが重複していた場合' do
@@ -183,7 +222,8 @@ describe Api::Users::SignupController, type: :request do
           {
             signups: {
               email:,
-              password:
+              password:,
+              max_member_count: 10
             }
           }
         end
@@ -220,7 +260,8 @@ describe Api::Users::SignupController, type: :request do
           {
             signups: {
               email:,
-              password:
+              password:,
+              max_member_count: 10
             }
           }
         end
@@ -257,7 +298,8 @@ describe Api::Users::SignupController, type: :request do
           {
             signups: {
               email:,
-              password:
+              password:,
+              max_member_count: 10
             }
           }
         end
@@ -294,7 +336,8 @@ describe Api::Users::SignupController, type: :request do
           {
             signups: {
               email:,
-              password:
+              password:,
+              max_member_count: 10
             }
           }
         end
@@ -335,7 +378,8 @@ describe Api::Users::SignupController, type: :request do
           {
             signups: {
               email:,
-              password:
+              password:,
+              max_member_count: 10
             }
           }
         end

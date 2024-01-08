@@ -26,7 +26,7 @@ module Api
       private
 
       def signup_params
-        params.require(:signups).permit(:email, :password)
+        params.fetch(:signups, {}).permit(:email, :password, :max_member_count)
       end
     end
   end

@@ -33,14 +33,14 @@ module Signup
       def signup(signups)
         raise ArgumentError, 'emailがありません' if signups[:signups][:email].blank?
         raise ArgumentError, 'passwordがありません' if signups[:signups][:password].blank?
+        raise ArgumentError, 'max_member_countがありません' if signups[:signups][:max_member_count].blank?
 
         service = ContractSignupDomain.new(signups:)
-
         service&.add
         target_user = UserRepository.find_by_email(service.email)
         return if target_user.blank?
 
-        ContractRepository.create(target_user.id)
+        ContractRepository.create(target_user.id, signups[:signups][:max_member_count])
         Rails.logger.info("Contract created_by: user_id: #{service.user_id}, target_user: #{target_user.id}")
       rescue Account::Email::EmailFormatError => e
         Rails.logger.error(e)

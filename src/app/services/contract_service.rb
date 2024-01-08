@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+app/services/contract_service.rb# frozen_string_literal: true
 
 class ContractService
   class << self
@@ -11,7 +11,9 @@ class ContractService
       raise ArgumentError, 'max_member_countがありません' if max_member_count.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Contracts::ContractsError::Forbidden if !PermissionService.has_contract_role?(user_id)
+      if !PermissionService.has_contract_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Contracts::ContractsError::Forbidden
+      end
 
       Contracts::ContractDomain.create(target_user_id, max_member_count)
     rescue StandardError => e
@@ -24,7 +26,9 @@ class ContractService
       raise ArgumentError, 'target_user_idがありません' if target_user_id.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Contracts::ContractsError::Forbidden if !PermissionService.has_contract_role?(user_id)
+      if !PermissionService.has_contract_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Contracts::ContractsError::Forbidden
+      end
 
       contract = Contracts::ContractDomain.show(target_user_id)
       return nil if contract.blank?
@@ -51,7 +55,9 @@ class ContractService
       raise ArgumentError, 'tokenがありません' if token.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Contracts::ContractsError::Forbidden if !PermissionService.has_contract_role?(user_id)
+      if !PermissionService.has_contract_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Contracts::ContractsError::Forbidden
+      end
 
       contracts = Contracts::ContractDomain.index
       return nil if contracts.blank?
@@ -80,7 +86,9 @@ class ContractService
       raise ArgumentError, 'max_member_countがありません' if max_member_count.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Contracts::ContractsError::Forbidden if !PermissionService.has_contract_role?(user_id)
+      if !PermissionService.has_contract_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Contracts::ContractsError::Forbidden
+      end
 
       Contracts::ContractDomain.update(target_user_id, max_member_count)
     rescue StandardError => e
@@ -93,7 +101,9 @@ class ContractService
       raise ArgumentError, 'target_user_idがありません' if target_user_id.blank?
 
       user_id = authenticate_user(token)[:user_id]
-      raise Contracts::ContractsError::Forbidden if !PermissionService.has_contract_role?(user_id)
+      if !PermissionService.has_contract_role?(user_id) && !PermissionService.has_admin_role?(user_id)
+        raise Contracts::ContractsError::Forbidden
+      end
 
       Contracts::ContractDomain.destroy(target_user_id)
     rescue StandardError => e

@@ -24,8 +24,16 @@ describe ContractService do
       allow(Contracts::ContractDomain).to receive(:create)
     end
     context '正常系' do
-      let!(:resource) { Resource.find_by(name: 'contract') }
       context '正しいtarget_user_idとmax_member_countを受け取った場合' do
+        let!(:resource) { Resource.find_by(name: 'contract') }
+        let!(:max_member_count) { 10 }
+        it 'Contracts::ContractDomain.createが呼ばれること' do
+          ContractService.create(token, target_user.id, max_member_count)
+          expect(Contracts::ContractDomain).to have_received(:create).with(target_user.id, max_member_count)
+        end
+      end
+      context 'admin権限を持っている場合' do
+        let!(:resource) { Resource.find_by(name: 'admin') }
         let!(:max_member_count) { 10 }
         it 'Contracts::ContractDomain.createが呼ばれること' do
           ContractService.create(token, target_user.id, max_member_count)
@@ -90,6 +98,13 @@ describe ContractService do
           expect(Contracts::ContractDomain).to have_received(:show).with(target_user.id)
         end
       end
+      context 'admin権限を持っている場合' do
+        let!(:resource) { Resource.find_by(name: 'admin') }
+        it 'Contracts::ContractDomain.showが呼ばれること' do
+          ContractService.show(token, target_user.id)
+          expect(Contracts::ContractDomain).to have_received(:show).with(target_user.id)
+        end
+      end
     end
     context '異常系' do
       context 'tokenがなかった場合' do
@@ -138,6 +153,13 @@ describe ContractService do
           expect(Contracts::ContractDomain).to have_received(:index)
         end
       end
+      context 'admin権限を持っている場合' do
+        let!(:resource) { Resource.find_by(name: 'admin') }
+        it 'Contracts::ContractDomain.indexが呼ばれること' do
+          ContractService.index(token)
+          expect(Contracts::ContractDomain).to have_received(:index)
+        end
+      end
     end
     context '異常系' do
       context 'tokenがなかった場合' do
@@ -176,6 +198,14 @@ describe ContractService do
     context '正常系' do
       let!(:resource) { Resource.find_by(name: 'contract') }
       context '正しいパラメータを受け取った場合' do
+        let!(:max_member_count) { 10 }
+        it 'Contracts::ContractDomain.updateが呼ばれること' do
+          ContractService.update(token, target_user.id, max_member_count)
+          expect(Contracts::ContractDomain).to have_received(:update).with(target_user.id, max_member_count)
+        end
+      end
+      context 'admin権限を持っている場合' do
+        let!(:resource) { Resource.find_by(name: 'admin') }
         let!(:max_member_count) { 10 }
         it 'Contracts::ContractDomain.updateが呼ばれること' do
           ContractService.update(token, target_user.id, max_member_count)
@@ -237,6 +267,13 @@ describe ContractService do
     context '正常系' do
       let!(:resource) { Resource.find_by(name: 'contract') }
       context '正しいパラメータを受け取った場合' do
+        it 'Contracts::ContractDomain.destroyが呼ばれること' do
+          ContractService.destroy(token, target_user.id)
+          expect(Contracts::ContractDomain).to have_received(:destroy).with(target_user.id)
+        end
+      end
+      context 'admin権限を持っている場合' do
+        let!(:resource) { Resource.find_by(name: 'admin') }
         it 'Contracts::ContractDomain.destroyが呼ばれること' do
           ContractService.destroy(token, target_user.id)
           expect(Contracts::ContractDomain).to have_received(:destroy).with(target_user.id)

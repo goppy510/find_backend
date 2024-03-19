@@ -7,7 +7,6 @@ AllCops:
     - bin/*
     - db/schema.rb
     - vendor/**/*
-    - **/*_old.rb
 
 Style/Documentation:
   Enabled: false

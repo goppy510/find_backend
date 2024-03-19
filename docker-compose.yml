@@ -34,12 +34,3 @@ services:
       - "3000:3000"
     links:
       - db
-
-  doc:
-    image: swaggerapi/swagger-ui
-    volumes:
-      - ./src/doc/openapi.yml:/usr/share/nginx/html/openapi.yml
-    environment:
-      API_URL: openapi.yml
-    ports:
-      - 8888:8888

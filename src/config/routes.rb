@@ -30,7 +30,9 @@ Rails.application.routes.draw do
     delete '/contracts/:user_id', to: 'contract#destroy'
 
     post '/permissions', to: 'permissions#create'
+    get '/permissions', to: 'permissions#index'
     get '/permissions/:user_id', to: 'permissions#show'
+    put '/permissions', to: 'permissions#update'
     delete '/permissions/:user_id', to: 'permissions#destroy'
 
     post '/prompts', to: 'prompts#create'
@@ -42,7 +44,7 @@ Rails.application.routes.draw do
     post '/prompts/:prompt_id/like', to: 'prompts#like'
     delete '/prompts/:prompt_id/like', to: 'prompts#dislike'
     get '/prompts/:prompt_id/like', to: 'prompts#like_count'
-    
+
     post '/prompts/:prompt_id/bookmark', to: 'prompts#bookmark'
     delete '/prompts/:prompt_id/bookmark', to: 'prompts#disbookmark'
     get '/prompts/:prompt_id/bookmark', to: 'prompts#bookmark_count'

@@ -57,3 +57,5 @@ doc/
 /config/credentials.yml.enc
 
 /coverage/
+
+.tool-versions

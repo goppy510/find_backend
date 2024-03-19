@@ -7,6 +7,7 @@ AllCops:
     - bin/*
     - db/schema.rb
     - vendor/**/*
+    - **/*_old.rb
 
 Style/Documentation:
   Enabled: false
@@ -16,7 +17,6 @@ Style/AsciiComments:
 
 Lint/AssignmentInCondition:
   Enambled: false
-
 
 Rails/DynamicFindBy:
   Enabled: false

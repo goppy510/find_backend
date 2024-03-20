@@ -10,12 +10,12 @@ class PermissionService
     # @param [Array] permissions
     # @return [Array]
     def create(token, target_user_email, permissions)
-      raise ArgumentError, 'tokenがありません' if token.blank?
-      raise ArgumentError, 'target_user_emailがありません' if target_user_email.blank?
-      raise ArgumentError, 'permissionsがありません' if permissions.blank?
+      raise ArgumentError, 'token がありません' if token.blank?
+      raise ArgumentError, 'target_user_email がありません' if target_user_email.blank?
+      raise ArgumentError, 'permissions がありません' if permissions.blank?
 
       target_user_id = UserRepository.find_by_email(target_user_email).id
-      raise Permissions::PermissionError::Forbidden unless target_user_id.present?
+      raise Permissions::PermissionError::Forbidden if target_user_id.blank?
 
       user_id = authenticate_user(token)[:user_id]
       if !PermissionService.has_permisssion_role?(user_id) && !PermissionService.has_admin_role?(user_id)
@@ -71,16 +71,13 @@ class PermissionService
     end
 
     # @param [String] token
-    # @param [String] target_user_email
+    # @param [String] target_user_id
     # @param [Array] permissions
     # @return [Array]
-    def update(token, target_user_email, permissions)
-      raise ArgumentError, 'tokenがありません' if token.blank?
-      raise ArgumentError, 'target_user_emailがありません' if target_user_email.blank?
-      raise ArgumentError, 'permissionsがありません' if permissions.blank?
-
-      target_user_id = UserRepository.find_by_email(target_user_email).id
-      raise Permissions::PermissionError::Forbidden if target_user_id.blank?
+    def update(token, target_user_id, permissions)
+      raise ArgumentError, 'token がありません' if token.blank?
+      raise ArgumentError, 'target_user_id がありません' if target_user_id.blank?
+      raise ArgumentError, 'permissions target_user_idがありません' if permissions.blank?
 
       user_id = authenticate_user(token)[:user_id]
       if !PermissionService.has_permisssion_role?(user_id) && !PermissionService.has_admin_role?(user_id)
@@ -103,10 +100,11 @@ class PermissionService
         raise Permissions::PermissionError::Forbidden
       end
 
-      is_own_user = is_own_user?(user_id, target_user_id)
+      # 管理者権限ならtrue, それ以外は対象ユーザーと自分自身の契約IDが一致しているならtrue
+      is_own_user = PermissionService.has_admin_role?(user_id) ? true : own_user?(user_id, target_user_id)
       raise Permissions::PermissionError::Forbidden unless is_own_user
 
-      Permissions::PermissionDomain.destroy(target_user_id, permissions)
+      Permissions::PermissionDomain.destroy(target_user_id)
     end
 
     def has_admin_role?(user_id)

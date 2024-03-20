@@ -10,13 +10,17 @@ class UserRepository
       User.find_by(id:)
     end
 
+    def find_by_ids(ids)
+      User.where(id: ids)
+    end
+
     def find_by_email(email)
       User.find_by(email:)
     end
 
     def find_by_activated(email, password)
       user = User.find_by(email:, activated: true)
-      return user if user&.authenticate(password)
+      user if user&.authenticate(password)
     end
 
     def activate(user)

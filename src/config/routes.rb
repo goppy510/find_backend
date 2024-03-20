@@ -32,7 +32,7 @@ Rails.application.routes.draw do
     post '/permissions', to: 'permissions#create'
     get '/permissions', to: 'permissions#index'
     get '/permissions/:user_id', to: 'permissions#show'
-    put '/permissions', to: 'permissions#update'
+    put '/permissions/:user_id', to: 'permissions#update'
     delete '/permissions/:user_id', to: 'permissions#destroy'
 
     post '/prompts', to: 'prompts#create'

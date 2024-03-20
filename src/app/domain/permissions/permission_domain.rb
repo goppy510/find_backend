@@ -40,7 +40,7 @@ module Permissions
     end
 
     def destroy
-      PermissionRepository.destroy(@target_user_id, @permissions)
+      PermissionRepository.destroy(@target_user_id)
     end
 
     class << self
@@ -88,11 +88,10 @@ module Permissions
         domain&.update
       end
 
-      def destroy(target_user_id, permissions)
+      def destroy(target_user_id)
         raise ArgumentError, 'target_user_idがありません' if target_user_id.blank?
-        raise ArgumentError, 'permissionsがありません' if permissions.blank?
 
-        domain = new(target_user_id, permissions)
+        domain = new(target_user_id)
         domain&.destroy
       end
     end

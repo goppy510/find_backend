@@ -28,6 +28,10 @@ module Contracts
       ContractMembershipRepository.index(@contract_id)
     end
 
+    def all_user_permissions
+      PermissionRepository.index(@contract_id)
+    end
+
     def destroy
       record = ContractMembershipRepository.show(@target_user_id, @contract_id)
       raise Contracts::ContractsError::Forbidden if record.blank?

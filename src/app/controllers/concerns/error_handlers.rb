@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_dependency 'signup_service'
+require_dependency 'users_service'
 
 module ErrorHandlers
   extend ActiveSupport::Concern
@@ -14,6 +15,10 @@ module ErrorHandlers
     rescue_from Contracts::ContractsError::DuplicateEntry, with: :rescue409
     rescue_from Contracts::ContractsError::EmailFormatError, with: :rescue422
     rescue_from Contracts::ContractsError::PasswordFormatError, with: :rescue422
+    rescue_from Members::UsersError::DuplicateEntry, with: :rescue409
+    rescue_from Members::UsersError::EmailFormatError, with: :rescue422
+    rescue_from Members::UsersError::PasswordFormatError, with: :rescue422
+    rescue_from Members::UsersError::Forbidden, with: :rescue403
     rescue_from Activation::ActivationError::Unauthorized, with: :rescue401
     rescue_from Password::PasswordError::Unauthorized, with: :rescue401
     rescue_from Permissions::PermissionError::Forbidden, with: :rescue403

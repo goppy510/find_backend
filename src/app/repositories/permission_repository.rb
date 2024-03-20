@@ -42,25 +42,24 @@ class PermissionRepository
       return if permissions.blank?
 
       # 現在のユーザーの権限を取得
-      current_permissions = Permission.where(user_id: user_id).includes(:resource)
+      current_permissions = Permission.where(user_id:).includes(:resource)
       current_permission_names = current_permissions.map { |permission| permission.resource.name }
 
       # 削除が必要な権限を識別
       permissions_to_remove = current_permission_names - permissions
       resources_to_remove = Resource.where(name: permissions_to_remove)
-      Permission.where(user_id: user_id, resource: resources_to_remove).delete_all
+      Permission.where(user_id:, resource: resources_to_remove).delete_all
 
       # 新規挿入が必要な権限を識別
       permissions_to_add = permissions - current_permission_names
       resources_to_add = Resource.where(name: permissions_to_add)
 
-      permission_data = resources_to_add.map { |resource| { user_id: user_id, resource_id: resource.id } }
+      permission_data = resources_to_add.map { |resource| { user_id:, resource_id: resource.id } }
       Permission.insert_all(permission_data) unless permission_data.empty?
     end
 
-    def destroy(user_id, permissions = [])
-      resource_ids = Resource.where(name: permissions).pluck(:id)
-      Permission.where(user_id:, resource_id: resource_ids).destroy_all
+    def destroy(user_id)
+      Permission.where(user_id: user_id).destroy_all
     end
   end
 end

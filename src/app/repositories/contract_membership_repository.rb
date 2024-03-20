@@ -2,20 +2,28 @@
 
 class ContractMembershipRepository
   class << self
-    def create(target_user_id, contract_id)
-      ContractMembership.create!(user_id: target_user_id, contract_id: contract_id)
+    def index_all
+      ContractMembership.joins(:user, :contract)
+                        .select('users.id AS user_id, users.email, users.activated, users.created_at, users.updated_at, contracts.id AS contract_id')
+                        .distinct
     end
 
-    def show(target_user_id, contract_id)
-      ContractMembership.find_by(user_id: target_user_id, contract_id: contract_id)
+    def index(target_user_id)
+      ContractMembership.joins(:contract, :user)
+                        .where(contracts: { user_id: target_user_id })
+                        .select('users.id AS user_id, users.email, users.activated, users.created_at, users.updated_at, contracts.id AS contract_id')
     end
 
-    def index(contract_id)
-      ContractMembership.where(contract_id: contract_id)
+    def create(target_user_id)
+      ContractMembership.create!(user_id: target_user_id)
     end
 
-    def destroy(target_user_id, contract_id)
-      ContractMembership.find_by(user_id: target_user_id, contract_id: contract_id).destroy!
+    def show(target_user_id)
+      ContractMembership.find_by(user_id: target_user_id)
+    end
+
+    def destroy(target_user_id)
+      ContractMembership.find_by(user_id: target_user_id).destroy!
     end
   end
 end

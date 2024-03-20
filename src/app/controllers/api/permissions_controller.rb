@@ -52,11 +52,11 @@ module Api
     # 権限更新
     def update
       token = header_token
-      target_user_email = params[:email]
+      target_user_id = params[:user_id]
       permissions = params[:permissions]
-      raise ActionController::BadRequest if target_user_email.blank?
+      raise ActionController::BadRequest if target_user_id.blank?
 
-      PermissionService.update(token, target_user_email, permissions)
+      PermissionService.update(token, target_user_id, permissions)
       render json: { status: 'success' }, status: :ok
     rescue Permissions::PermissionError::Forbidden => e
       Rails.logger.error e
@@ -69,10 +69,10 @@ module Api
     # 権限削除
     def destroy
       token = header_token
-      target_user_email = params[:email]
-      raise ActionController::BadRequest if target_user_email.blank?
+      target_user_id = params[:user_id]
+      raise ActionController::BadRequest if target_user_id.blank?
 
-      PermissionService.destroy(token, target_user_email)
+      PermissionService.destroy(token, target_user_id)
       render json: { status: 'success' }, status: :ok
     rescue Permissions::PermissionError::Forbidden => e
       Rails.logger.error e

@@ -17,7 +17,7 @@ module Signup
       @user_id = hash_signups[:user_id] if hash_signups&.key?(:user_id)
       @contract = ContractRepository.show(@user_id) if @user_id.present?
       @contract_id = @contract&.id
-      @current_member_count = ContractMembershipRepository.index(@contract_id)&.count || 0
+      @current_member_count = ContractMembershipRepository.count_by_contract_id(@contract_id) || 0
       @max_member_count = @contract&.max_member_count
       raise RecordLimitExceeded if @current_member_count >= @max_member_count
 
@@ -25,7 +25,7 @@ module Signup
     end
 
     # ユーザー情報をDBに登録する
-    def add
+    def create
       ActiveRecord::Base.transaction do
         UserRepository.create(@email, @password)
         target_user_id = UserRepository.find_by_email(@email)&.id
@@ -40,8 +40,6 @@ module Signup
       raise e
     end
 
-    private
-
     class << self
       def signup(signups)
         raise ArgumentError, 'emailがありません' if signups[:signups][:email].blank?
@@ -49,7 +47,7 @@ module Signup
         raise ArgumentError, 'user_idがありません' if signups[:signups][:user_id].blank?
 
         domain = UserSignupDomain.new(signups:)
-        domain&.add
+        domain&.create
 
         ActivationMailService.activation_email(domain.email)
       rescue Account::Email::EmailFormatError => e

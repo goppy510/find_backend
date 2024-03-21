@@ -12,7 +12,7 @@ class CreateDeletedUsers < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
-    add_index :deleted_users, :email, unique: true
+    add_index :deleted_users, :email
     add_index :deleted_users, :activated
   end
 end

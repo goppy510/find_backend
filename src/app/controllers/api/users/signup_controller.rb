@@ -12,7 +12,6 @@ module Api
         SignupService.signup(token, valid_params)
 
         render json: { status: 'success' }, status: :ok
-
       rescue Signup::SignupError::DuplicateEntry => e
         rescue409(e)
       rescue Signup::SignupError::EmailFormatError, Signup::SignupError::PasswordFormatError => e

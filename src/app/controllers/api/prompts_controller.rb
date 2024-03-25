@@ -123,6 +123,8 @@ module Api
       raise ActionController::BadRequest
     end
 
+    def categories; end
+
     private
 
     def prompt_params

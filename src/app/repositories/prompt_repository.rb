@@ -3,7 +3,7 @@
 class PromptRepository
   class << self
     # プロンプト一覧を取得する
-    def index(contract_id, page: 1, per_page: 6, category: nil, generative_ai_model: nil, keyword: nil)
+    def index(contract_id: nil, page: 1, per_page: 6, category: nil, generative_ai_model: nil, keyword: nil)
       prompts = Prompt.left_outer_joins(:likes, :bookmarks, :category, :generative_ai_model, user: :profile)
 
       # カテゴリーで絞り込み
@@ -11,16 +11,42 @@ class PromptRepository
       # AIモデルで絞り込み
       prompts = prompts.where(generative_ai_models: { name: generative_ai_model }) if generative_ai_model.present?
       # キーワードで絞り込み
-      prompts = prompts.where('prompts.title LIKE ? OR prompts.about LIKE ? OR prompts.input_example LIKE ? OR prompts.output_example LIKE ? OR prompts.prompt LIKE ?', "%#{keyword}%", "%#{keyword}%", "%#{keyword}%", "%#{keyword}%", "%#{keyword}%") if keyword.present?
-      
-      prompts = prompts.where(contract_id: contract_id, prompts: { deleted: false })
+      if keyword.present?
+        prompts = prompts.where(
+          'prompts.title LIKE ? OR prompts.about LIKE ? OR prompts.input_example LIKE ? OR prompts.output_example LIKE ? OR prompts.prompt LIKE ?', "%#{keyword}%", "%#{keyword}%", "%#{keyword}%", "%#{keyword}%", "%#{keyword}%"
+        )
+      end
 
-      prompts = prompts.group('prompts.id', 'categories.name', 'generative_ai_models.name')
-        .select('prompts.*', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
-        .order('prompts.created_at DESC')
-        .offset((page - 1) * per_page)
-        .limit(per_page)
-      prompts
+      prompts = prompts.where(contract_id:, prompts: { deleted: false })
+
+      prompts.group('prompts.id', 'categories.name', 'generative_ai_models.name')
+             .select('prompts.*', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
+             .order('prompts.created_at DESC')
+             .offset((page - 1) * per_page)
+             .limit(per_page)
+    end
+
+    def index_all(page: 1, per_page: 6, category: nil, generative_ai_model: nil, keyword: nil)
+      prompts = Prompt.left_outer_joins(:likes, :bookmarks, :category, :generative_ai_model, user: :profile)
+
+      # カテゴリーで絞り込み
+      prompts = prompts.where(egories: { name: category }) if category.present?
+      # AIモデルで絞り込み
+      prompts = prompts.where(generative_ai_models: { name: generative_ai_model }) if generative_ai_model.present?
+      # キーワードで絞り込み
+      if keyword.present?
+        prompts = prompts.where(
+          'prompts.title LIKE ? OR prompts.about LIKE ? OR prompts.input_example LIKE ? OR prompts.output_example LIKE ? OR prompts.prompt LIKE ?', "%#{keyword}%", "%#{keyword}%", "%#{keyword}%", "%#{keyword}%", "%#{keyword}%"
+        )
+      end
+
+      prompts = prompts.where(prompts: { deleted: false })
+
+      prompts.group('prompts.id', 'categories.name', 'generative_ai_models.name')
+             .select('prompts.*', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
+             .order('prompts.created_at DESC')
+             .offset((page - 1) * per_page)
+             .limit(per_page)
     end
 
     # プロンプトを登録する
@@ -32,7 +58,7 @@ class PromptRepository
       Prompt.create!(
         user_id:,
         category_id: category.id,
-        contract_id: contract_id,
+        contract_id:,
         title: prompts[:title],
         about: prompts[:about],
         input_example: prompts[:input_example],
@@ -42,14 +68,17 @@ class PromptRepository
         uuid: prompts[:uuid]
       )
     end
-  
+
     # プロンプトを更新する
     def update(user_id, uuid, prompts = {})
       updates = {}
       updates[:title] = prompts[:title] if prompts.key?(:title)
       updates[:user_id] = user_id
       updates[:category_id] = Category.find(prompts[:category]).id if prompts.key?(:category)
-      updates[:generative_ai_model_id] = GenerativeAiModel.find(prompts[:generative_ai_model]).id if prompts.key?(:generative_ai_model)
+      if prompts.key?(:generative_ai_model)
+        updates[:generative_ai_model_id] =
+          GenerativeAiModel.find(prompts[:generative_ai_model]).id
+      end
       # 残りのフィールドは直接更新します
       updates[:about] = prompts[:about] if prompts.key?(:about)
       updates[:input_example] = prompts[:input_example] if prompts.key?(:input_example)
@@ -71,10 +100,10 @@ class PromptRepository
     # 詳細ページ用にプロンプトを取得する
     def prompt_detail(uuid)
       Prompt.left_outer_joins(:likes, :bookmarks, :category, :generative_ai_model, user: :profile)
-        .where(uuid:, deleted: false)
-        .group('prompts.id', 'categories.name', 'generative_ai_models.name')
-        .select('prompts.*', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
-        .first
+            .where(uuid:, deleted: false)
+            .group('prompts.id', 'categories.name', 'generative_ai_models.name')
+            .select('prompts.*', 'categories.name AS category_name', 'generative_ai_models.name AS generative_ai_model_name', 'COUNT(DISTINCT likes.id) AS likes_count', 'COUNT(DISTINCT bookmarks.id) AS bookmarks_count')
+            .first
     end
   end
 end

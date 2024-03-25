@@ -17,7 +17,6 @@ module Prompts
       @prompt_id = prompt_id if prompt_id.present? # いいね、ブックマーク用
       @uuid = uuid if uuid.present? # プロンプト表示用
       @page = page.to_i if page.present? # プロンプト一覧用
-    
       return if hash_prompts.blank?
 
       @prompts = {}
@@ -30,21 +29,28 @@ module Prompts
       if hash_prompts&.key?(:output_example)
         @prompts[:output_example] = PromptData::OutputExample.from_string(hash_prompts[:output_example])
       end
-      if hash_prompts&.key?(:prompt)
-        @prompts[:prompt] = PromptData::Prompt.from_string(hash_prompts[:prompt])
-      end
+      @prompts[:prompt] = PromptData::Prompt.from_string(hash_prompts[:prompt]) if hash_prompts&.key?(:prompt)
       # 以下、ラジオボタンの数値なのでバリデーションしない
       @prompts[:category_id] = hash_prompts[:category_id] if hash_prompts&.key?(:category_id)
-      @prompts[:generative_ai_model_id] = hash_prompts[:generative_ai_model_id] if hash_prompts&.key?(:generative_ai_model_id)
+      if hash_prompts&.key?(:generative_ai_model_id)
+        @prompts[:generative_ai_model_id] =
+          hash_prompts[:generative_ai_model_id]
+      end
 
       freeze
     end
 
     # プロンプト一覧取得
     def index
-      return unless @page.present?
+      return if @page.blank?
 
       PromptRepository.index(@contract_id, page: @page).to_a
+    end
+
+    def index_all
+      return if @page.blank?
+
+      PromptRepository.index(page: @page).to_a
     end
 
     # プロンプト新規作成
@@ -110,7 +116,7 @@ module Prompts
         raise ArgumentError, 'contract_idがありません' if contract_id.blank?
         raise ArgumentError, 'pageがありません' if page.blank?
 
-        domain = new(contract_id: contract_id, page: page)
+        domain = new(contract_id:, page:)
         prompt_list = domain&.index
         total_count = prompt_list.count
         # promptデータを取得
@@ -130,7 +136,33 @@ module Prompts
             updated_at: prompt[:updated_at].strftime('%Y-%m-%d %H:%M:%S')
           }
         end
-        return { items: response, total_count: total_count }
+        { items: response, total_count: }
+      end
+
+      def index_all(page)
+        raise ArgumentError, 'pageがありません' if page.blank?
+
+        domain = new(page:)
+        prompt_list = domain&.index_all
+        total_count = prompt_list.count
+        # promptデータを取得
+        response = prompt_list.map do |prompt|
+          {
+            id: prompt[:id],
+            prompt_uuid: prompt[:uuid],
+            category: prompt[:category_name],
+            generative_ai_model: prompt[:generative_ai_model_name],
+            title: prompt[:title],
+            input_example: prompt[:input_example],
+            output_example: prompt[:output_example],
+            prompt: prompt[:prompt],
+            about: prompt[:about],
+            likes_count: prompt[:likes_count],
+            bookmarks_count: prompt[:bookmarks_count],
+            updated_at: prompt[:updated_at].strftime('%Y-%m-%d %H:%M:%S')
+          }
+        end
+        { items: response, total_count: }
       end
 
       def create(user_id, contract_id, prompts)
@@ -138,7 +170,7 @@ module Prompts
         raise ArgumentError, 'contract_idがありません' if contract_id.blank?
         raise ArgumentError, 'promptsがありません' if prompts.blank?
 
-        domain = new(user_id: user_id, contract_id: contract_id, prompts:)
+        domain = new(user_id:, contract_id:, prompts:)
         domain&.create
       end
 
@@ -147,7 +179,7 @@ module Prompts
         raise ArgumentError, 'uuidがありません' if uuid.blank?
         raise ArgumentError, 'promptsがありません' if prompts.blank?
 
-        domain = new(user_id: user_id, uuid:, prompts:)
+        domain = new(user_id:, uuid:, prompts:)
         domain&.update
       end
 
@@ -155,7 +187,7 @@ module Prompts
         raise ArgumentError, 'user_idがありません' if user_id.blank?
         raise ArgumentError, 'uuidがありません' if uuid.blank?
 
-        domain = new(user_id: user_id, uuid:)
+        domain = new(user_id:, uuid:)
         domain&.destroy
       end
 
@@ -165,7 +197,7 @@ module Prompts
         raise ArgumentError, 'uuidがありません' if uuid.blank?
 
         # promptデータを取得
-        res = new(user_id: user_id, uuid:)&.show
+        res = new(user_id:, uuid:)&.show
         {
           id: res[:id],
           prompt_uuid: res[:uuid],
@@ -186,7 +218,7 @@ module Prompts
         raise ArgumentError, 'user_idがありません' if user_id.blank?
         raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
 
-        domain = new(user_id: user_id, prompt_id:)
+        domain = new(user_id:, prompt_id:)
         domain&.like
       end
 
@@ -195,7 +227,7 @@ module Prompts
         raise ArgumentError, 'user_idがありません' if user_id.blank?
         raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
 
-        domain = new(user_id: user_id, prompt_id:)
+        domain = new(user_id:, prompt_id:)
         domain&.dislike
       end
 
@@ -204,7 +236,7 @@ module Prompts
         raise ArgumentError, 'user_idがありません' if user_id.blank?
         raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
 
-        domain = new(user_id: user_id, prompt_id:)
+        domain = new(user_id:, prompt_id:)
         domain&.like_count
       end
 
@@ -213,7 +245,7 @@ module Prompts
         raise ArgumentError, 'user_idがありません' if user_id.blank?
         raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
 
-        domain = new(user_id: user_id, prompt_id:)
+        domain = new(user_id:, prompt_id:)
         domain&.bookmark
       end
 
@@ -222,7 +254,7 @@ module Prompts
         raise ArgumentError, 'user_idがありません' if user_id.blank?
         raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
 
-        domain = new(user_id: user_id, prompt_id:)
+        domain = new(user_id:, prompt_id:)
         domain&.disbookmark
       end
 
@@ -231,7 +263,7 @@ module Prompts
         raise ArgumentError, 'user_idがありません' if user_id.blank?
         raise ArgumentError, 'prompt_idがありません' if prompt_id.blank?
 
-        domain = new(user_id: user_id, prompt_id:)
+        domain = new(user_id:, prompt_id:)
         domain&.bookmark_count
       end
     end

@@ -13,7 +13,7 @@ industry_data = [
   'その他'
 ]
 industry_data.each do |name|
-  Industry.find_or_create_by(name: name)
+  Industry.find_or_create_by(name:)
 end
 
 # 従業員数
@@ -41,36 +41,33 @@ position_data = [
   'その他/個人事業主'
 ]
 position_data.each do |name|
-  Position.find_or_create_by(name: name)
+  Position.find_or_create_by(name:)
 end
 
 # 事業モデル
-business_model_data = [
-  'BtoB',
-  'BtoC',
-  'その他'
+business_model_data = %W[
+  BtoB
+  BtoC
+  \u305D\u306E\u4ED6
 ]
 business_model_data.each do |name|
-  BusinessModel.find_or_create_by(name: name)
+  BusinessModel.find_or_create_by(name:)
 end
 
 # カテゴリ
 category_data = [
-  'IT・情報通信業',
-  '金融・保険業',
-  '不動産業',
-  '交通・運輸業',
-  '医療・福祉',
-  '教育・学習支援業',
-  '旅行・宿泊・飲食業',
-  'エンターテインメント・マスコミ',
-  '広告・マーケティング',
-  'コンサルティング業',
+  'セールスプロモーション',
+  '広告・Web制作・マーケティング支援',
+  'Webサービス',
+  'メーカー',
+  '店舗運営',
+  '不動産',
+  '人材',
   'その他'
 ]
 
 category_data.each do |name|
-  Category.find_or_create_by(name: name)
+  Category.find_or_create_by(name:)
 end
 
 # 生成AIモデル
@@ -79,20 +76,20 @@ generative_ai_model_data = [
   'GPT-4'
 ]
 generative_ai_model_data.each do |name|
-  GenerativeAiModel.find_or_create_by(name: name)
+  GenerativeAiModel.find_or_create_by(name:)
 end
 
 # resources
-resources_data = [
-  'admin',
-  'contract',
-  'permission',
-  'user',
-  'create_prompt',
-  'read_prompt',
-  'update_prompt',
-  'destroy_prompt'
+resources_data = %w[
+  admin
+  contract
+  permission
+  user
+  create_prompt
+  read_prompt
+  update_prompt
+  destroy_prompt
 ]
 resources_data.each do |name|
-  Resource.find_or_create_by(name: name)
+  Resource.find_or_create_by(name:)
 end
